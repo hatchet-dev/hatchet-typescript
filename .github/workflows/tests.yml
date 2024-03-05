@@ -86,6 +86,6 @@ jobs:
         run: |
           cd hatchet/
           export HATCHET_CLIENT_TOKEN="$(go run ./cmd/hatchet-admin token create --config ./generated/ --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)"
-          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hack/dev/certs/ca.cert
           cd ..
+          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
           pnpm test:e2e

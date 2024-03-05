@@ -60,6 +60,8 @@ describe('e2e', () => {
 
       await sleep(5000);
 
+      console.log('invoked', invoked);
+
       expect(invoked).toEqual(2);
 
       // await worker.stop();

@@ -70,15 +70,15 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Compose
-        run: cd hatchet/ && docker compose up -d
+        working-directory: hatchet
+        run: docker compose up -d
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Setup
-        run: |
-          touch .env
-          cd hatchet/ && touch .env && task setup
+        working-directory: hatchet
+        run: task setup
 
       - name: Prepare
         run: |

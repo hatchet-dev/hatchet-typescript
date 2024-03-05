@@ -82,10 +82,10 @@ jobs:
           export DATABASE_URL='postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet'
           task setup
 
-      - name: Prepare
-        run: |
-          export HATCHET_CLIENT_TOKEN="$(go run ./hatchet/cmd/hatchet-admin token create --config ./generated/ --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)"
-          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
-
       - name: E2E tests
-        run: pnpm test:e2e
+        run: |
+          cd hatchet/
+          export HATCHET_CLIENT_TOKEN="$(go run ./cmd/hatchet-admin token create --config ./generated/ --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)"
+          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hack/dev/certs/ca.cert
+          cd ..
+          pnpm test:e2e

@@ -189,7 +189,7 @@ describe('Worker', () => {
       worker.listener = mockActionListener;
 
       expect(async () => {
-        await worker.exitGracefully();
+        await worker.exitGracefully(true);
       }).toThrow('EXIT 0');
       expect(mockActionListener.unregister).toHaveBeenCalledTimes(1);
     });
@@ -197,7 +197,7 @@ describe('Worker', () => {
     it('should exit the process if handle_kill is true', async () => {
       const worker = new Worker(hatchet, { name: 'WORKER_NAME' });
       const exitSpy = jest.spyOn(process, 'exit').mockReturnValue(undefined as never);
-      await worker.exitGracefully();
+      await worker.exitGracefully(true);
       expect(exitSpy).toHaveBeenCalledTimes(1);
     });
   });

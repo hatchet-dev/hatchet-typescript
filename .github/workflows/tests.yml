@@ -78,7 +78,9 @@ jobs:
 
       - name: Setup
         working-directory: hatchet
-        run: task setup
+        run: |
+          export DATABASE_URL='postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet'
+          task setup
 
       - name: Prepare
         run: |

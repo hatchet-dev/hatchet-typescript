@@ -40,6 +40,19 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          version: "25.1"
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
       - name: Install pnpm
         run: npm install -g pnpm@8
 
@@ -58,6 +71,14 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Prepare engine
+        run: |
+          pnpm setup-engine
+          
+          export HATCHET_CLIENT_TOKEN="$(go run ./hatchet/cmd/hatchet-admin token create --config ./generated/ --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)"
+          
+          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
 
       - name: E2E tests
         run: pnpm test:e2e

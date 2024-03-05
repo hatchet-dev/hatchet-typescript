@@ -18,6 +18,7 @@
   "scripts": {
     "build": "echo 'build hatchet sdk with `npn run tsc:build` to ensure it is not build during the publish step' && exit 0",
     "prepare": "npm run build",
+    "setup-engine": "cd hatchet/ && task setup",
     "tsc:build": "tsc && resolve-tspaths",
     "test:unit": "jest --testMatch='**/*.test.ts'",
     "test:e2e": "jest --testMatch='**/*.e2e.ts'",

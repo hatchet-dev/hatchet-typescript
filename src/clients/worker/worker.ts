@@ -371,6 +371,11 @@ export class Worker {
         }
       }
     } catch (e: any) {
+      // TODO TEMP this needs to be handled better
+      if (this.killing) {
+        this.logger.info(`Exiting worker, ignoring error: ${e.message}`);
+        return;
+      }
       this.logger.error(`Could not run worker: ${e.message}`);
       throw new HatchetError(`Could not run worker: ${e.message}`);
     }

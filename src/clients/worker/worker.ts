@@ -324,7 +324,7 @@ export class Worker {
     this.logger.info('Starting to exit...');
 
     try {
-      this.listener?.unregister();
+      await this.listener?.unregister();
     } catch (e: any) {
       this.logger.error(`Could not unregister listener: ${e.message}`);
     }
@@ -333,6 +333,8 @@ export class Worker {
 
     // attempt to wait for futures to finish
     await Promise.all(Object.values(this.futures).map(({ promise }) => promise));
+
+    this.logger.info('Successfully finished pending tasks.');
 
     if (handleKill) {
       this.logger.info('Exiting hatchet worker...');

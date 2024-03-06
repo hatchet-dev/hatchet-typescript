@@ -65,6 +65,8 @@ describe('e2e', () => {
       expect(invoked).toEqual(2);
 
       await worker.stop();
+
+      await sleep(10000);
     }, 60000);
   });
 });

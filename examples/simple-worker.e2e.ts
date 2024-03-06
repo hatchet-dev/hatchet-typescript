@@ -50,7 +50,7 @@ describe('e2e', () => {
 
       void worker.start();
 
-      await sleep(20000);
+      await sleep(30000);
 
       console.log('pushing event...');
 

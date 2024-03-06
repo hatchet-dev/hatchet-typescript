@@ -55,7 +55,6 @@ export class ActionListener {
     (async function* gen(client: ActionListener) {
       while (true) {
         if (client.done) {
-          // console.log('client done, exitting');
           break;
         }
         try {

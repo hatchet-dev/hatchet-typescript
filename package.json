@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/hatchet-dev/hatchet.git"
+    "url": "https://github.com/hatchet-dev/hatchet-typescript.git"
   },
   "scripts": {
     "build": "echo 'build hatchet sdk with `npn run tsc:build` to ensure it is not build during the publish step' && exit 0",

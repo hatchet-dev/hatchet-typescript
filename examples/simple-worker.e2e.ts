@@ -65,6 +65,6 @@ describe('e2e', () => {
 
     await worker.stop();
 
-    await sleep(1000);
+    await sleep(2000);
   }, 60000);
 });

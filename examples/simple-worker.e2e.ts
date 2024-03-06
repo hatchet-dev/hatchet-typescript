@@ -9,64 +9,62 @@ describe('e2e', () => {
     hatchet = Hatchet.init();
   });
 
-  describe('workflow', () => {
-    it('should pass', async () => {
-      let invoked = 0;
+  it('should pass a simple workflow', async () => {
+    let invoked = 0;
 
-      const workflow: Workflow = {
-        id: 'simple-e2e-workflow',
-        description: 'test',
-        on: {
-          event: 'user:create',
+    const workflow: Workflow = {
+      id: 'simple-e2e-workflow',
+      description: 'test',
+      on: {
+        event: 'user:create',
+      },
+      steps: [
+        {
+          name: 'step1',
+          run: async (ctx) => {
+            console.log('starting step1 with the following input', ctx.workflowInput());
+            invoked += 1;
+            return { step1: 'step1 results!' };
+          },
         },
-        steps: [
-          {
-            name: 'step1',
-            run: async (ctx) => {
-              console.log('starting step1 with the following input', ctx.workflowInput());
-              invoked += 1;
-              return { step1: 'step1 results!' };
-            },
+        {
+          name: 'step2',
+          parents: ['step1'],
+          run: (ctx) => {
+            console.log('executed step2 after step1 returned ', ctx.stepOutput('step1'));
+            invoked += 1;
+            return { step2: 'step2 results!' };
           },
-          {
-            name: 'step2',
-            parents: ['step1'],
-            run: (ctx) => {
-              console.log('executed step2 after step1 returned ', ctx.stepOutput('step1'));
-              invoked += 1;
-              return { step2: 'step2 results!' };
-            },
-          },
-        ],
-      };
+        },
+      ],
+    };
 
-      console.log('starting worker...');
+    console.log('starting worker...');
 
-      const worker = await hatchet.worker('example-worker');
-      console.log('registering workflow...');
-      await worker.registerWorkflow(workflow);
+    const worker = await hatchet.worker('example-worker');
+    console.log('registering workflow...');
+    await worker.registerWorkflow(workflow);
 
-      console.log('worker started.');
+    console.log('worker started.');
 
-      void worker.start();
+    void worker.start();
 
-      await sleep(10000);
+    await sleep(5000);
 
-      console.log('pushing event...');
+    console.log('pushing event...');
 
-      await hatchet.event.push('user:create', {
-        test: 'test',
-      });
+    await hatchet.event.push('user:create', {
+      test: 'test',
+    });
 
-      await sleep(5000);
+    await sleep(2000);
 
-      console.log('invoked', invoked);
+    console.log('invoked', invoked);
 
-      expect(invoked).toEqual(2);
+    expect(invoked).toEqual(2);
 
-      await worker.stop();
+    await worker.stop();
 
-      await sleep(10000);
-    }, 60000);
-  });
+    await sleep(1000);
+  }, 60000);
 });

@@ -2,7 +2,7 @@ name: tests
 on: pull_request
 
 jobs:
-  run-tests:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,5 +29,98 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Jest tests
-        run: pnpm test
+      - name: Unit tests
+        run: pnpm test:unit
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v2
+        with:
+          version: "25.1"
+
+      - name: Install Task
+        uses: arduino/setup-task@v1
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Install pnpm
+        run: npm install -g pnpm@8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Compose
+        working-directory: hatchet
+        run: docker compose up -d
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate
+        working-directory: hatchet
+        run: |
+          export DATABASE_URL="postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet"
+          go run github.com/steebchen/prisma-client-go migrate deploy
+          task generate-all
+          task generate-certs
+          task generate-local-encryption-keys
+
+      - name: Setup
+        working-directory: hatchet
+        run: | 
+          cat > .env <<EOF
+          HATCHET_CLIENT_TENANT_ID=707d0855-80ab-4e1f-a156-f1c4546cbf52
+          DATABASE_URL="postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet"
+          HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hack/dev/certs/ca.cert
+          HATCHET_CLIENT_TLS_SERVER_NAME="cluster"
+          SERVER_TLS_CERT_FILE=./hack/dev/certs/cluster.pem
+          SERVER_TLS_KEY_FILE=./hack/dev/certs/cluster.key
+          SERVER_TLS_ROOT_CA_FILE=./hack/dev/certs/ca.cert
+          SERVER_ENCRYPTION_MASTER_KEYSET_FILE=./hack/dev/encryption-keys/master.key
+          SERVER_ENCRYPTION_JWT_PRIVATE_KEYSET_FILE=./hack/dev/encryption-keys/private_ec256.key
+          SERVER_ENCRYPTION_JWT_PUBLIC_KEYSET_FILE=./hack/dev/encryption-keys/public_ec256.key
+
+          DATABASE_URL='postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet'
+          SERVER_PORT=8080
+          SERVER_URL=https://app.dev.hatchet-tools.com
+
+          SERVER_AUTH_COOKIE_SECRETS="kPpegRDNpofgkUsr HoWe67haMOF5qnaB"
+          SERVER_AUTH_COOKIE_DOMAIN=app.dev.hatchet-tools.com
+          SERVER_AUTH_COOKIE_INSECURE=false
+          SERVER_AUTH_SET_EMAIL_VERIFIED=true
+          EOF
+          
+          go run ./cmd/hatchet-admin quickstart
+
+          go run ./cmd/hatchet-engine --config ./generated/ &
+          go run ./cmd/hatchet-api --config ./generated/ &
+          
+          sleep 20
+
+      - name: E2E tests
+        run: |
+          cd hatchet/
+          export HATCHET_CLIENT_TOKEN="$(go run ./cmd/hatchet-admin token create --config ./generated/ --tenant-id 707d0855-80ab-4e1f-a156-f1c4546cbf52)"
+          cd ..
+          export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
+          pnpm test:e2e

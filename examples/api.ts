@@ -1,6 +1,5 @@
 import https from 'https';
-import Hatchet, { Context } from '../src';
-import { AdminClient } from '../src/clients/admin/admin-client';
+import Hatchet, { Context, AdminClient } from '../src';
 import { CreateWorkflowVersionOpts } from '../src/protoc/workflows';
 
 const hatchet = Hatchet.init(
@@ -37,6 +36,7 @@ const opts: CreateWorkflowVersionOpts = {
       description: 'Job description',
       steps: [
         {
+          retries: 0,
           readableId: 'custom-step',
           action: `default:step-one`,
           timeout: '60s',

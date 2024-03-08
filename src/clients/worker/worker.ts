@@ -44,8 +44,8 @@ export class Worker {
     this.action_registry = {};
     this.maxRuns = options.maxRuns;
 
-    process.on('SIGTERM', () => this.exitGracefully());
-    process.on('SIGINT', () => this.exitGracefully());
+    process.on('SIGTERM', () => this.exitGracefully(true));
+    process.on('SIGINT', () => this.exitGracefully(true));
 
     this.killing = false;
     this.handle_kill = options.handleKill === undefined ? true : options.handleKill;
@@ -315,16 +315,16 @@ export class Worker {
   }
 
   async stop() {
-    await this.exitGracefully();
+    await this.exitGracefully(false);
   }
 
-  async exitGracefully() {
+  async exitGracefully(handleKill: boolean) {
     this.killing = true;
 
     this.logger.info('Starting to exit...');
 
     try {
-      this.listener?.unregister();
+      await this.listener?.unregister();
     } catch (e: any) {
       this.logger.error(`Could not unregister listener: ${e.message}`);
     }
@@ -334,7 +334,9 @@ export class Worker {
     // attempt to wait for futures to finish
     await Promise.all(Object.values(this.futures).map(({ promise }) => promise));
 
-    if (this.handle_kill) {
+    this.logger.info('Successfully finished pending tasks.');
+
+    if (handleKill) {
       this.logger.info('Exiting hatchet worker...');
       process.exit(0);
     }
@@ -371,6 +373,11 @@ export class Worker {
         }
       }
     } catch (e: any) {
+      // TODO TEMP this needs to be handled better
+      if (this.killing) {
+        this.logger.info(`Exiting worker, ignoring error: ${e.message}`);
+        return;
+      }
       this.logger.error(`Could not run worker: ${e.message}`);
       throw new HatchetError(`Could not run worker: ${e.message}`);
     }

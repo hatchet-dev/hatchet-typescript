@@ -35,6 +35,7 @@ export class ActionListener {
   retries: number = 0;
   retryInterval: number = DEFAULT_ACTION_LISTENER_RETRY_INTERVAL;
   retryCount: number = DEFAULT_ACTION_LISTENER_RETRY_COUNT;
+  done = false;
 
   constructor(
     client: DispatcherClient,
@@ -53,6 +54,9 @@ export class ActionListener {
   actions = () =>
     (async function* gen(client: ActionListener) {
       while (true) {
+        if (client.done) {
+          break;
+        }
         try {
           for await (const assignedAction of await client.getListenClient()) {
             const action: Action = {
@@ -117,6 +121,7 @@ export class ActionListener {
   }
 
   async unregister() {
+    this.done = true;
     try {
       return this.client.unsubscribe({
         workerId: this.workerId,

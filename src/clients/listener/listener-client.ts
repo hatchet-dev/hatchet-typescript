@@ -37,14 +37,14 @@ export class ListenerClient {
     this.logger = new Logger(`Listener`, config.log_level);
   }
 
-  async on(workflowRunId: string, handler: (event: StepRunEvent) => Promise<void>) {
+  async *stream(workflowRunId: string) {
     let listener = this.client.subscribeToWorkflowEvents({
       workflowRunId,
     });
 
     try {
       for await (const workflowEvent of listener) {
-        let eventType: StepRunEventType;
+        let eventType: StepRunEventType | undefined;
 
         switch (workflowEvent.eventType) {
           case ResourceEventType.RESOURCE_EVENT_TYPE_STARTED:
@@ -63,13 +63,15 @@ export class ListenerClient {
             eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT;
             break;
           default:
-            throw new HatchetError(`Unknown event type: ${workflowEvent.eventType}`);
+          // no nothing
         }
 
-        await handler({
-          type: eventType,
-          payload: workflowEvent.eventPayload,
-        });
+        if (eventType) {
+          yield {
+            type: eventType,
+            payload: workflowEvent.eventPayload,
+          };
+        }
       }
     } catch (e: any) {
       if (e.code === Status.CANCELLED) {

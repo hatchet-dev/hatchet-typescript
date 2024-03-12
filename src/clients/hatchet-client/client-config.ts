@@ -2,7 +2,7 @@ import { ChannelCredentials } from 'nice-grpc';
 import { z } from 'zod';
 
 const ClientTLSConfigSchema = z.object({
-  tls_strategy: z.enum(['tls', 'mtls']).optional(),
+  tls_strategy: z.enum(['tls', 'mtls', 'none']).optional(),
   cert_file: z.string().optional(),
   ca_file: z.string().optional(),
   key_file: z.string().optional(),

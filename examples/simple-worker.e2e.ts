@@ -57,7 +57,7 @@ describe('e2e', () => {
       test: 'test',
     });
 
-    await sleep(2000);
+    await sleep(5000);
 
     console.log('invoked', invoked);
 

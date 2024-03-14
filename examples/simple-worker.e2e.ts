@@ -18,6 +18,7 @@ describe('e2e', () => {
 
   it('should pass a simple workflow', async () => {
     let invoked = 0;
+    const start = new Date();
 
     const workflow: Workflow = {
       id: 'simple-e2e-workflow',
@@ -30,6 +31,7 @@ describe('e2e', () => {
           name: 'step1',
           run: async (ctx) => {
             console.log('starting step1 with the following input', ctx.workflowInput());
+            console.log(`took ${new Date().getTime() - start.getTime()}ms`);
             invoked += 1;
             return { step1: 'step1 results!' };
           },
@@ -38,6 +40,7 @@ describe('e2e', () => {
           name: 'step2',
           parents: ['step1'],
           run: (ctx) => {
+            console.log(`step 1 -> 2 took ${new Date().getTime() - start.getTime()}ms`);
             console.log('executed step2 after step1 returned ', ctx.stepOutput('step1'));
             invoked += 1;
             return { step2: 'step2 results!' };
@@ -61,7 +64,7 @@ describe('e2e', () => {
       test: 'test',
     });
 
-    await sleep(2000);
+    await sleep(10000);
 
     console.log('invoked', invoked);
 

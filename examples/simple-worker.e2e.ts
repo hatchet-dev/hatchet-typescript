@@ -1,12 +1,19 @@
-import { Workflow } from '../src';
+import { Workflow, Worker } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
 
 describe('e2e', () => {
   let hatchet: Hatchet;
+  let worker: Worker;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     hatchet = Hatchet.init();
+    worker = await hatchet.worker('example-worker');
+  });
+
+  afterEach(async () => {
+    await worker.stop();
+    await sleep(2000);
   });
 
   it('should pass a simple workflow', async () => {
@@ -39,15 +46,12 @@ describe('e2e', () => {
       ],
     };
 
-    console.log('starting worker...');
-
-    const worker = await hatchet.worker('example-worker');
     console.log('registering workflow...');
     await worker.registerWorkflow(workflow);
 
-    console.log('worker started.');
-
     void worker.start();
+
+    console.log('worker started.');
 
     await sleep(5000);
 
@@ -62,9 +66,5 @@ describe('e2e', () => {
     console.log('invoked', invoked);
 
     expect(invoked).toEqual(2);
-
-    await worker.stop();
-
-    await sleep(2000);
   }, 60000);
 });

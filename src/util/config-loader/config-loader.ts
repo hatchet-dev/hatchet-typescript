@@ -44,6 +44,13 @@ export class ConfigLoader {
     };
 
     const token = override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN');
+
+    if (!token) {
+      throw new Error(
+        'No token provided. Provide it by setting the HATCHET_CLIENT_TOKEN environment variable.'
+      );
+    }
+
     let grpcBroadcastAddress: string | undefined;
     let apiUrl: string | undefined;
     const tenantId = getTenantIdFromJWT(token!);

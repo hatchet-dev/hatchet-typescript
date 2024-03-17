@@ -94,6 +94,11 @@ export class ConfigLoader {
   }
 
   static createCredentials(config: ClientConfig['tls_config']): ChannelCredentials {
+    // if none, create insecure credentials
+    if (config.tls_strategy === 'none') {
+      return ChannelCredentials.createInsecure();
+    }
+
     if (config.tls_strategy === 'tls') {
       const rootCerts = config.ca_file ? readFileSync(config.ca_file) : undefined;
       return ChannelCredentials.createSsl(rootCerts);

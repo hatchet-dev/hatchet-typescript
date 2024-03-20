@@ -16,6 +16,7 @@ export const ClientConfigSchema = z.object({
   api_url: z.string(),
   log_level: z.enum(['OFF', 'DEBUG', 'INFO', 'WARN', 'ERROR']).optional(),
   tenant_id: z.string(),
+  namespace: z.string().optional(),
 });
 
 export type ClientConfig = z.infer<typeof ClientConfigSchema> & {

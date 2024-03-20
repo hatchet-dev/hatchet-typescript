@@ -42,7 +42,6 @@ export class ConfigLoader {
       key_file: yaml?.tls_config?.key_file ?? this.env('HATCHET_CLIENT_TLS_KEY_FILE')!,
       ca_file: yaml?.tls_config?.ca_file ?? this.env('HATCHET_CLIENT_TLS_ROOT_CA_FILE')!,
       server_name: yaml?.tls_config?.server_name ?? this.env('HATCHET_CLIENT_TLS_SERVER_NAME')!,
-      namespace: yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE'),
     };
 
     const token = override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN');
@@ -88,6 +87,7 @@ export class ConfigLoader {
         (this.env('HATCHET_CLIENT_LOG_LEVEL') as LogLevel) ??
         'INFO',
       tenant_id: tenantId,
+      namespace: override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE'),
     };
   }
 

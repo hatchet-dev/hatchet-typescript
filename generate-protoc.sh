@@ -1,4 +1,6 @@
 # Directory to write generated code to (.js and .d.ts files)
+git submodule update --remote --merge
+
 OUT_DIR="./src/protoc"
 
 # Generate code

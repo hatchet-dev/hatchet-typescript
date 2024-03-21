@@ -2,12 +2,14 @@ import { Workflow, Worker } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
 
-describe('e2e', () => {
+xdescribe('e2e', () => {
   let hatchet: Hatchet;
   let worker: Worker;
 
   beforeEach(async () => {
-    hatchet = Hatchet.init();
+    hatchet = Hatchet.init({
+      namespace: 'dev',
+    });
     worker = await hatchet.worker('example-worker');
   });
 

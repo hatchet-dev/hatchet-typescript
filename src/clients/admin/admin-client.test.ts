@@ -86,10 +86,8 @@ describe('AdminClient', () => {
         version: 'v0.1.0',
         order: 1,
         workflowId: 'workflow1',
-        jobs: [],
         createdAt: undefined,
         updatedAt: undefined,
-        triggers: undefined,
       });
 
       await client.put_workflow(workflow);
@@ -105,10 +103,8 @@ describe('AdminClient', () => {
         version: 'v0.0.1',
         order: 1,
         workflowId: 'string',
-        jobs: [],
         createdAt: undefined,
         updatedAt: undefined,
-        triggers: undefined,
       };
 
       const spy = jest.spyOn(client.client, 'scheduleWorkflow').mockResolvedValue(res);

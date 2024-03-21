@@ -30,7 +30,7 @@ export class EventClient {
   }
 
   push<T>(type: string, input: T) {
-    const namespacedType = this.config.namespace + type;
+    const namespacedType = `${this.config.namespace ?? ''}${type}`;
 
     const req: PushEventRequest = {
       key: namespacedType,

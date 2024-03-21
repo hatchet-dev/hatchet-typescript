@@ -40,7 +40,7 @@ export class Worker {
     options: { name: string; handleKill?: boolean; maxRuns?: number }
   ) {
     this.client = client;
-    this.name = options.name;
+    this.name = this.client.config.namespace + options.name;
     this.action_registry = {};
     this.maxRuns = options.maxRuns;
 
@@ -53,7 +53,11 @@ export class Worker {
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
-  async registerWorkflow(workflow: Workflow) {
+  async registerWorkflow(initWorkflow: Workflow) {
+    const workflow: Workflow = {
+      ...initWorkflow,
+      id: this.client.config.namespace + initWorkflow.id,
+    };
     try {
       const concurrency: WorkflowConcurrencyOpts | undefined = workflow.concurrency?.name
         ? {
@@ -68,7 +72,7 @@ export class Worker {
         name: workflow.id,
         description: workflow.description,
         version: workflow.version || '',
-        eventTriggers: workflow.on.event ? [workflow.on.event] : [],
+        eventTriggers: workflow.on.event ? [this.client.config.namespace + workflow.on.event] : [],
         cronTriggers: workflow.on.cron ? [workflow.on.cron] : [],
         scheduledTriggers: [],
         concurrency,

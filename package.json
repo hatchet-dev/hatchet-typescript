@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.1.28",
+  "version": "0.1.29",
   "description": "Background task orchestration & visibility for developers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -34,6 +34,7 @@
     "exec": "npx dotenv -- ts-node -r tsconfig-paths/register --project tsconfig.json",
     "example:event": "npm run exec -- ./examples/example-event.ts",
     "example:event-listen": "npm run exec -- ./examples/example-event-with-results.ts",
+    "worker:namespaced": "npm run exec -- ./examples/namespaced-worker.ts",
     "worker:simple": "npm run exec -- ./examples/simple-worker.ts",
     "manual:trigger": "npm run exec -- ./examples/manual-trigger.ts",
     "worker:dag": "npm run exec -- ./examples/dag-worker.ts",

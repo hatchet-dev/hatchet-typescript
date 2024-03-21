@@ -76,6 +76,9 @@ export class ConfigLoader {
       apiUrl = override?.api_url ?? yaml?.api_url ?? this.env('HATCHET_CLIENT_API_URL');
     }
 
+    const namespace =
+      override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE');
+
     return {
       token: override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN'),
       host_port: grpcBroadcastAddress,
@@ -87,7 +90,7 @@ export class ConfigLoader {
         (this.env('HATCHET_CLIENT_LOG_LEVEL') as LogLevel) ??
         'INFO',
       tenant_id: tenantId,
-      namespace: override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE'),
+      namespace: namespace ? `${namespace}_` : undefined,
     };
   }
 

@@ -143,13 +143,13 @@ export class AdminClient {
 
   /**
    * Schedule a workflow to run at a specific time or times.
-   * @param workflowId the ID of the workflow to schedule
+   * @param name the name of the workflow to schedule
    * @param options an object containing the schedules to set
    */
-  schedule_workflow(workflowId: string, options?: { schedules?: Date[] }) {
+  schedule_workflow(name: string, options?: { schedules?: Date[] }) {
     try {
       this.client.scheduleWorkflow({
-        workflowId,
+        name,
         schedules: options?.schedules,
       });
     } catch (e: any) {

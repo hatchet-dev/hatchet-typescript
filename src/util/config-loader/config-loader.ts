@@ -16,7 +16,8 @@ type EnvVars =
   | 'HATCHET_CLIENT_TLS_KEY_FILE'
   | 'HATCHET_CLIENT_TLS_ROOT_CA_FILE'
   | 'HATCHET_CLIENT_TLS_SERVER_NAME'
-  | 'HATCHET_CLIENT_LOG_LEVEL';
+  | 'HATCHET_CLIENT_LOG_LEVEL'
+  | 'HATCHET_CLIENT_NAMESPACE';
 
 type TLSStrategy = 'tls' | 'mtls';
 
@@ -44,6 +45,13 @@ export class ConfigLoader {
     };
 
     const token = override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN');
+
+    if (!token) {
+      throw new Error(
+        'No token provided. Provide it by setting the HATCHET_CLIENT_TOKEN environment variable.'
+      );
+    }
+
     let grpcBroadcastAddress: string | undefined;
     let apiUrl: string | undefined;
     const tenantId = getTenantIdFromJWT(token!);
@@ -68,6 +76,9 @@ export class ConfigLoader {
       apiUrl = override?.api_url ?? yaml?.api_url ?? this.env('HATCHET_CLIENT_API_URL');
     }
 
+    const namespace =
+      override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE');
+
     return {
       token: override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN'),
       host_port: grpcBroadcastAddress,
@@ -79,6 +90,7 @@ export class ConfigLoader {
         (this.env('HATCHET_CLIENT_LOG_LEVEL') as LogLevel) ??
         'INFO',
       tenant_id: tenantId,
+      namespace: namespace ? `${namespace}_` : '',
     };
   }
 
@@ -87,6 +99,11 @@ export class ConfigLoader {
   }
 
   static createCredentials(config: ClientConfig['tls_config']): ChannelCredentials {
+    // if none, create insecure credentials
+    if (config.tls_strategy === 'none') {
+      return ChannelCredentials.createInsecure();
+    }
+
     if (config.tls_strategy === 'tls') {
       const rootCerts = config.ca_file ? readFileSync(config.ca_file) : undefined;
       return ChannelCredentials.createSsl(rootCerts);

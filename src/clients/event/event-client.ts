@@ -30,15 +30,17 @@ export class EventClient {
   }
 
   push<T>(type: string, input: T) {
+    const namespacedType = this.config.namespace + type;
+
     const req: PushEventRequest = {
-      key: type,
+      key: namespacedType,
       payload: JSON.stringify(input),
       eventTimestamp: new Date(),
     };
 
     try {
       const e = this.client.push(req);
-      this.logger.info(`Event pushed: ${type}`);
+      this.logger.info(`Event pushed: ${namespacedType}`);
       return e;
     } catch (e: any) {
       throw new HatchetError(e.message);

@@ -111,12 +111,12 @@ describe('AdminClient', () => {
 
       const now = new Date();
 
-      client.schedule_workflow('workflowId', {
+      client.schedule_workflow('workflowName', {
         schedules: [now],
       });
 
       expect(spy).toHaveBeenCalledWith({
-        workflowId: 'workflowId',
+        name: 'workflowName',
         schedules: [now],
       });
     });

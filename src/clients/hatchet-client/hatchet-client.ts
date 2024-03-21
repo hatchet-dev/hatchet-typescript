@@ -122,6 +122,9 @@ export class HatchetClient {
 
   // @deprecated
   async run(workflow: string | Workflow): Promise<Worker> {
+    this.logger.warn(
+      'HatchetClient.run is deprecated and will be removed in a future release. Use HatchetClient.worker and Worker.start instead.'
+    );
     const worker = await this.worker(workflow);
     worker.start();
     return worker;

@@ -47,18 +47,6 @@ export interface PushEventRequest {
   eventTimestamp: Date | undefined;
 }
 
-export interface ListEventRequest {
-  /** (optional) the number of events to skip */
-  offset: number;
-  /** (optional) the key for the event */
-  key: string;
-}
-
-export interface ListEventResponse {
-  /** the events */
-  events: Event[];
-}
-
 export interface ReplayEventRequest {
   /** the event id to replay */
   eventId: string;
@@ -434,137 +422,6 @@ export const PushEventRequest = {
   },
 };
 
-function createBaseListEventRequest(): ListEventRequest {
-  return { offset: 0, key: "" };
-}
-
-export const ListEventRequest = {
-  encode(message: ListEventRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.offset !== 0) {
-      writer.uint32(8).int32(message.offset);
-    }
-    if (message.key !== "") {
-      writer.uint32(18).string(message.key);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListEventRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListEventRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 8) {
-            break;
-          }
-
-          message.offset = reader.int32();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.key = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListEventRequest {
-    return {
-      offset: isSet(object.offset) ? globalThis.Number(object.offset) : 0,
-      key: isSet(object.key) ? globalThis.String(object.key) : "",
-    };
-  },
-
-  toJSON(message: ListEventRequest): unknown {
-    const obj: any = {};
-    if (message.offset !== 0) {
-      obj.offset = Math.round(message.offset);
-    }
-    if (message.key !== "") {
-      obj.key = message.key;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<ListEventRequest>): ListEventRequest {
-    return ListEventRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<ListEventRequest>): ListEventRequest {
-    const message = createBaseListEventRequest();
-    message.offset = object.offset ?? 0;
-    message.key = object.key ?? "";
-    return message;
-  },
-};
-
-function createBaseListEventResponse(): ListEventResponse {
-  return { events: [] };
-}
-
-export const ListEventResponse = {
-  encode(message: ListEventResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.events) {
-      Event.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListEventResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListEventResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.events.push(Event.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListEventResponse {
-    return { events: globalThis.Array.isArray(object?.events) ? object.events.map((e: any) => Event.fromJSON(e)) : [] };
-  },
-
-  toJSON(message: ListEventResponse): unknown {
-    const obj: any = {};
-    if (message.events?.length) {
-      obj.events = message.events.map((e) => Event.toJSON(e));
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<ListEventResponse>): ListEventResponse {
-    return ListEventResponse.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<ListEventResponse>): ListEventResponse {
-    const message = createBaseListEventResponse();
-    message.events = object.events?.map((e) => Event.fromPartial(e)) || [];
-    return message;
-  },
-};
-
 function createBaseReplayEventRequest(): ReplayEventRequest {
   return { eventId: "" };
 }
@@ -635,14 +492,6 @@ export const EventsServiceDefinition = {
       responseStream: false,
       options: {},
     },
-    list: {
-      name: "List",
-      requestType: ListEventRequest,
-      requestStream: false,
-      responseType: ListEventResponse,
-      responseStream: false,
-      options: {},
-    },
     replaySingleEvent: {
       name: "ReplaySingleEvent",
       requestType: ReplayEventRequest,
@@ -664,14 +513,12 @@ export const EventsServiceDefinition = {
 
 export interface EventsServiceImplementation<CallContextExt = {}> {
   push(request: PushEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Event>>;
-  list(request: ListEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ListEventResponse>>;
   replaySingleEvent(request: ReplayEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Event>>;
   putLog(request: PutLogRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PutLogResponse>>;
 }
 
 export interface EventsServiceClient<CallOptionsExt = {}> {
   push(request: DeepPartial<PushEventRequest>, options?: CallOptions & CallOptionsExt): Promise<Event>;
-  list(request: DeepPartial<ListEventRequest>, options?: CallOptions & CallOptionsExt): Promise<ListEventResponse>;
   replaySingleEvent(request: DeepPartial<ReplayEventRequest>, options?: CallOptions & CallOptionsExt): Promise<Event>;
   putLog(request: DeepPartial<PutLogRequest>, options?: CallOptions & CallOptionsExt): Promise<PutLogResponse>;
 }

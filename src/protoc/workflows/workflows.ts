@@ -2,7 +2,6 @@
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import * as _m0 from "protobufjs/minimal";
 import { Timestamp } from "../google/protobuf/timestamp";
-import { StringValue } from "../google/protobuf/wrappers";
 
 export const protobufPackage = "";
 
@@ -123,32 +122,10 @@ export interface ListWorkflowsRequest {
 }
 
 export interface ScheduleWorkflowRequest {
-  workflowId: string;
+  name: string;
   schedules: Date[];
   /** (optional) the input data for the workflow */
   input: string;
-}
-
-/** ListWorkflowsResponse is the response for ListWorkflows. */
-export interface ListWorkflowsResponse {
-  workflows: Workflow[];
-}
-
-/** ListWorkflowsForEventRequest is the request for ListWorkflowsForEvent. */
-export interface ListWorkflowsForEventRequest {
-  eventKey: string;
-}
-
-/** Workflow represents the Workflow model. */
-export interface Workflow {
-  id: string;
-  createdAt: Date | undefined;
-  updatedAt: Date | undefined;
-  tenantId: string;
-  name: string;
-  /** Optional */
-  description: string | undefined;
-  versions: WorkflowVersion[];
 }
 
 /** WorkflowVersion represents the WorkflowVersion model. */
@@ -159,19 +136,6 @@ export interface WorkflowVersion {
   version: string;
   order: number;
   workflowId: string;
-  triggers: WorkflowTriggers | undefined;
-  jobs: Job[];
-}
-
-/** WorkflowTriggers represents the WorkflowTriggers model. */
-export interface WorkflowTriggers {
-  id: string;
-  createdAt: Date | undefined;
-  updatedAt: Date | undefined;
-  workflowVersionId: string;
-  tenantId: string;
-  events: WorkflowTriggerEventRef[];
-  crons: WorkflowTriggerCronRef[];
 }
 
 /** WorkflowTriggerEventRef represents the WorkflowTriggerEventRef model. */
@@ -184,47 +148,6 @@ export interface WorkflowTriggerEventRef {
 export interface WorkflowTriggerCronRef {
   parentId: string;
   cron: string;
-}
-
-/** Job represents the Job model. */
-export interface Job {
-  id: string;
-  createdAt: Date | undefined;
-  updatedAt: Date | undefined;
-  tenantId: string;
-  workflowVersionId: string;
-  name: string;
-  /** Optional */
-  description: string | undefined;
-  steps: Step[];
-  /** Optional */
-  timeout: string | undefined;
-}
-
-/** Step represents the Step model. */
-export interface Step {
-  id: string;
-  createdAt: Date | undefined;
-  updatedAt:
-    | Date
-    | undefined;
-  /** Optional */
-  readableId: string | undefined;
-  tenantId: string;
-  jobId: string;
-  action: string;
-  /** Optional */
-  timeout: string | undefined;
-  parents: string[];
-  children: string[];
-}
-
-export interface DeleteWorkflowRequest {
-  workflowId: string;
-}
-
-export interface GetWorkflowByNameRequest {
-  name: string;
 }
 
 export interface TriggerWorkflowRequest {
@@ -883,13 +806,13 @@ export const ListWorkflowsRequest = {
 };
 
 function createBaseScheduleWorkflowRequest(): ScheduleWorkflowRequest {
-  return { workflowId: "", schedules: [], input: "" };
+  return { name: "", schedules: [], input: "" };
 }
 
 export const ScheduleWorkflowRequest = {
   encode(message: ScheduleWorkflowRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workflowId !== "") {
-      writer.uint32(10).string(message.workflowId);
+    if (message.name !== "") {
+      writer.uint32(10).string(message.name);
     }
     for (const v of message.schedules) {
       Timestamp.encode(toTimestamp(v!), writer.uint32(18).fork()).ldelim();
@@ -912,7 +835,7 @@ export const ScheduleWorkflowRequest = {
             break;
           }
 
-          message.workflowId = reader.string();
+          message.name = reader.string();
           continue;
         case 2:
           if (tag !== 18) {
@@ -939,7 +862,7 @@ export const ScheduleWorkflowRequest = {
 
   fromJSON(object: any): ScheduleWorkflowRequest {
     return {
-      workflowId: isSet(object.workflowId) ? globalThis.String(object.workflowId) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
       schedules: globalThis.Array.isArray(object?.schedules)
         ? object.schedules.map((e: any) => fromJsonTimestamp(e))
         : [],
@@ -949,8 +872,8 @@ export const ScheduleWorkflowRequest = {
 
   toJSON(message: ScheduleWorkflowRequest): unknown {
     const obj: any = {};
-    if (message.workflowId !== "") {
-      obj.workflowId = message.workflowId;
+    if (message.name !== "") {
+      obj.name = message.name;
     }
     if (message.schedules?.length) {
       obj.schedules = message.schedules.map((e) => e.toISOString());
@@ -966,301 +889,15 @@ export const ScheduleWorkflowRequest = {
   },
   fromPartial(object: DeepPartial<ScheduleWorkflowRequest>): ScheduleWorkflowRequest {
     const message = createBaseScheduleWorkflowRequest();
-    message.workflowId = object.workflowId ?? "";
+    message.name = object.name ?? "";
     message.schedules = object.schedules?.map((e) => e) || [];
     message.input = object.input ?? "";
     return message;
   },
 };
 
-function createBaseListWorkflowsResponse(): ListWorkflowsResponse {
-  return { workflows: [] };
-}
-
-export const ListWorkflowsResponse = {
-  encode(message: ListWorkflowsResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    for (const v of message.workflows) {
-      Workflow.encode(v!, writer.uint32(10).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListWorkflowsResponse {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListWorkflowsResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.workflows.push(Workflow.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListWorkflowsResponse {
-    return {
-      workflows: globalThis.Array.isArray(object?.workflows)
-        ? object.workflows.map((e: any) => Workflow.fromJSON(e))
-        : [],
-    };
-  },
-
-  toJSON(message: ListWorkflowsResponse): unknown {
-    const obj: any = {};
-    if (message.workflows?.length) {
-      obj.workflows = message.workflows.map((e) => Workflow.toJSON(e));
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<ListWorkflowsResponse>): ListWorkflowsResponse {
-    return ListWorkflowsResponse.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<ListWorkflowsResponse>): ListWorkflowsResponse {
-    const message = createBaseListWorkflowsResponse();
-    message.workflows = object.workflows?.map((e) => Workflow.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseListWorkflowsForEventRequest(): ListWorkflowsForEventRequest {
-  return { eventKey: "" };
-}
-
-export const ListWorkflowsForEventRequest = {
-  encode(message: ListWorkflowsForEventRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.eventKey !== "") {
-      writer.uint32(10).string(message.eventKey);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): ListWorkflowsForEventRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListWorkflowsForEventRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.eventKey = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListWorkflowsForEventRequest {
-    return { eventKey: isSet(object.eventKey) ? globalThis.String(object.eventKey) : "" };
-  },
-
-  toJSON(message: ListWorkflowsForEventRequest): unknown {
-    const obj: any = {};
-    if (message.eventKey !== "") {
-      obj.eventKey = message.eventKey;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<ListWorkflowsForEventRequest>): ListWorkflowsForEventRequest {
-    return ListWorkflowsForEventRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<ListWorkflowsForEventRequest>): ListWorkflowsForEventRequest {
-    const message = createBaseListWorkflowsForEventRequest();
-    message.eventKey = object.eventKey ?? "";
-    return message;
-  },
-};
-
-function createBaseWorkflow(): Workflow {
-  return {
-    id: "",
-    createdAt: undefined,
-    updatedAt: undefined,
-    tenantId: "",
-    name: "",
-    description: undefined,
-    versions: [],
-  };
-}
-
-export const Workflow = {
-  encode(message: Workflow, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
-    }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(26).fork()).ldelim();
-    }
-    if (message.tenantId !== "") {
-      writer.uint32(42).string(message.tenantId);
-    }
-    if (message.name !== "") {
-      writer.uint32(50).string(message.name);
-    }
-    if (message.description !== undefined) {
-      StringValue.encode({ value: message.description! }, writer.uint32(58).fork()).ldelim();
-    }
-    for (const v of message.versions) {
-      WorkflowVersion.encode(v!, writer.uint32(66).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): Workflow {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseWorkflow();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.tenantId = reader.string();
-          continue;
-        case 6:
-          if (tag !== 50) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.description = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.versions.push(WorkflowVersion.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): Workflow {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
-      updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? String(object.description) : undefined,
-      versions: globalThis.Array.isArray(object?.versions)
-        ? object.versions.map((e: any) => WorkflowVersion.fromJSON(e))
-        : [],
-    };
-  },
-
-  toJSON(message: Workflow): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.createdAt !== undefined) {
-      obj.createdAt = message.createdAt.toISOString();
-    }
-    if (message.updatedAt !== undefined) {
-      obj.updatedAt = message.updatedAt.toISOString();
-    }
-    if (message.tenantId !== "") {
-      obj.tenantId = message.tenantId;
-    }
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.description !== undefined) {
-      obj.description = message.description;
-    }
-    if (message.versions?.length) {
-      obj.versions = message.versions.map((e) => WorkflowVersion.toJSON(e));
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<Workflow>): Workflow {
-    return Workflow.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<Workflow>): Workflow {
-    const message = createBaseWorkflow();
-    message.id = object.id ?? "";
-    message.createdAt = object.createdAt ?? undefined;
-    message.updatedAt = object.updatedAt ?? undefined;
-    message.tenantId = object.tenantId ?? "";
-    message.name = object.name ?? "";
-    message.description = object.description ?? undefined;
-    message.versions = object.versions?.map((e) => WorkflowVersion.fromPartial(e)) || [];
-    return message;
-  },
-};
-
 function createBaseWorkflowVersion(): WorkflowVersion {
-  return {
-    id: "",
-    createdAt: undefined,
-    updatedAt: undefined,
-    version: "",
-    order: 0,
-    workflowId: "",
-    triggers: undefined,
-    jobs: [],
-  };
+  return { id: "", createdAt: undefined, updatedAt: undefined, version: "", order: 0, workflowId: "" };
 }
 
 export const WorkflowVersion = {
@@ -1282,12 +919,6 @@ export const WorkflowVersion = {
     }
     if (message.workflowId !== "") {
       writer.uint32(58).string(message.workflowId);
-    }
-    if (message.triggers !== undefined) {
-      WorkflowTriggers.encode(message.triggers, writer.uint32(66).fork()).ldelim();
-    }
-    for (const v of message.jobs) {
-      Job.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -1341,20 +972,6 @@ export const WorkflowVersion = {
 
           message.workflowId = reader.string();
           continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.triggers = WorkflowTriggers.decode(reader, reader.uint32());
-          continue;
-        case 9:
-          if (tag !== 74) {
-            break;
-          }
-
-          message.jobs.push(Job.decode(reader, reader.uint32()));
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1372,8 +989,6 @@ export const WorkflowVersion = {
       version: isSet(object.version) ? globalThis.String(object.version) : "",
       order: isSet(object.order) ? globalThis.Number(object.order) : 0,
       workflowId: isSet(object.workflowId) ? globalThis.String(object.workflowId) : "",
-      triggers: isSet(object.triggers) ? WorkflowTriggers.fromJSON(object.triggers) : undefined,
-      jobs: globalThis.Array.isArray(object?.jobs) ? object.jobs.map((e: any) => Job.fromJSON(e)) : [],
     };
   },
 
@@ -1397,12 +1012,6 @@ export const WorkflowVersion = {
     if (message.workflowId !== "") {
       obj.workflowId = message.workflowId;
     }
-    if (message.triggers !== undefined) {
-      obj.triggers = WorkflowTriggers.toJSON(message.triggers);
-    }
-    if (message.jobs?.length) {
-      obj.jobs = message.jobs.map((e) => Job.toJSON(e));
-    }
     return obj;
   },
 
@@ -1417,171 +1026,6 @@ export const WorkflowVersion = {
     message.version = object.version ?? "";
     message.order = object.order ?? 0;
     message.workflowId = object.workflowId ?? "";
-    message.triggers = (object.triggers !== undefined && object.triggers !== null)
-      ? WorkflowTriggers.fromPartial(object.triggers)
-      : undefined;
-    message.jobs = object.jobs?.map((e) => Job.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseWorkflowTriggers(): WorkflowTriggers {
-  return {
-    id: "",
-    createdAt: undefined,
-    updatedAt: undefined,
-    workflowVersionId: "",
-    tenantId: "",
-    events: [],
-    crons: [],
-  };
-}
-
-export const WorkflowTriggers = {
-  encode(message: WorkflowTriggers, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
-    }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(26).fork()).ldelim();
-    }
-    if (message.workflowVersionId !== "") {
-      writer.uint32(42).string(message.workflowVersionId);
-    }
-    if (message.tenantId !== "") {
-      writer.uint32(50).string(message.tenantId);
-    }
-    for (const v of message.events) {
-      WorkflowTriggerEventRef.encode(v!, writer.uint32(58).fork()).ldelim();
-    }
-    for (const v of message.crons) {
-      WorkflowTriggerCronRef.encode(v!, writer.uint32(66).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): WorkflowTriggers {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseWorkflowTriggers();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.workflowVersionId = reader.string();
-          continue;
-        case 6:
-          if (tag !== 50) {
-            break;
-          }
-
-          message.tenantId = reader.string();
-          continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.events.push(WorkflowTriggerEventRef.decode(reader, reader.uint32()));
-          continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.crons.push(WorkflowTriggerCronRef.decode(reader, reader.uint32()));
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): WorkflowTriggers {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
-      updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
-      workflowVersionId: isSet(object.workflowVersionId) ? globalThis.String(object.workflowVersionId) : "",
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      events: globalThis.Array.isArray(object?.events)
-        ? object.events.map((e: any) => WorkflowTriggerEventRef.fromJSON(e))
-        : [],
-      crons: globalThis.Array.isArray(object?.crons)
-        ? object.crons.map((e: any) => WorkflowTriggerCronRef.fromJSON(e))
-        : [],
-    };
-  },
-
-  toJSON(message: WorkflowTriggers): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.createdAt !== undefined) {
-      obj.createdAt = message.createdAt.toISOString();
-    }
-    if (message.updatedAt !== undefined) {
-      obj.updatedAt = message.updatedAt.toISOString();
-    }
-    if (message.workflowVersionId !== "") {
-      obj.workflowVersionId = message.workflowVersionId;
-    }
-    if (message.tenantId !== "") {
-      obj.tenantId = message.tenantId;
-    }
-    if (message.events?.length) {
-      obj.events = message.events.map((e) => WorkflowTriggerEventRef.toJSON(e));
-    }
-    if (message.crons?.length) {
-      obj.crons = message.crons.map((e) => WorkflowTriggerCronRef.toJSON(e));
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<WorkflowTriggers>): WorkflowTriggers {
-    return WorkflowTriggers.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<WorkflowTriggers>): WorkflowTriggers {
-    const message = createBaseWorkflowTriggers();
-    message.id = object.id ?? "";
-    message.createdAt = object.createdAt ?? undefined;
-    message.updatedAt = object.updatedAt ?? undefined;
-    message.workflowVersionId = object.workflowVersionId ?? "";
-    message.tenantId = object.tenantId ?? "";
-    message.events = object.events?.map((e) => WorkflowTriggerEventRef.fromPartial(e)) || [];
-    message.crons = object.crons?.map((e) => WorkflowTriggerCronRef.fromPartial(e)) || [];
     return message;
   },
 };
@@ -1734,514 +1178,6 @@ export const WorkflowTriggerCronRef = {
   },
 };
 
-function createBaseJob(): Job {
-  return {
-    id: "",
-    createdAt: undefined,
-    updatedAt: undefined,
-    tenantId: "",
-    workflowVersionId: "",
-    name: "",
-    description: undefined,
-    steps: [],
-    timeout: undefined,
-  };
-}
-
-export const Job = {
-  encode(message: Job, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
-    }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(26).fork()).ldelim();
-    }
-    if (message.tenantId !== "") {
-      writer.uint32(42).string(message.tenantId);
-    }
-    if (message.workflowVersionId !== "") {
-      writer.uint32(50).string(message.workflowVersionId);
-    }
-    if (message.name !== "") {
-      writer.uint32(58).string(message.name);
-    }
-    if (message.description !== undefined) {
-      StringValue.encode({ value: message.description! }, writer.uint32(66).fork()).ldelim();
-    }
-    for (const v of message.steps) {
-      Step.encode(v!, writer.uint32(74).fork()).ldelim();
-    }
-    if (message.timeout !== undefined) {
-      StringValue.encode({ value: message.timeout! }, writer.uint32(82).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): Job {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseJob();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.tenantId = reader.string();
-          continue;
-        case 6:
-          if (tag !== 50) {
-            break;
-          }
-
-          message.workflowVersionId = reader.string();
-          continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.description = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        case 9:
-          if (tag !== 74) {
-            break;
-          }
-
-          message.steps.push(Step.decode(reader, reader.uint32()));
-          continue;
-        case 10:
-          if (tag !== 82) {
-            break;
-          }
-
-          message.timeout = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): Job {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
-      updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      workflowVersionId: isSet(object.workflowVersionId) ? globalThis.String(object.workflowVersionId) : "",
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? String(object.description) : undefined,
-      steps: globalThis.Array.isArray(object?.steps) ? object.steps.map((e: any) => Step.fromJSON(e)) : [],
-      timeout: isSet(object.timeout) ? String(object.timeout) : undefined,
-    };
-  },
-
-  toJSON(message: Job): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.createdAt !== undefined) {
-      obj.createdAt = message.createdAt.toISOString();
-    }
-    if (message.updatedAt !== undefined) {
-      obj.updatedAt = message.updatedAt.toISOString();
-    }
-    if (message.tenantId !== "") {
-      obj.tenantId = message.tenantId;
-    }
-    if (message.workflowVersionId !== "") {
-      obj.workflowVersionId = message.workflowVersionId;
-    }
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.description !== undefined) {
-      obj.description = message.description;
-    }
-    if (message.steps?.length) {
-      obj.steps = message.steps.map((e) => Step.toJSON(e));
-    }
-    if (message.timeout !== undefined) {
-      obj.timeout = message.timeout;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<Job>): Job {
-    return Job.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<Job>): Job {
-    const message = createBaseJob();
-    message.id = object.id ?? "";
-    message.createdAt = object.createdAt ?? undefined;
-    message.updatedAt = object.updatedAt ?? undefined;
-    message.tenantId = object.tenantId ?? "";
-    message.workflowVersionId = object.workflowVersionId ?? "";
-    message.name = object.name ?? "";
-    message.description = object.description ?? undefined;
-    message.steps = object.steps?.map((e) => Step.fromPartial(e)) || [];
-    message.timeout = object.timeout ?? undefined;
-    return message;
-  },
-};
-
-function createBaseStep(): Step {
-  return {
-    id: "",
-    createdAt: undefined,
-    updatedAt: undefined,
-    readableId: undefined,
-    tenantId: "",
-    jobId: "",
-    action: "",
-    timeout: undefined,
-    parents: [],
-    children: [],
-  };
-}
-
-export const Step = {
-  encode(message: Step, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.createdAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
-    }
-    if (message.updatedAt !== undefined) {
-      Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(26).fork()).ldelim();
-    }
-    if (message.readableId !== undefined) {
-      StringValue.encode({ value: message.readableId! }, writer.uint32(42).fork()).ldelim();
-    }
-    if (message.tenantId !== "") {
-      writer.uint32(50).string(message.tenantId);
-    }
-    if (message.jobId !== "") {
-      writer.uint32(58).string(message.jobId);
-    }
-    if (message.action !== "") {
-      writer.uint32(66).string(message.action);
-    }
-    if (message.timeout !== undefined) {
-      StringValue.encode({ value: message.timeout! }, writer.uint32(74).fork()).ldelim();
-    }
-    for (const v of message.parents) {
-      writer.uint32(82).string(v!);
-    }
-    for (const v of message.children) {
-      writer.uint32(90).string(v!);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): Step {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStep();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        case 2:
-          if (tag !== 18) {
-            break;
-          }
-
-          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.updatedAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
-          continue;
-        case 5:
-          if (tag !== 42) {
-            break;
-          }
-
-          message.readableId = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        case 6:
-          if (tag !== 50) {
-            break;
-          }
-
-          message.tenantId = reader.string();
-          continue;
-        case 7:
-          if (tag !== 58) {
-            break;
-          }
-
-          message.jobId = reader.string();
-          continue;
-        case 8:
-          if (tag !== 66) {
-            break;
-          }
-
-          message.action = reader.string();
-          continue;
-        case 9:
-          if (tag !== 74) {
-            break;
-          }
-
-          message.timeout = StringValue.decode(reader, reader.uint32()).value;
-          continue;
-        case 10:
-          if (tag !== 82) {
-            break;
-          }
-
-          message.parents.push(reader.string());
-          continue;
-        case 11:
-          if (tag !== 90) {
-            break;
-          }
-
-          message.children.push(reader.string());
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): Step {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
-      updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
-      readableId: isSet(object.readableId) ? String(object.readableId) : undefined,
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      jobId: isSet(object.jobId) ? globalThis.String(object.jobId) : "",
-      action: isSet(object.action) ? globalThis.String(object.action) : "",
-      timeout: isSet(object.timeout) ? String(object.timeout) : undefined,
-      parents: globalThis.Array.isArray(object?.parents) ? object.parents.map((e: any) => globalThis.String(e)) : [],
-      children: globalThis.Array.isArray(object?.children) ? object.children.map((e: any) => globalThis.String(e)) : [],
-    };
-  },
-
-  toJSON(message: Step): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.createdAt !== undefined) {
-      obj.createdAt = message.createdAt.toISOString();
-    }
-    if (message.updatedAt !== undefined) {
-      obj.updatedAt = message.updatedAt.toISOString();
-    }
-    if (message.readableId !== undefined) {
-      obj.readableId = message.readableId;
-    }
-    if (message.tenantId !== "") {
-      obj.tenantId = message.tenantId;
-    }
-    if (message.jobId !== "") {
-      obj.jobId = message.jobId;
-    }
-    if (message.action !== "") {
-      obj.action = message.action;
-    }
-    if (message.timeout !== undefined) {
-      obj.timeout = message.timeout;
-    }
-    if (message.parents?.length) {
-      obj.parents = message.parents;
-    }
-    if (message.children?.length) {
-      obj.children = message.children;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<Step>): Step {
-    return Step.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<Step>): Step {
-    const message = createBaseStep();
-    message.id = object.id ?? "";
-    message.createdAt = object.createdAt ?? undefined;
-    message.updatedAt = object.updatedAt ?? undefined;
-    message.readableId = object.readableId ?? undefined;
-    message.tenantId = object.tenantId ?? "";
-    message.jobId = object.jobId ?? "";
-    message.action = object.action ?? "";
-    message.timeout = object.timeout ?? undefined;
-    message.parents = object.parents?.map((e) => e) || [];
-    message.children = object.children?.map((e) => e) || [];
-    return message;
-  },
-};
-
-function createBaseDeleteWorkflowRequest(): DeleteWorkflowRequest {
-  return { workflowId: "" };
-}
-
-export const DeleteWorkflowRequest = {
-  encode(message: DeleteWorkflowRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workflowId !== "") {
-      writer.uint32(10).string(message.workflowId);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): DeleteWorkflowRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDeleteWorkflowRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.workflowId = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): DeleteWorkflowRequest {
-    return { workflowId: isSet(object.workflowId) ? globalThis.String(object.workflowId) : "" };
-  },
-
-  toJSON(message: DeleteWorkflowRequest): unknown {
-    const obj: any = {};
-    if (message.workflowId !== "") {
-      obj.workflowId = message.workflowId;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<DeleteWorkflowRequest>): DeleteWorkflowRequest {
-    return DeleteWorkflowRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<DeleteWorkflowRequest>): DeleteWorkflowRequest {
-    const message = createBaseDeleteWorkflowRequest();
-    message.workflowId = object.workflowId ?? "";
-    return message;
-  },
-};
-
-function createBaseGetWorkflowByNameRequest(): GetWorkflowByNameRequest {
-  return { name: "" };
-}
-
-export const GetWorkflowByNameRequest = {
-  encode(message: GetWorkflowByNameRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): GetWorkflowByNameRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetWorkflowByNameRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): GetWorkflowByNameRequest {
-    return { name: isSet(object.name) ? globalThis.String(object.name) : "" };
-  },
-
-  toJSON(message: GetWorkflowByNameRequest): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    return obj;
-  },
-
-  create(base?: DeepPartial<GetWorkflowByNameRequest>): GetWorkflowByNameRequest {
-    return GetWorkflowByNameRequest.fromPartial(base ?? {});
-  },
-  fromPartial(object: DeepPartial<GetWorkflowByNameRequest>): GetWorkflowByNameRequest {
-    const message = createBaseGetWorkflowByNameRequest();
-    message.name = object.name ?? "";
-    return message;
-  },
-};
-
 function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
   return { name: "", input: "" };
 }
@@ -2379,14 +1315,6 @@ export const WorkflowServiceDefinition = {
   name: "WorkflowService",
   fullName: "WorkflowService",
   methods: {
-    listWorkflows: {
-      name: "ListWorkflows",
-      requestType: ListWorkflowsRequest,
-      requestStream: false,
-      responseType: ListWorkflowsResponse,
-      responseStream: false,
-      options: {},
-    },
     putWorkflow: {
       name: "PutWorkflow",
       requestType: PutWorkflowRequest,
@@ -2411,38 +1339,10 @@ export const WorkflowServiceDefinition = {
       responseStream: false,
       options: {},
     },
-    getWorkflowByName: {
-      name: "GetWorkflowByName",
-      requestType: GetWorkflowByNameRequest,
-      requestStream: false,
-      responseType: Workflow,
-      responseStream: false,
-      options: {},
-    },
-    listWorkflowsForEvent: {
-      name: "ListWorkflowsForEvent",
-      requestType: ListWorkflowsForEventRequest,
-      requestStream: false,
-      responseType: ListWorkflowsResponse,
-      responseStream: false,
-      options: {},
-    },
-    deleteWorkflow: {
-      name: "DeleteWorkflow",
-      requestType: DeleteWorkflowRequest,
-      requestStream: false,
-      responseType: Workflow,
-      responseStream: false,
-      options: {},
-    },
   },
 } as const;
 
 export interface WorkflowServiceImplementation<CallContextExt = {}> {
-  listWorkflows(
-    request: ListWorkflowsRequest,
-    context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<ListWorkflowsResponse>>;
   putWorkflow(
     request: PutWorkflowRequest,
     context: CallContext & CallContextExt,
@@ -2455,22 +1355,9 @@ export interface WorkflowServiceImplementation<CallContextExt = {}> {
     request: TriggerWorkflowRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<TriggerWorkflowResponse>>;
-  getWorkflowByName(
-    request: GetWorkflowByNameRequest,
-    context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<Workflow>>;
-  listWorkflowsForEvent(
-    request: ListWorkflowsForEventRequest,
-    context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<ListWorkflowsResponse>>;
-  deleteWorkflow(request: DeleteWorkflowRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Workflow>>;
 }
 
 export interface WorkflowServiceClient<CallOptionsExt = {}> {
-  listWorkflows(
-    request: DeepPartial<ListWorkflowsRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<ListWorkflowsResponse>;
   putWorkflow(
     request: DeepPartial<PutWorkflowRequest>,
     options?: CallOptions & CallOptionsExt,
@@ -2483,18 +1370,6 @@ export interface WorkflowServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<TriggerWorkflowRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<TriggerWorkflowResponse>;
-  getWorkflowByName(
-    request: DeepPartial<GetWorkflowByNameRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<Workflow>;
-  listWorkflowsForEvent(
-    request: DeepPartial<ListWorkflowsForEventRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<ListWorkflowsResponse>;
-  deleteWorkflow(
-    request: DeepPartial<DeleteWorkflowRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<Workflow>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

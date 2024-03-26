@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 import HatchetError from '@util/errors/hatchet-error';
 import * as z from 'zod';
 import { HatchetTimeoutSchema } from './workflow';
@@ -35,27 +36,32 @@ class ChildWorkflowRef<T> {
     this.client = client;
   }
 
-  async stream(): Promise<AsyncGenerator<{ type: RunEventType; payload: string; }, void, unknown>>{
+  async stream(): Promise<AsyncGenerator<{ type: RunEventType; payload: string }, void, unknown>> {
     const workflowRunId = await this.workflowRunId;
-
-
-    
-    return this.client.listener.stream(await this.workflowRunId);
+    return this.client.listener.stream(workflowRunId);
   }
 
   async result(): Promise<T> {
-    return new Promise(async (resolve, reject) => {
-      console.log('waiting for workflow to complete');
+    return new Promise((resolve, reject) => {
+      const f = async () => {
+        for await (const event of await this.stream()) {
+          if (
+            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED ||
+            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED ||
+            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT
+          ) {
+            reject(new HatchetError(event.type));
+            return;
+          }
 
-
-      for await (const event of await this.stream()) {
-        console.log('event received', event);
-
-        if(event.type === RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED){
-          return resolve(event.payload as T);
+          if (event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
+            resolve(JSON.parse(event.payload) as T);
+            return;
+          }
         }
-      }
+      };
 
+      f();
     });
   }
 
@@ -64,9 +70,7 @@ class ChildWorkflowRef<T> {
       workflowRunId: await this.workflowRunId,
     });
   }
-
 }
-
 
 export class Context<T, K> {
   data: ContextData<T, K>;
@@ -158,17 +162,17 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
-  spawnWorfklow<K=unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<K> {
+  spawnWorfklow<P = unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
     const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {
       parentId: workflowRunId,
       parentStepRunId: stepRunId,
       childKey: key,
-      childIndex: this.spawnIndex
+      childIndex: this.spawnIndex,
     });
 
-    this.spawnIndex++;
+    this.spawnIndex += 1;
 
     return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
   }
@@ -183,8 +187,6 @@ export class Context<T, K> {
 
   //   this.client.admin.join(refs);
   // }
-
-
 }
 
 export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep> | NextStep | void;

@@ -2,7 +2,7 @@ import { Workflow, Worker } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
 
-fdescribe('fanout-e2e', () => {
+describe('fanout-e2e', () => {
   let hatchet: Hatchet;
   let worker: Worker;
 

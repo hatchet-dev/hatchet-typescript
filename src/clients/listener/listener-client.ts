@@ -1,4 +1,5 @@
 import { Channel, ClientFactory, Status } from 'nice-grpc';
+import { EventEmitter, on } from 'events';
 import {
   DispatcherClient as PbDispatcherClient,
   DispatcherDefinition,
@@ -28,6 +29,36 @@ export enum RunEventType {
   WORKFLOW_RUN_EVENT_TYPE_CANCELLED = 'WORKFLOW_RUN_EVENT_TYPE_CANCELLED',
   WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT = 'WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT',
 }
+
+const stepEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
+  [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.STEP_RUN_EVENT_TYPE_STARTED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.STEP_RUN_EVENT_TYPE_FAILED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.STEP_RUN_EVENT_TYPE_CANCELLED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
+  [ResourceEventType.UNRECOGNIZED]: undefined,
+};
+
+const workflowEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
+  [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_STARTED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT,
+  [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
+  [ResourceEventType.UNRECOGNIZED]: undefined,
+};
+
+const resourceTypeMap: Record<
+  ResourceType,
+  Record<ResourceEventType, RunEventType | undefined> | undefined
+> = {
+  [ResourceType.RESOURCE_TYPE_STEP_RUN]: stepEventTypeMap,
+  [ResourceType.RESOURCE_TYPE_WORKFLOW_RUN]: workflowEventTypeMap,
+  [ResourceType.RESOURCE_TYPE_UNKNOWN]: undefined,
+  [ResourceType.UNRECOGNIZED]: undefined,
+};
 
 export interface StepRunEvent {
   type: RunEventType;
@@ -64,10 +95,53 @@ export class ListenerClient {
           payload: JSON.stringify(stepRunOutput),
         };
       }
+
+      // TODO - handle other statuses
+      if (res.data.status === WorkflowRunStatus.FAILED) {
+        const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
+          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
+          return acc;
+        }, {});
+
+        return {
+          type: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+          payload: JSON.stringify(stepRunOutput),
+        };
+      }
+
       return undefined;
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
+  }
+
+  async *polling(workflowRunId: string) {
+    const eventEmitter = new EventEmitter();
+    const queue: Array<StepRunEvent | undefined> = [];
+
+    const interval = setInterval(async () => {
+      console.log('polling');
+      try {
+        const result = await this.getWorkflowRun(workflowRunId);
+        queue.push(result);
+        eventEmitter.emit('newResult');
+      } catch (e: any) {
+        // TODO error handling
+      }
+    }, 15000);
+
+    // yeild the results from the queue
+    for await (const _ of on(eventEmitter, 'newResult')) {
+      while (queue.length > 0) {
+        const r = queue.shift();
+        console.log('r', r);
+        if (r) {
+          yield r;
+        }
+      }
+    }
+
+    clearInterval(interval);
   }
 
   async *stream(workflowRunId: string) {
@@ -83,46 +157,8 @@ export class ListenerClient {
 
     try {
       for await (const workflowEvent of listener) {
-        const stepEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
-          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.STEP_RUN_EVENT_TYPE_STARTED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]:
-            RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.STEP_RUN_EVENT_TYPE_FAILED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]:
-            RunEventType.STEP_RUN_EVENT_TYPE_CANCELLED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]:
-            RunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
-          [ResourceEventType.UNRECOGNIZED]: undefined,
-        };
-
-        const workflowEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
-          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]:
-            RunEventType.WORKFLOW_RUN_EVENT_TYPE_STARTED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]:
-            RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]:
-            RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]:
-            RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]:
-            RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
-          [ResourceEventType.UNRECOGNIZED]: undefined,
-        };
-
-        const resourceTypeMap: Record<
-          ResourceType,
-          Record<ResourceEventType, RunEventType | undefined> | undefined
-        > = {
-          [ResourceType.RESOURCE_TYPE_STEP_RUN]: stepEventTypeMap,
-          [ResourceType.RESOURCE_TYPE_WORKFLOW_RUN]: workflowEventTypeMap,
-          [ResourceType.RESOURCE_TYPE_UNKNOWN]: undefined,
-          [ResourceType.UNRECOGNIZED]: undefined,
-        };
-
         const eventType = resourceTypeMap[workflowEvent.resourceType]?.[workflowEvent.eventType];
-
+        console.log('eventType', eventType);
         if (eventType) {
           if (eventType === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
             // OPTIMZATION - consider including the workflow run data in the event?
@@ -146,6 +182,8 @@ export class ListenerClient {
         listener = await this.retrySubscribe(workflowRunId);
       }
     }
+
+    // TODO cleanup listener?
   }
 
   async retrySubscribe(workflowRunId: string) {

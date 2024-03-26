@@ -34,6 +34,7 @@
     "example:event": "npm run exec -- ./examples/example-event.ts",
     "example:event-listen": "npm run exec -- ./examples/example-event-with-results.ts",
     "worker:namespaced": "npm run exec -- ./examples/namespaced-worker.ts",
+    "worker:fanout": "npm run exec -- ./examples/fanout-worker.ts",
     "worker:simple": "npm run exec -- ./examples/simple-worker.ts",
     "manual:trigger": "npm run exec -- ./examples/manual-trigger.ts",
     "worker:dag": "npm run exec -- ./examples/dag-worker.ts",

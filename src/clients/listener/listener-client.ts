@@ -53,10 +53,9 @@ export class ListenerClient {
 
       const stepRuns = res.data.jobRuns?.[0]?.stepRuns ?? [];
 
-      if(res.data.status === WorkflowRunStatus.SUCCEEDED){
+      if (res.data.status === WorkflowRunStatus.SUCCEEDED) {
         const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
-          console.log(stepRun.output)
-          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || "{}");
+          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
           return acc;
         }, {});
 
@@ -64,7 +63,6 @@ export class ListenerClient {
           type: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
           payload: JSON.stringify(stepRunOutput),
         };
-
       }
       return undefined;
     } catch (e: any) {
@@ -72,57 +70,72 @@ export class ListenerClient {
     }
   }
 
-
   async *stream(workflowRunId: string) {
     let listener = this.client.subscribeToWorkflowEvents({
       workflowRunId,
     });
 
-    const res = await this.getWorkflowRun(workflowRunId)
+    const res = await this.getWorkflowRun(workflowRunId);
 
-    if(res){
-      yield res
+    if (res) {
+      yield res;
     }
 
     try {
       for await (const workflowEvent of listener) {
-
         const stepEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
           [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.STEP_RUN_EVENT_TYPE_STARTED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]:
+            RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
           [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.STEP_RUN_EVENT_TYPE_FAILED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.STEP_RUN_EVENT_TYPE_CANCELLED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]:
+            RunEventType.STEP_RUN_EVENT_TYPE_CANCELLED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]:
+            RunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT,
           [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
-          [ResourceEventType.UNRECOGNIZED]:  undefined,
+          [ResourceEventType.UNRECOGNIZED]: undefined,
         };
-
 
         const workflowEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
-          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_STARTED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
-          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]:
+            RunEventType.WORKFLOW_RUN_EVENT_TYPE_STARTED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]:
+            RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]:
+            RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]:
+            RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]:
+            RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT,
           [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
-          [ResourceEventType.UNRECOGNIZED]:  undefined,
+          [ResourceEventType.UNRECOGNIZED]: undefined,
         };
 
-
-        const resourceTypeMap: Record<ResourceType, Record<ResourceEventType, RunEventType | undefined>|undefined> = {
+        const resourceTypeMap: Record<
+          ResourceType,
+          Record<ResourceEventType, RunEventType | undefined> | undefined
+        > = {
           [ResourceType.RESOURCE_TYPE_STEP_RUN]: stepEventTypeMap,
           [ResourceType.RESOURCE_TYPE_WORKFLOW_RUN]: workflowEventTypeMap,
           [ResourceType.RESOURCE_TYPE_UNKNOWN]: undefined,
           [ResourceType.UNRECOGNIZED]: undefined,
         };
 
-        const eventType = resourceTypeMap[workflowEvent.resourceType]?.[workflowEvent.eventType]
+        const eventType = resourceTypeMap[workflowEvent.resourceType]?.[workflowEvent.eventType];
 
         if (eventType) {
-          yield {
-            type: eventType,
-            payload: workflowEvent.eventPayload,
-          };
+          if (eventType === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
+            // OPTIMZATION - consider including the workflow run data in the event?
+            const data = await this.getWorkflowRun(workflowRunId);
+            if (data) {
+              yield data;
+            }
+          } else {
+            yield {
+              type: eventType,
+              payload: workflowEvent.eventPayload,
+            };
+          }
         }
       }
     } catch (e: any) {

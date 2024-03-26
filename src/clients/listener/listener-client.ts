@@ -3,6 +3,7 @@ import {
   DispatcherClient as PbDispatcherClient,
   DispatcherDefinition,
   ResourceEventType,
+  ResourceType,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -15,16 +16,21 @@ const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5; // seconds
 const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 5;
 
 // eslint-disable-next-line no-shadow
-export enum StepRunEventType {
+export enum RunEventType {
   STEP_RUN_EVENT_TYPE_STARTED = 'STEP_RUN_EVENT_TYPE_STARTED',
   STEP_RUN_EVENT_TYPE_COMPLETED = 'STEP_RUN_EVENT_TYPE_COMPLETED',
   STEP_RUN_EVENT_TYPE_FAILED = 'STEP_RUN_EVENT_TYPE_FAILED',
   STEP_RUN_EVENT_TYPE_CANCELLED = 'STEP_RUN_EVENT_TYPE_CANCELLED',
   STEP_RUN_EVENT_TYPE_TIMED_OUT = 'STEP_RUN_EVENT_TYPE_TIMED_OUT',
+  WORKFLOW_RUN_EVENT_TYPE_STARTED = 'WORKFLOW_RUN_EVENT_TYPE_STARTED',
+  WORKFLOW_RUN_EVENT_TYPE_COMPLETED = 'WORKFLOW_RUN_EVENT_TYPE_COMPLETED',
+  WORKFLOW_RUN_EVENT_TYPE_FAILED = 'WORKFLOW_RUN_EVENT_TYPE_FAILED',
+  WORKFLOW_RUN_EVENT_TYPE_CANCELLED = 'WORKFLOW_RUN_EVENT_TYPE_CANCELLED',
+  WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT = 'WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT',
 }
 
 export interface StepRunEvent {
-  type: StepRunEventType;
+  type: RunEventType;
   payload: string;
 }
 
@@ -55,7 +61,7 @@ export class ListenerClient {
         }, {});
 
         return {
-          type: StepRunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
+          type: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
           payload: JSON.stringify(stepRunOutput),
         };
 
@@ -73,34 +79,44 @@ export class ListenerClient {
     });
 
     const res = await this.getWorkflowRun(workflowRunId)
+
     if(res){
       yield res
     }
 
-
     try {
       for await (const workflowEvent of listener) {
-        let eventType: StepRunEventType | undefined;
 
-        switch (workflowEvent.eventType) {
-          case ResourceEventType.RESOURCE_EVENT_TYPE_STARTED:
-            eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_STARTED;
-            break;
-          case ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED:
-            eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_COMPLETED;
-            break;
-          case ResourceEventType.RESOURCE_EVENT_TYPE_FAILED:
-            eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_FAILED;
-            break;
-          case ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED:
-            eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_CANCELLED;
-            break;
-          case ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT:
-            eventType = StepRunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT;
-            break;
-          default:
-          // no nothing
-        }
+        const stepEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
+          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.STEP_RUN_EVENT_TYPE_STARTED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.STEP_RUN_EVENT_TYPE_FAILED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.STEP_RUN_EVENT_TYPE_CANCELLED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.STEP_RUN_EVENT_TYPE_TIMED_OUT,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
+          [ResourceEventType.UNRECOGNIZED]:  undefined,
+        };
+
+
+        const workflowEventTypeMap: Record<ResourceEventType, RunEventType | undefined> = {
+          [ResourceEventType.RESOURCE_EVENT_TYPE_STARTED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_STARTED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT,
+          [ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN]: undefined,
+          [ResourceEventType.UNRECOGNIZED]:  undefined,
+        };
+
+
+        const resourceTypeMap: Record<ResourceType, Record<ResourceEventType, RunEventType | undefined>|undefined> = {
+          [ResourceType.RESOURCE_TYPE_STEP_RUN]: stepEventTypeMap,
+          [ResourceType.RESOURCE_TYPE_WORKFLOW_RUN]: workflowEventTypeMap,
+          [ResourceType.RESOURCE_TYPE_UNKNOWN]: undefined,
+          [ResourceType.UNRECOGNIZED]: undefined,
+        };
+
+        const eventType = resourceTypeMap[workflowEvent.resourceType]?.[workflowEvent.eventType]
 
         if (eventType) {
           yield {

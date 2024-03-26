@@ -361,6 +361,12 @@ export interface WorkflowEvent {
    * will hang up the connection but clients might want to case
    */
   hangup: boolean;
+  /** (optional) the max number of retries this step can handle */
+  stepRetries?:
+    | number
+    | undefined;
+  /** (optional) the retry count of this step */
+  retryCount?: number | undefined;
 }
 
 export interface OverridesData {
@@ -1481,6 +1487,8 @@ function createBaseWorkflowEvent(): WorkflowEvent {
     eventTimestamp: undefined,
     eventPayload: "",
     hangup: false,
+    stepRetries: undefined,
+    retryCount: undefined,
   };
 }
 
@@ -1506,6 +1514,12 @@ export const WorkflowEvent = {
     }
     if (message.hangup === true) {
       writer.uint32(56).bool(message.hangup);
+    }
+    if (message.stepRetries !== undefined) {
+      writer.uint32(64).int32(message.stepRetries);
+    }
+    if (message.retryCount !== undefined) {
+      writer.uint32(72).int32(message.retryCount);
     }
     return writer;
   },
@@ -1566,6 +1580,20 @@ export const WorkflowEvent = {
 
           message.hangup = reader.bool();
           continue;
+        case 8:
+          if (tag !== 64) {
+            break;
+          }
+
+          message.stepRetries = reader.int32();
+          continue;
+        case 9:
+          if (tag !== 72) {
+            break;
+          }
+
+          message.retryCount = reader.int32();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1584,6 +1612,8 @@ export const WorkflowEvent = {
       eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
       eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : "",
       hangup: isSet(object.hangup) ? globalThis.Boolean(object.hangup) : false,
+      stepRetries: isSet(object.stepRetries) ? globalThis.Number(object.stepRetries) : undefined,
+      retryCount: isSet(object.retryCount) ? globalThis.Number(object.retryCount) : undefined,
     };
   },
 
@@ -1610,6 +1640,12 @@ export const WorkflowEvent = {
     if (message.hangup === true) {
       obj.hangup = message.hangup;
     }
+    if (message.stepRetries !== undefined) {
+      obj.stepRetries = Math.round(message.stepRetries);
+    }
+    if (message.retryCount !== undefined) {
+      obj.retryCount = Math.round(message.retryCount);
+    }
     return obj;
   },
 
@@ -1625,6 +1661,8 @@ export const WorkflowEvent = {
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     message.eventPayload = object.eventPayload ?? "";
     message.hangup = object.hangup ?? false;
+    message.stepRetries = object.stepRetries ?? undefined;
+    message.retryCount = object.retryCount ?? undefined;
     return message;
   },
 };

@@ -126,6 +126,26 @@ export interface ScheduleWorkflowRequest {
   schedules: Date[];
   /** (optional) the input data for the workflow */
   input: string;
+  /** (optional) the parent workflow run id */
+  parentId?:
+    | string
+    | undefined;
+  /** (optional) the parent step run id */
+  parentStepRunId?:
+    | string
+    | undefined;
+  /**
+   * (optional) the index of the child workflow. if this is set, matches on the index or the
+   * child key will be a no-op, even if the schedule has changed.
+   */
+  childIndex?:
+    | number
+    | undefined;
+  /**
+   * (optional) the key for the child. if this is set, matches on the index or the
+   * child key will be a no-op, even if the schedule has changed.
+   */
+  childKey?: string | undefined;
 }
 
 /** WorkflowVersion represents the WorkflowVersion model. */
@@ -154,6 +174,28 @@ export interface TriggerWorkflowRequest {
   name: string;
   /** (optional) the input data for the workflow */
   input: string;
+  /** (optional) the parent workflow run id */
+  parentId?:
+    | string
+    | undefined;
+  /** (optional) the parent step run id */
+  parentStepRunId?:
+    | string
+    | undefined;
+  /**
+   * (optional) the index of the child workflow. if this is set, matches on the index or the
+   * child key will return an existing workflow run if the parent id, parent step run id, and
+   * child index/key match an existing workflow run.
+   */
+  childIndex?:
+    | number
+    | undefined;
+  /**
+   * (optional) the key for the child. if this is set, matches on the index or the
+   * child key will return an existing workflow run if the parent id, parent step run id, and
+   * child index/key match an existing workflow run.
+   */
+  childKey?: string | undefined;
 }
 
 export interface TriggerWorkflowResponse {
@@ -806,7 +848,15 @@ export const ListWorkflowsRequest = {
 };
 
 function createBaseScheduleWorkflowRequest(): ScheduleWorkflowRequest {
-  return { name: "", schedules: [], input: "" };
+  return {
+    name: "",
+    schedules: [],
+    input: "",
+    parentId: undefined,
+    parentStepRunId: undefined,
+    childIndex: undefined,
+    childKey: undefined,
+  };
 }
 
 export const ScheduleWorkflowRequest = {
@@ -819,6 +869,18 @@ export const ScheduleWorkflowRequest = {
     }
     if (message.input !== "") {
       writer.uint32(26).string(message.input);
+    }
+    if (message.parentId !== undefined) {
+      writer.uint32(34).string(message.parentId);
+    }
+    if (message.parentStepRunId !== undefined) {
+      writer.uint32(42).string(message.parentStepRunId);
+    }
+    if (message.childIndex !== undefined) {
+      writer.uint32(48).int32(message.childIndex);
+    }
+    if (message.childKey !== undefined) {
+      writer.uint32(58).string(message.childKey);
     }
     return writer;
   },
@@ -851,6 +913,34 @@ export const ScheduleWorkflowRequest = {
 
           message.input = reader.string();
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.parentId = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.parentStepRunId = reader.string();
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.childIndex = reader.int32();
+          continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.childKey = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -867,6 +957,10 @@ export const ScheduleWorkflowRequest = {
         ? object.schedules.map((e: any) => fromJsonTimestamp(e))
         : [],
       input: isSet(object.input) ? globalThis.String(object.input) : "",
+      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : undefined,
+      parentStepRunId: isSet(object.parentStepRunId) ? globalThis.String(object.parentStepRunId) : undefined,
+      childIndex: isSet(object.childIndex) ? globalThis.Number(object.childIndex) : undefined,
+      childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
     };
   },
 
@@ -881,6 +975,18 @@ export const ScheduleWorkflowRequest = {
     if (message.input !== "") {
       obj.input = message.input;
     }
+    if (message.parentId !== undefined) {
+      obj.parentId = message.parentId;
+    }
+    if (message.parentStepRunId !== undefined) {
+      obj.parentStepRunId = message.parentStepRunId;
+    }
+    if (message.childIndex !== undefined) {
+      obj.childIndex = Math.round(message.childIndex);
+    }
+    if (message.childKey !== undefined) {
+      obj.childKey = message.childKey;
+    }
     return obj;
   },
 
@@ -892,6 +998,10 @@ export const ScheduleWorkflowRequest = {
     message.name = object.name ?? "";
     message.schedules = object.schedules?.map((e) => e) || [];
     message.input = object.input ?? "";
+    message.parentId = object.parentId ?? undefined;
+    message.parentStepRunId = object.parentStepRunId ?? undefined;
+    message.childIndex = object.childIndex ?? undefined;
+    message.childKey = object.childKey ?? undefined;
     return message;
   },
 };
@@ -1179,7 +1289,14 @@ export const WorkflowTriggerCronRef = {
 };
 
 function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
-  return { name: "", input: "" };
+  return {
+    name: "",
+    input: "",
+    parentId: undefined,
+    parentStepRunId: undefined,
+    childIndex: undefined,
+    childKey: undefined,
+  };
 }
 
 export const TriggerWorkflowRequest = {
@@ -1189,6 +1306,18 @@ export const TriggerWorkflowRequest = {
     }
     if (message.input !== "") {
       writer.uint32(18).string(message.input);
+    }
+    if (message.parentId !== undefined) {
+      writer.uint32(26).string(message.parentId);
+    }
+    if (message.parentStepRunId !== undefined) {
+      writer.uint32(34).string(message.parentStepRunId);
+    }
+    if (message.childIndex !== undefined) {
+      writer.uint32(40).int32(message.childIndex);
+    }
+    if (message.childKey !== undefined) {
+      writer.uint32(50).string(message.childKey);
     }
     return writer;
   },
@@ -1214,6 +1343,34 @@ export const TriggerWorkflowRequest = {
 
           message.input = reader.string();
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.parentId = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.parentStepRunId = reader.string();
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.childIndex = reader.int32();
+          continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.childKey = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1227,6 +1384,10 @@ export const TriggerWorkflowRequest = {
     return {
       name: isSet(object.name) ? globalThis.String(object.name) : "",
       input: isSet(object.input) ? globalThis.String(object.input) : "",
+      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : undefined,
+      parentStepRunId: isSet(object.parentStepRunId) ? globalThis.String(object.parentStepRunId) : undefined,
+      childIndex: isSet(object.childIndex) ? globalThis.Number(object.childIndex) : undefined,
+      childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
     };
   },
 
@@ -1238,6 +1399,18 @@ export const TriggerWorkflowRequest = {
     if (message.input !== "") {
       obj.input = message.input;
     }
+    if (message.parentId !== undefined) {
+      obj.parentId = message.parentId;
+    }
+    if (message.parentStepRunId !== undefined) {
+      obj.parentStepRunId = message.parentStepRunId;
+    }
+    if (message.childIndex !== undefined) {
+      obj.childIndex = Math.round(message.childIndex);
+    }
+    if (message.childKey !== undefined) {
+      obj.childKey = message.childKey;
+    }
     return obj;
   },
 
@@ -1248,6 +1421,10 @@ export const TriggerWorkflowRequest = {
     const message = createBaseTriggerWorkflowRequest();
     message.name = object.name ?? "";
     message.input = object.input ?? "";
+    message.parentId = object.parentId ?? undefined;
+    message.parentStepRunId = object.parentStepRunId ?? undefined;
+    message.childIndex = object.childIndex ?? undefined;
+    message.childKey = object.childKey ?? undefined;
     return message;
   },
 };

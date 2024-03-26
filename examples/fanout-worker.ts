@@ -17,15 +17,15 @@ const parentWorkflow: Workflow = {
   steps: [
     {
       name: 'parent-spawn',
-      timeout:'10s',
+      timeout: '10s',
       run: async (ctx) => {
-        const res = await ctx.spawnWorfklow<string>(
-          'child-workflow', 
-          { input: 'child-input' }).result();
+        const res = await ctx
+          .spawnWorfklow<string>('child-workflow', { input: 'child-input' })
+          .result();
 
-        return { spawned: [res] }
+        return { spawned: [res] };
       },
-    }
+    },
   ],
 };
 
@@ -42,9 +42,9 @@ const childWorkflow: Workflow = {
         const { input } = ctx.workflowInput();
         await sleep(3000);
         console.log('child workflow input:', input);
-        return { "child-output": "input"}
+        return { 'child-output': 'results' };
       },
-    }
+    },
   ],
 };
 

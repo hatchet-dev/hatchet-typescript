@@ -1,9 +1,9 @@
 /* eslint-disable */
-import type { CallContext, CallOptions } from "nice-grpc-common";
-import * as _m0 from "protobufjs/minimal";
-import { Timestamp } from "../google/protobuf/timestamp";
+import type { CallContext, CallOptions } from 'nice-grpc-common';
+import * as _m0 from 'protobufjs/minimal';
+import { Timestamp } from '../google/protobuf/timestamp';
 
-export const protobufPackage = "";
+export const protobufPackage = '';
 
 export interface Event {
   /** the tenant id */
@@ -22,21 +22,16 @@ export interface PutLogRequest {
   /** the step run id for the request */
   stepRunId: string;
   /** when the log line was created */
-  createdAt:
-    | Date
-    | undefined;
+  createdAt: Date | undefined;
   /** the log line message */
   message: string;
   /** the log line level */
-  level?:
-    | string
-    | undefined;
+  level?: string | undefined;
   /** associated log line metadata */
   metadata: string;
 }
 
-export interface PutLogResponse {
-}
+export interface PutLogResponse {}
 
 export interface PushEventRequest {
   /** the key for the event */
@@ -53,21 +48,21 @@ export interface ReplayEventRequest {
 }
 
 function createBaseEvent(): Event {
-  return { tenantId: "", eventId: "", key: "", payload: "", eventTimestamp: undefined };
+  return { tenantId: '', eventId: '', key: '', payload: '', eventTimestamp: undefined };
 }
 
 export const Event = {
   encode(message: Event, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       writer.uint32(10).string(message.tenantId);
     }
-    if (message.eventId !== "") {
+    if (message.eventId !== '') {
       writer.uint32(18).string(message.eventId);
     }
-    if (message.key !== "") {
+    if (message.key !== '') {
       writer.uint32(26).string(message.key);
     }
-    if (message.payload !== "") {
+    if (message.payload !== '') {
       writer.uint32(34).string(message.payload);
     }
     if (message.eventTimestamp !== undefined) {
@@ -129,26 +124,28 @@ export const Event = {
 
   fromJSON(object: any): Event {
     return {
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      eventId: isSet(object.eventId) ? globalThis.String(object.eventId) : "",
-      key: isSet(object.key) ? globalThis.String(object.key) : "",
-      payload: isSet(object.payload) ? globalThis.String(object.payload) : "",
-      eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      eventId: isSet(object.eventId) ? globalThis.String(object.eventId) : '',
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      payload: isSet(object.payload) ? globalThis.String(object.payload) : '',
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
     };
   },
 
   toJSON(message: Event): unknown {
     const obj: any = {};
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
     }
-    if (message.eventId !== "") {
+    if (message.eventId !== '') {
       obj.eventId = message.eventId;
     }
-    if (message.key !== "") {
+    if (message.key !== '') {
       obj.key = message.key;
     }
-    if (message.payload !== "") {
+    if (message.payload !== '') {
       obj.payload = message.payload;
     }
     if (message.eventTimestamp !== undefined) {
@@ -162,34 +159,34 @@ export const Event = {
   },
   fromPartial(object: DeepPartial<Event>): Event {
     const message = createBaseEvent();
-    message.tenantId = object.tenantId ?? "";
-    message.eventId = object.eventId ?? "";
-    message.key = object.key ?? "";
-    message.payload = object.payload ?? "";
+    message.tenantId = object.tenantId ?? '';
+    message.eventId = object.eventId ?? '';
+    message.key = object.key ?? '';
+    message.payload = object.payload ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     return message;
   },
 };
 
 function createBasePutLogRequest(): PutLogRequest {
-  return { stepRunId: "", createdAt: undefined, message: "", level: undefined, metadata: "" };
+  return { stepRunId: '', createdAt: undefined, message: '', level: undefined, metadata: '' };
 }
 
 export const PutLogRequest = {
   encode(message: PutLogRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       writer.uint32(10).string(message.stepRunId);
     }
     if (message.createdAt !== undefined) {
       Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
     }
-    if (message.message !== "") {
+    if (message.message !== '') {
       writer.uint32(26).string(message.message);
     }
     if (message.level !== undefined) {
       writer.uint32(34).string(message.level);
     }
-    if (message.metadata !== "") {
+    if (message.metadata !== '') {
       writer.uint32(42).string(message.metadata);
     }
     return writer;
@@ -248,29 +245,29 @@ export const PutLogRequest = {
 
   fromJSON(object: any): PutLogRequest {
     return {
-      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : "",
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
       createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
-      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      message: isSet(object.message) ? globalThis.String(object.message) : '',
       level: isSet(object.level) ? globalThis.String(object.level) : undefined,
-      metadata: isSet(object.metadata) ? globalThis.String(object.metadata) : "",
+      metadata: isSet(object.metadata) ? globalThis.String(object.metadata) : '',
     };
   },
 
   toJSON(message: PutLogRequest): unknown {
     const obj: any = {};
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       obj.stepRunId = message.stepRunId;
     }
     if (message.createdAt !== undefined) {
       obj.createdAt = message.createdAt.toISOString();
     }
-    if (message.message !== "") {
+    if (message.message !== '') {
       obj.message = message.message;
     }
     if (message.level !== undefined) {
       obj.level = message.level;
     }
-    if (message.metadata !== "") {
+    if (message.metadata !== '') {
       obj.metadata = message.metadata;
     }
     return obj;
@@ -281,11 +278,11 @@ export const PutLogRequest = {
   },
   fromPartial(object: DeepPartial<PutLogRequest>): PutLogRequest {
     const message = createBasePutLogRequest();
-    message.stepRunId = object.stepRunId ?? "";
+    message.stepRunId = object.stepRunId ?? '';
     message.createdAt = object.createdAt ?? undefined;
-    message.message = object.message ?? "";
+    message.message = object.message ?? '';
     message.level = object.level ?? undefined;
-    message.metadata = object.metadata ?? "";
+    message.metadata = object.metadata ?? '';
     return message;
   },
 };
@@ -334,15 +331,15 @@ export const PutLogResponse = {
 };
 
 function createBasePushEventRequest(): PushEventRequest {
-  return { key: "", payload: "", eventTimestamp: undefined };
+  return { key: '', payload: '', eventTimestamp: undefined };
 }
 
 export const PushEventRequest = {
   encode(message: PushEventRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.key !== "") {
+    if (message.key !== '') {
       writer.uint32(10).string(message.key);
     }
-    if (message.payload !== "") {
+    if (message.payload !== '') {
       writer.uint32(18).string(message.payload);
     }
     if (message.eventTimestamp !== undefined) {
@@ -390,18 +387,20 @@ export const PushEventRequest = {
 
   fromJSON(object: any): PushEventRequest {
     return {
-      key: isSet(object.key) ? globalThis.String(object.key) : "",
-      payload: isSet(object.payload) ? globalThis.String(object.payload) : "",
-      eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      payload: isSet(object.payload) ? globalThis.String(object.payload) : '',
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
     };
   },
 
   toJSON(message: PushEventRequest): unknown {
     const obj: any = {};
-    if (message.key !== "") {
+    if (message.key !== '') {
       obj.key = message.key;
     }
-    if (message.payload !== "") {
+    if (message.payload !== '') {
       obj.payload = message.payload;
     }
     if (message.eventTimestamp !== undefined) {
@@ -415,20 +414,20 @@ export const PushEventRequest = {
   },
   fromPartial(object: DeepPartial<PushEventRequest>): PushEventRequest {
     const message = createBasePushEventRequest();
-    message.key = object.key ?? "";
-    message.payload = object.payload ?? "";
+    message.key = object.key ?? '';
+    message.payload = object.payload ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     return message;
   },
 };
 
 function createBaseReplayEventRequest(): ReplayEventRequest {
-  return { eventId: "" };
+  return { eventId: '' };
 }
 
 export const ReplayEventRequest = {
   encode(message: ReplayEventRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.eventId !== "") {
+    if (message.eventId !== '') {
       writer.uint32(10).string(message.eventId);
     }
     return writer;
@@ -458,12 +457,12 @@ export const ReplayEventRequest = {
   },
 
   fromJSON(object: any): ReplayEventRequest {
-    return { eventId: isSet(object.eventId) ? globalThis.String(object.eventId) : "" };
+    return { eventId: isSet(object.eventId) ? globalThis.String(object.eventId) : '' };
   },
 
   toJSON(message: ReplayEventRequest): unknown {
     const obj: any = {};
-    if (message.eventId !== "") {
+    if (message.eventId !== '') {
       obj.eventId = message.eventId;
     }
     return obj;
@@ -474,18 +473,18 @@ export const ReplayEventRequest = {
   },
   fromPartial(object: DeepPartial<ReplayEventRequest>): ReplayEventRequest {
     const message = createBaseReplayEventRequest();
-    message.eventId = object.eventId ?? "";
+    message.eventId = object.eventId ?? '';
     return message;
   },
 };
 
 export type EventsServiceDefinition = typeof EventsServiceDefinition;
 export const EventsServiceDefinition = {
-  name: "EventsService",
-  fullName: "EventsService",
+  name: 'EventsService',
+  fullName: 'EventsService',
   methods: {
     push: {
-      name: "Push",
+      name: 'Push',
       requestType: PushEventRequest,
       requestStream: false,
       responseType: Event,
@@ -493,7 +492,7 @@ export const EventsServiceDefinition = {
       options: {},
     },
     replaySingleEvent: {
-      name: "ReplaySingleEvent",
+      name: 'ReplaySingleEvent',
       requestType: ReplayEventRequest,
       requestStream: false,
       responseType: Event,
@@ -501,7 +500,7 @@ export const EventsServiceDefinition = {
       options: {},
     },
     putLog: {
-      name: "PutLog",
+      name: 'PutLog',
       requestType: PutLogRequest,
       requestStream: false,
       responseType: PutLogResponse,
@@ -512,24 +511,46 @@ export const EventsServiceDefinition = {
 } as const;
 
 export interface EventsServiceImplementation<CallContextExt = {}> {
-  push(request: PushEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Event>>;
-  replaySingleEvent(request: ReplayEventRequest, context: CallContext & CallContextExt): Promise<DeepPartial<Event>>;
-  putLog(request: PutLogRequest, context: CallContext & CallContextExt): Promise<DeepPartial<PutLogResponse>>;
+  push(
+    request: PushEventRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<Event>>;
+  replaySingleEvent(
+    request: ReplayEventRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<Event>>;
+  putLog(
+    request: PutLogRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<PutLogResponse>>;
 }
 
 export interface EventsServiceClient<CallOptionsExt = {}> {
-  push(request: DeepPartial<PushEventRequest>, options?: CallOptions & CallOptionsExt): Promise<Event>;
-  replaySingleEvent(request: DeepPartial<ReplayEventRequest>, options?: CallOptions & CallOptionsExt): Promise<Event>;
-  putLog(request: DeepPartial<PutLogRequest>, options?: CallOptions & CallOptionsExt): Promise<PutLogResponse>;
+  push(
+    request: DeepPartial<PushEventRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<Event>;
+  replaySingleEvent(
+    request: DeepPartial<ReplayEventRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<Event>;
+  putLog(
+    request: DeepPartial<PutLogRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<PutLogResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends globalThis.Array<infer U>
+    ? globalThis.Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepPartial<U>>
+      : T extends {}
+        ? { [K in keyof T]?: DeepPartial<T[K]> }
+        : Partial<T>;
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = Math.trunc(date.getTime() / 1_000);
@@ -546,7 +567,7 @@ function fromTimestamp(t: Timestamp): Date {
 function fromJsonTimestamp(o: any): Date {
   if (o instanceof globalThis.Date) {
     return o;
-  } else if (typeof o === "string") {
+  } else if (typeof o === 'string') {
     return new globalThis.Date(o);
   } else {
     return fromTimestamp(Timestamp.fromJSON(o));

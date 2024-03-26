@@ -1,9 +1,9 @@
 /* eslint-disable */
-import type { CallContext, CallOptions } from "nice-grpc-common";
-import * as _m0 from "protobufjs/minimal";
-import { Timestamp } from "../google/protobuf/timestamp";
+import type { CallContext, CallOptions } from 'nice-grpc-common';
+import * as _m0 from 'protobufjs/minimal';
+import { Timestamp } from '../google/protobuf/timestamp';
 
-export const protobufPackage = "";
+export const protobufPackage = '';
 
 export enum ActionType {
   START_STEP_RUN = 0,
@@ -15,16 +15,16 @@ export enum ActionType {
 export function actionTypeFromJSON(object: any): ActionType {
   switch (object) {
     case 0:
-    case "START_STEP_RUN":
+    case 'START_STEP_RUN':
       return ActionType.START_STEP_RUN;
     case 1:
-    case "CANCEL_STEP_RUN":
+    case 'CANCEL_STEP_RUN':
       return ActionType.CANCEL_STEP_RUN;
     case 2:
-    case "START_GET_GROUP_KEY":
+    case 'START_GET_GROUP_KEY':
       return ActionType.START_GET_GROUP_KEY;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return ActionType.UNRECOGNIZED;
   }
@@ -33,14 +33,14 @@ export function actionTypeFromJSON(object: any): ActionType {
 export function actionTypeToJSON(object: ActionType): string {
   switch (object) {
     case ActionType.START_STEP_RUN:
-      return "START_STEP_RUN";
+      return 'START_STEP_RUN';
     case ActionType.CANCEL_STEP_RUN:
-      return "CANCEL_STEP_RUN";
+      return 'CANCEL_STEP_RUN';
     case ActionType.START_GET_GROUP_KEY:
-      return "START_GET_GROUP_KEY";
+      return 'START_GET_GROUP_KEY';
     case ActionType.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -55,19 +55,19 @@ export enum GroupKeyActionEventType {
 export function groupKeyActionEventTypeFromJSON(object: any): GroupKeyActionEventType {
   switch (object) {
     case 0:
-    case "GROUP_KEY_EVENT_TYPE_UNKNOWN":
+    case 'GROUP_KEY_EVENT_TYPE_UNKNOWN':
       return GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_UNKNOWN;
     case 1:
-    case "GROUP_KEY_EVENT_TYPE_STARTED":
+    case 'GROUP_KEY_EVENT_TYPE_STARTED':
       return GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_STARTED;
     case 2:
-    case "GROUP_KEY_EVENT_TYPE_COMPLETED":
+    case 'GROUP_KEY_EVENT_TYPE_COMPLETED':
       return GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_COMPLETED;
     case 3:
-    case "GROUP_KEY_EVENT_TYPE_FAILED":
+    case 'GROUP_KEY_EVENT_TYPE_FAILED':
       return GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_FAILED;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return GroupKeyActionEventType.UNRECOGNIZED;
   }
@@ -76,16 +76,16 @@ export function groupKeyActionEventTypeFromJSON(object: any): GroupKeyActionEven
 export function groupKeyActionEventTypeToJSON(object: GroupKeyActionEventType): string {
   switch (object) {
     case GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_UNKNOWN:
-      return "GROUP_KEY_EVENT_TYPE_UNKNOWN";
+      return 'GROUP_KEY_EVENT_TYPE_UNKNOWN';
     case GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_STARTED:
-      return "GROUP_KEY_EVENT_TYPE_STARTED";
+      return 'GROUP_KEY_EVENT_TYPE_STARTED';
     case GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_COMPLETED:
-      return "GROUP_KEY_EVENT_TYPE_COMPLETED";
+      return 'GROUP_KEY_EVENT_TYPE_COMPLETED';
     case GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_FAILED:
-      return "GROUP_KEY_EVENT_TYPE_FAILED";
+      return 'GROUP_KEY_EVENT_TYPE_FAILED';
     case GroupKeyActionEventType.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -100,19 +100,19 @@ export enum StepActionEventType {
 export function stepActionEventTypeFromJSON(object: any): StepActionEventType {
   switch (object) {
     case 0:
-    case "STEP_EVENT_TYPE_UNKNOWN":
+    case 'STEP_EVENT_TYPE_UNKNOWN':
       return StepActionEventType.STEP_EVENT_TYPE_UNKNOWN;
     case 1:
-    case "STEP_EVENT_TYPE_STARTED":
+    case 'STEP_EVENT_TYPE_STARTED':
       return StepActionEventType.STEP_EVENT_TYPE_STARTED;
     case 2:
-    case "STEP_EVENT_TYPE_COMPLETED":
+    case 'STEP_EVENT_TYPE_COMPLETED':
       return StepActionEventType.STEP_EVENT_TYPE_COMPLETED;
     case 3:
-    case "STEP_EVENT_TYPE_FAILED":
+    case 'STEP_EVENT_TYPE_FAILED':
       return StepActionEventType.STEP_EVENT_TYPE_FAILED;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return StepActionEventType.UNRECOGNIZED;
   }
@@ -121,16 +121,16 @@ export function stepActionEventTypeFromJSON(object: any): StepActionEventType {
 export function stepActionEventTypeToJSON(object: StepActionEventType): string {
   switch (object) {
     case StepActionEventType.STEP_EVENT_TYPE_UNKNOWN:
-      return "STEP_EVENT_TYPE_UNKNOWN";
+      return 'STEP_EVENT_TYPE_UNKNOWN';
     case StepActionEventType.STEP_EVENT_TYPE_STARTED:
-      return "STEP_EVENT_TYPE_STARTED";
+      return 'STEP_EVENT_TYPE_STARTED';
     case StepActionEventType.STEP_EVENT_TYPE_COMPLETED:
-      return "STEP_EVENT_TYPE_COMPLETED";
+      return 'STEP_EVENT_TYPE_COMPLETED';
     case StepActionEventType.STEP_EVENT_TYPE_FAILED:
-      return "STEP_EVENT_TYPE_FAILED";
+      return 'STEP_EVENT_TYPE_FAILED';
     case StepActionEventType.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -144,16 +144,16 @@ export enum ResourceType {
 export function resourceTypeFromJSON(object: any): ResourceType {
   switch (object) {
     case 0:
-    case "RESOURCE_TYPE_UNKNOWN":
+    case 'RESOURCE_TYPE_UNKNOWN':
       return ResourceType.RESOURCE_TYPE_UNKNOWN;
     case 1:
-    case "RESOURCE_TYPE_STEP_RUN":
+    case 'RESOURCE_TYPE_STEP_RUN':
       return ResourceType.RESOURCE_TYPE_STEP_RUN;
     case 2:
-    case "RESOURCE_TYPE_WORKFLOW_RUN":
+    case 'RESOURCE_TYPE_WORKFLOW_RUN':
       return ResourceType.RESOURCE_TYPE_WORKFLOW_RUN;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return ResourceType.UNRECOGNIZED;
   }
@@ -162,14 +162,14 @@ export function resourceTypeFromJSON(object: any): ResourceType {
 export function resourceTypeToJSON(object: ResourceType): string {
   switch (object) {
     case ResourceType.RESOURCE_TYPE_UNKNOWN:
-      return "RESOURCE_TYPE_UNKNOWN";
+      return 'RESOURCE_TYPE_UNKNOWN';
     case ResourceType.RESOURCE_TYPE_STEP_RUN:
-      return "RESOURCE_TYPE_STEP_RUN";
+      return 'RESOURCE_TYPE_STEP_RUN';
     case ResourceType.RESOURCE_TYPE_WORKFLOW_RUN:
-      return "RESOURCE_TYPE_WORKFLOW_RUN";
+      return 'RESOURCE_TYPE_WORKFLOW_RUN';
     case ResourceType.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -186,25 +186,25 @@ export enum ResourceEventType {
 export function resourceEventTypeFromJSON(object: any): ResourceEventType {
   switch (object) {
     case 0:
-    case "RESOURCE_EVENT_TYPE_UNKNOWN":
+    case 'RESOURCE_EVENT_TYPE_UNKNOWN':
       return ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN;
     case 1:
-    case "RESOURCE_EVENT_TYPE_STARTED":
+    case 'RESOURCE_EVENT_TYPE_STARTED':
       return ResourceEventType.RESOURCE_EVENT_TYPE_STARTED;
     case 2:
-    case "RESOURCE_EVENT_TYPE_COMPLETED":
+    case 'RESOURCE_EVENT_TYPE_COMPLETED':
       return ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED;
     case 3:
-    case "RESOURCE_EVENT_TYPE_FAILED":
+    case 'RESOURCE_EVENT_TYPE_FAILED':
       return ResourceEventType.RESOURCE_EVENT_TYPE_FAILED;
     case 4:
-    case "RESOURCE_EVENT_TYPE_CANCELLED":
+    case 'RESOURCE_EVENT_TYPE_CANCELLED':
       return ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED;
     case 5:
-    case "RESOURCE_EVENT_TYPE_TIMED_OUT":
+    case 'RESOURCE_EVENT_TYPE_TIMED_OUT':
       return ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return ResourceEventType.UNRECOGNIZED;
   }
@@ -213,20 +213,20 @@ export function resourceEventTypeFromJSON(object: any): ResourceEventType {
 export function resourceEventTypeToJSON(object: ResourceEventType): string {
   switch (object) {
     case ResourceEventType.RESOURCE_EVENT_TYPE_UNKNOWN:
-      return "RESOURCE_EVENT_TYPE_UNKNOWN";
+      return 'RESOURCE_EVENT_TYPE_UNKNOWN';
     case ResourceEventType.RESOURCE_EVENT_TYPE_STARTED:
-      return "RESOURCE_EVENT_TYPE_STARTED";
+      return 'RESOURCE_EVENT_TYPE_STARTED';
     case ResourceEventType.RESOURCE_EVENT_TYPE_COMPLETED:
-      return "RESOURCE_EVENT_TYPE_COMPLETED";
+      return 'RESOURCE_EVENT_TYPE_COMPLETED';
     case ResourceEventType.RESOURCE_EVENT_TYPE_FAILED:
-      return "RESOURCE_EVENT_TYPE_FAILED";
+      return 'RESOURCE_EVENT_TYPE_FAILED';
     case ResourceEventType.RESOURCE_EVENT_TYPE_CANCELLED:
-      return "RESOURCE_EVENT_TYPE_CANCELLED";
+      return 'RESOURCE_EVENT_TYPE_CANCELLED';
     case ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT:
-      return "RESOURCE_EVENT_TYPE_TIMED_OUT";
+      return 'RESOURCE_EVENT_TYPE_TIMED_OUT';
     case ResourceEventType.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -302,9 +302,7 @@ export interface GroupKeyActionEvent {
   getGroupKeyRunId: string;
   /** the action id */
   actionId: string;
-  eventTimestamp:
-    | Date
-    | undefined;
+  eventTimestamp: Date | undefined;
   /** the step event type */
   eventType: GroupKeyActionEventType;
   /** the event payload */
@@ -324,9 +322,7 @@ export interface StepActionEvent {
   stepRunId: string;
   /** the action id */
   actionId: string;
-  eventTimestamp:
-    | Date
-    | undefined;
+  eventTimestamp: Date | undefined;
   /** the step event type */
   eventType: StepActionEventType;
   /** the event payload */
@@ -351,9 +347,7 @@ export interface WorkflowEvent {
   resourceType: ResourceType;
   eventType: ResourceEventType;
   resourceId: string;
-  eventTimestamp:
-    | Date
-    | undefined;
+  eventTimestamp: Date | undefined;
   /** the event payload */
   eventPayload: string;
   /**
@@ -362,9 +356,7 @@ export interface WorkflowEvent {
    */
   hangup: boolean;
   /** (optional) the max number of retries this step can handle */
-  stepRetries?:
-    | number
-    | undefined;
+  stepRetries?: number | undefined;
   /** (optional) the retry count of this step */
   retryCount?: number | undefined;
 }
@@ -380,16 +372,15 @@ export interface OverridesData {
   callerFilename: string;
 }
 
-export interface OverridesDataResponse {
-}
+export interface OverridesDataResponse {}
 
 function createBaseWorkerRegisterRequest(): WorkerRegisterRequest {
-  return { workerName: "", actions: [], services: [], maxRuns: undefined };
+  return { workerName: '', actions: [], services: [], maxRuns: undefined };
 }
 
 export const WorkerRegisterRequest = {
   encode(message: WorkerRegisterRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workerName !== "") {
+    if (message.workerName !== '') {
       writer.uint32(10).string(message.workerName);
     }
     for (const v of message.actions) {
@@ -450,16 +441,20 @@ export const WorkerRegisterRequest = {
 
   fromJSON(object: any): WorkerRegisterRequest {
     return {
-      workerName: isSet(object.workerName) ? globalThis.String(object.workerName) : "",
-      actions: globalThis.Array.isArray(object?.actions) ? object.actions.map((e: any) => globalThis.String(e)) : [],
-      services: globalThis.Array.isArray(object?.services) ? object.services.map((e: any) => globalThis.String(e)) : [],
+      workerName: isSet(object.workerName) ? globalThis.String(object.workerName) : '',
+      actions: globalThis.Array.isArray(object?.actions)
+        ? object.actions.map((e: any) => globalThis.String(e))
+        : [],
+      services: globalThis.Array.isArray(object?.services)
+        ? object.services.map((e: any) => globalThis.String(e))
+        : [],
       maxRuns: isSet(object.maxRuns) ? globalThis.Number(object.maxRuns) : undefined,
     };
   },
 
   toJSON(message: WorkerRegisterRequest): unknown {
     const obj: any = {};
-    if (message.workerName !== "") {
+    if (message.workerName !== '') {
       obj.workerName = message.workerName;
     }
     if (message.actions?.length) {
@@ -479,7 +474,7 @@ export const WorkerRegisterRequest = {
   },
   fromPartial(object: DeepPartial<WorkerRegisterRequest>): WorkerRegisterRequest {
     const message = createBaseWorkerRegisterRequest();
-    message.workerName = object.workerName ?? "";
+    message.workerName = object.workerName ?? '';
     message.actions = object.actions?.map((e) => e) || [];
     message.services = object.services?.map((e) => e) || [];
     message.maxRuns = object.maxRuns ?? undefined;
@@ -488,18 +483,18 @@ export const WorkerRegisterRequest = {
 };
 
 function createBaseWorkerRegisterResponse(): WorkerRegisterResponse {
-  return { tenantId: "", workerId: "", workerName: "" };
+  return { tenantId: '', workerId: '', workerName: '' };
 }
 
 export const WorkerRegisterResponse = {
   encode(message: WorkerRegisterResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       writer.uint32(10).string(message.tenantId);
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(18).string(message.workerId);
     }
-    if (message.workerName !== "") {
+    if (message.workerName !== '') {
       writer.uint32(26).string(message.workerName);
     }
     return writer;
@@ -544,21 +539,21 @@ export const WorkerRegisterResponse = {
 
   fromJSON(object: any): WorkerRegisterResponse {
     return {
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "",
-      workerName: isSet(object.workerName) ? globalThis.String(object.workerName) : "",
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+      workerName: isSet(object.workerName) ? globalThis.String(object.workerName) : '',
     };
   },
 
   toJSON(message: WorkerRegisterResponse): unknown {
     const obj: any = {};
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
-    if (message.workerName !== "") {
+    if (message.workerName !== '') {
       obj.workerName = message.workerName;
     }
     return obj;
@@ -569,66 +564,66 @@ export const WorkerRegisterResponse = {
   },
   fromPartial(object: DeepPartial<WorkerRegisterResponse>): WorkerRegisterResponse {
     const message = createBaseWorkerRegisterResponse();
-    message.tenantId = object.tenantId ?? "";
-    message.workerId = object.workerId ?? "";
-    message.workerName = object.workerName ?? "";
+    message.tenantId = object.tenantId ?? '';
+    message.workerId = object.workerId ?? '';
+    message.workerName = object.workerName ?? '';
     return message;
   },
 };
 
 function createBaseAssignedAction(): AssignedAction {
   return {
-    tenantId: "",
-    workflowRunId: "",
-    getGroupKeyRunId: "",
-    jobId: "",
-    jobName: "",
-    jobRunId: "",
-    stepId: "",
-    stepRunId: "",
-    actionId: "",
+    tenantId: '',
+    workflowRunId: '',
+    getGroupKeyRunId: '',
+    jobId: '',
+    jobName: '',
+    jobRunId: '',
+    stepId: '',
+    stepRunId: '',
+    actionId: '',
     actionType: 0,
-    actionPayload: "",
-    stepName: "",
+    actionPayload: '',
+    stepName: '',
   };
 }
 
 export const AssignedAction = {
   encode(message: AssignedAction, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       writer.uint32(10).string(message.tenantId);
     }
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       writer.uint32(18).string(message.workflowRunId);
     }
-    if (message.getGroupKeyRunId !== "") {
+    if (message.getGroupKeyRunId !== '') {
       writer.uint32(26).string(message.getGroupKeyRunId);
     }
-    if (message.jobId !== "") {
+    if (message.jobId !== '') {
       writer.uint32(34).string(message.jobId);
     }
-    if (message.jobName !== "") {
+    if (message.jobName !== '') {
       writer.uint32(42).string(message.jobName);
     }
-    if (message.jobRunId !== "") {
+    if (message.jobRunId !== '') {
       writer.uint32(50).string(message.jobRunId);
     }
-    if (message.stepId !== "") {
+    if (message.stepId !== '') {
       writer.uint32(58).string(message.stepId);
     }
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       writer.uint32(66).string(message.stepRunId);
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       writer.uint32(74).string(message.actionId);
     }
     if (message.actionType !== 0) {
       writer.uint32(80).int32(message.actionType);
     }
-    if (message.actionPayload !== "") {
+    if (message.actionPayload !== '') {
       writer.uint32(90).string(message.actionPayload);
     }
-    if (message.stepName !== "") {
+    if (message.stepName !== '') {
       writer.uint32(98).string(message.stepName);
     }
     return writer;
@@ -736,57 +731,59 @@ export const AssignedAction = {
 
   fromJSON(object: any): AssignedAction {
     return {
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : "",
-      getGroupKeyRunId: isSet(object.getGroupKeyRunId) ? globalThis.String(object.getGroupKeyRunId) : "",
-      jobId: isSet(object.jobId) ? globalThis.String(object.jobId) : "",
-      jobName: isSet(object.jobName) ? globalThis.String(object.jobName) : "",
-      jobRunId: isSet(object.jobRunId) ? globalThis.String(object.jobRunId) : "",
-      stepId: isSet(object.stepId) ? globalThis.String(object.stepId) : "",
-      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : "",
-      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : "",
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+      getGroupKeyRunId: isSet(object.getGroupKeyRunId)
+        ? globalThis.String(object.getGroupKeyRunId)
+        : '',
+      jobId: isSet(object.jobId) ? globalThis.String(object.jobId) : '',
+      jobName: isSet(object.jobName) ? globalThis.String(object.jobName) : '',
+      jobRunId: isSet(object.jobRunId) ? globalThis.String(object.jobRunId) : '',
+      stepId: isSet(object.stepId) ? globalThis.String(object.stepId) : '',
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : '',
       actionType: isSet(object.actionType) ? actionTypeFromJSON(object.actionType) : 0,
-      actionPayload: isSet(object.actionPayload) ? globalThis.String(object.actionPayload) : "",
-      stepName: isSet(object.stepName) ? globalThis.String(object.stepName) : "",
+      actionPayload: isSet(object.actionPayload) ? globalThis.String(object.actionPayload) : '',
+      stepName: isSet(object.stepName) ? globalThis.String(object.stepName) : '',
     };
   },
 
   toJSON(message: AssignedAction): unknown {
     const obj: any = {};
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
     }
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       obj.workflowRunId = message.workflowRunId;
     }
-    if (message.getGroupKeyRunId !== "") {
+    if (message.getGroupKeyRunId !== '') {
       obj.getGroupKeyRunId = message.getGroupKeyRunId;
     }
-    if (message.jobId !== "") {
+    if (message.jobId !== '') {
       obj.jobId = message.jobId;
     }
-    if (message.jobName !== "") {
+    if (message.jobName !== '') {
       obj.jobName = message.jobName;
     }
-    if (message.jobRunId !== "") {
+    if (message.jobRunId !== '') {
       obj.jobRunId = message.jobRunId;
     }
-    if (message.stepId !== "") {
+    if (message.stepId !== '') {
       obj.stepId = message.stepId;
     }
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       obj.stepRunId = message.stepRunId;
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       obj.actionId = message.actionId;
     }
     if (message.actionType !== 0) {
       obj.actionType = actionTypeToJSON(message.actionType);
     }
-    if (message.actionPayload !== "") {
+    if (message.actionPayload !== '') {
       obj.actionPayload = message.actionPayload;
     }
-    if (message.stepName !== "") {
+    if (message.stepName !== '') {
       obj.stepName = message.stepName;
     }
     return obj;
@@ -797,29 +794,29 @@ export const AssignedAction = {
   },
   fromPartial(object: DeepPartial<AssignedAction>): AssignedAction {
     const message = createBaseAssignedAction();
-    message.tenantId = object.tenantId ?? "";
-    message.workflowRunId = object.workflowRunId ?? "";
-    message.getGroupKeyRunId = object.getGroupKeyRunId ?? "";
-    message.jobId = object.jobId ?? "";
-    message.jobName = object.jobName ?? "";
-    message.jobRunId = object.jobRunId ?? "";
-    message.stepId = object.stepId ?? "";
-    message.stepRunId = object.stepRunId ?? "";
-    message.actionId = object.actionId ?? "";
+    message.tenantId = object.tenantId ?? '';
+    message.workflowRunId = object.workflowRunId ?? '';
+    message.getGroupKeyRunId = object.getGroupKeyRunId ?? '';
+    message.jobId = object.jobId ?? '';
+    message.jobName = object.jobName ?? '';
+    message.jobRunId = object.jobRunId ?? '';
+    message.stepId = object.stepId ?? '';
+    message.stepRunId = object.stepRunId ?? '';
+    message.actionId = object.actionId ?? '';
     message.actionType = object.actionType ?? 0;
-    message.actionPayload = object.actionPayload ?? "";
-    message.stepName = object.stepName ?? "";
+    message.actionPayload = object.actionPayload ?? '';
+    message.stepName = object.stepName ?? '';
     return message;
   },
 };
 
 function createBaseWorkerListenRequest(): WorkerListenRequest {
-  return { workerId: "" };
+  return { workerId: '' };
 }
 
 export const WorkerListenRequest = {
   encode(message: WorkerListenRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(10).string(message.workerId);
     }
     return writer;
@@ -849,12 +846,12 @@ export const WorkerListenRequest = {
   },
 
   fromJSON(object: any): WorkerListenRequest {
-    return { workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "" };
+    return { workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '' };
   },
 
   toJSON(message: WorkerListenRequest): unknown {
     const obj: any = {};
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
     return obj;
@@ -865,18 +862,18 @@ export const WorkerListenRequest = {
   },
   fromPartial(object: DeepPartial<WorkerListenRequest>): WorkerListenRequest {
     const message = createBaseWorkerListenRequest();
-    message.workerId = object.workerId ?? "";
+    message.workerId = object.workerId ?? '';
     return message;
   },
 };
 
 function createBaseWorkerUnsubscribeRequest(): WorkerUnsubscribeRequest {
-  return { workerId: "" };
+  return { workerId: '' };
 }
 
 export const WorkerUnsubscribeRequest = {
   encode(message: WorkerUnsubscribeRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(10).string(message.workerId);
     }
     return writer;
@@ -906,12 +903,12 @@ export const WorkerUnsubscribeRequest = {
   },
 
   fromJSON(object: any): WorkerUnsubscribeRequest {
-    return { workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "" };
+    return { workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '' };
   },
 
   toJSON(message: WorkerUnsubscribeRequest): unknown {
     const obj: any = {};
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
     return obj;
@@ -922,21 +919,21 @@ export const WorkerUnsubscribeRequest = {
   },
   fromPartial(object: DeepPartial<WorkerUnsubscribeRequest>): WorkerUnsubscribeRequest {
     const message = createBaseWorkerUnsubscribeRequest();
-    message.workerId = object.workerId ?? "";
+    message.workerId = object.workerId ?? '';
     return message;
   },
 };
 
 function createBaseWorkerUnsubscribeResponse(): WorkerUnsubscribeResponse {
-  return { tenantId: "", workerId: "" };
+  return { tenantId: '', workerId: '' };
 }
 
 export const WorkerUnsubscribeResponse = {
   encode(message: WorkerUnsubscribeResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       writer.uint32(10).string(message.tenantId);
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(18).string(message.workerId);
     }
     return writer;
@@ -974,17 +971,17 @@ export const WorkerUnsubscribeResponse = {
 
   fromJSON(object: any): WorkerUnsubscribeResponse {
     return {
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "",
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
     };
   },
 
   toJSON(message: WorkerUnsubscribeResponse): unknown {
     const obj: any = {};
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
     return obj;
@@ -995,36 +992,36 @@ export const WorkerUnsubscribeResponse = {
   },
   fromPartial(object: DeepPartial<WorkerUnsubscribeResponse>): WorkerUnsubscribeResponse {
     const message = createBaseWorkerUnsubscribeResponse();
-    message.tenantId = object.tenantId ?? "";
-    message.workerId = object.workerId ?? "";
+    message.tenantId = object.tenantId ?? '';
+    message.workerId = object.workerId ?? '';
     return message;
   },
 };
 
 function createBaseGroupKeyActionEvent(): GroupKeyActionEvent {
   return {
-    workerId: "",
-    workflowRunId: "",
-    getGroupKeyRunId: "",
-    actionId: "",
+    workerId: '',
+    workflowRunId: '',
+    getGroupKeyRunId: '',
+    actionId: '',
     eventTimestamp: undefined,
     eventType: 0,
-    eventPayload: "",
+    eventPayload: '',
   };
 }
 
 export const GroupKeyActionEvent = {
   encode(message: GroupKeyActionEvent, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(10).string(message.workerId);
     }
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       writer.uint32(18).string(message.workflowRunId);
     }
-    if (message.getGroupKeyRunId !== "") {
+    if (message.getGroupKeyRunId !== '') {
       writer.uint32(26).string(message.getGroupKeyRunId);
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       writer.uint32(34).string(message.actionId);
     }
     if (message.eventTimestamp !== undefined) {
@@ -1033,7 +1030,7 @@ export const GroupKeyActionEvent = {
     if (message.eventType !== 0) {
       writer.uint32(48).int32(message.eventType);
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       writer.uint32(58).string(message.eventPayload);
     }
     return writer;
@@ -1106,28 +1103,32 @@ export const GroupKeyActionEvent = {
 
   fromJSON(object: any): GroupKeyActionEvent {
     return {
-      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "",
-      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : "",
-      getGroupKeyRunId: isSet(object.getGroupKeyRunId) ? globalThis.String(object.getGroupKeyRunId) : "",
-      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : "",
-      eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+      getGroupKeyRunId: isSet(object.getGroupKeyRunId)
+        ? globalThis.String(object.getGroupKeyRunId)
+        : '',
+      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : '',
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
       eventType: isSet(object.eventType) ? groupKeyActionEventTypeFromJSON(object.eventType) : 0,
-      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : "",
+      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : '',
     };
   },
 
   toJSON(message: GroupKeyActionEvent): unknown {
     const obj: any = {};
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       obj.workflowRunId = message.workflowRunId;
     }
-    if (message.getGroupKeyRunId !== "") {
+    if (message.getGroupKeyRunId !== '') {
       obj.getGroupKeyRunId = message.getGroupKeyRunId;
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       obj.actionId = message.actionId;
     }
     if (message.eventTimestamp !== undefined) {
@@ -1136,7 +1137,7 @@ export const GroupKeyActionEvent = {
     if (message.eventType !== 0) {
       obj.eventType = groupKeyActionEventTypeToJSON(message.eventType);
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       obj.eventPayload = message.eventPayload;
     }
     return obj;
@@ -1147,49 +1148,49 @@ export const GroupKeyActionEvent = {
   },
   fromPartial(object: DeepPartial<GroupKeyActionEvent>): GroupKeyActionEvent {
     const message = createBaseGroupKeyActionEvent();
-    message.workerId = object.workerId ?? "";
-    message.workflowRunId = object.workflowRunId ?? "";
-    message.getGroupKeyRunId = object.getGroupKeyRunId ?? "";
-    message.actionId = object.actionId ?? "";
+    message.workerId = object.workerId ?? '';
+    message.workflowRunId = object.workflowRunId ?? '';
+    message.getGroupKeyRunId = object.getGroupKeyRunId ?? '';
+    message.actionId = object.actionId ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     message.eventType = object.eventType ?? 0;
-    message.eventPayload = object.eventPayload ?? "";
+    message.eventPayload = object.eventPayload ?? '';
     return message;
   },
 };
 
 function createBaseStepActionEvent(): StepActionEvent {
   return {
-    workerId: "",
-    jobId: "",
-    jobRunId: "",
-    stepId: "",
-    stepRunId: "",
-    actionId: "",
+    workerId: '',
+    jobId: '',
+    jobRunId: '',
+    stepId: '',
+    stepRunId: '',
+    actionId: '',
     eventTimestamp: undefined,
     eventType: 0,
-    eventPayload: "",
+    eventPayload: '',
   };
 }
 
 export const StepActionEvent = {
   encode(message: StepActionEvent, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(10).string(message.workerId);
     }
-    if (message.jobId !== "") {
+    if (message.jobId !== '') {
       writer.uint32(18).string(message.jobId);
     }
-    if (message.jobRunId !== "") {
+    if (message.jobRunId !== '') {
       writer.uint32(26).string(message.jobRunId);
     }
-    if (message.stepId !== "") {
+    if (message.stepId !== '') {
       writer.uint32(34).string(message.stepId);
     }
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       writer.uint32(42).string(message.stepRunId);
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       writer.uint32(50).string(message.actionId);
     }
     if (message.eventTimestamp !== undefined) {
@@ -1198,7 +1199,7 @@ export const StepActionEvent = {
     if (message.eventType !== 0) {
       writer.uint32(64).int32(message.eventType);
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       writer.uint32(74).string(message.eventPayload);
     }
     return writer;
@@ -1285,36 +1286,38 @@ export const StepActionEvent = {
 
   fromJSON(object: any): StepActionEvent {
     return {
-      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "",
-      jobId: isSet(object.jobId) ? globalThis.String(object.jobId) : "",
-      jobRunId: isSet(object.jobRunId) ? globalThis.String(object.jobRunId) : "",
-      stepId: isSet(object.stepId) ? globalThis.String(object.stepId) : "",
-      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : "",
-      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : "",
-      eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+      jobId: isSet(object.jobId) ? globalThis.String(object.jobId) : '',
+      jobRunId: isSet(object.jobRunId) ? globalThis.String(object.jobRunId) : '',
+      stepId: isSet(object.stepId) ? globalThis.String(object.stepId) : '',
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      actionId: isSet(object.actionId) ? globalThis.String(object.actionId) : '',
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
       eventType: isSet(object.eventType) ? stepActionEventTypeFromJSON(object.eventType) : 0,
-      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : "",
+      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : '',
     };
   },
 
   toJSON(message: StepActionEvent): unknown {
     const obj: any = {};
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
-    if (message.jobId !== "") {
+    if (message.jobId !== '') {
       obj.jobId = message.jobId;
     }
-    if (message.jobRunId !== "") {
+    if (message.jobRunId !== '') {
       obj.jobRunId = message.jobRunId;
     }
-    if (message.stepId !== "") {
+    if (message.stepId !== '') {
       obj.stepId = message.stepId;
     }
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       obj.stepRunId = message.stepRunId;
     }
-    if (message.actionId !== "") {
+    if (message.actionId !== '') {
       obj.actionId = message.actionId;
     }
     if (message.eventTimestamp !== undefined) {
@@ -1323,7 +1326,7 @@ export const StepActionEvent = {
     if (message.eventType !== 0) {
       obj.eventType = stepActionEventTypeToJSON(message.eventType);
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       obj.eventPayload = message.eventPayload;
     }
     return obj;
@@ -1334,29 +1337,29 @@ export const StepActionEvent = {
   },
   fromPartial(object: DeepPartial<StepActionEvent>): StepActionEvent {
     const message = createBaseStepActionEvent();
-    message.workerId = object.workerId ?? "";
-    message.jobId = object.jobId ?? "";
-    message.jobRunId = object.jobRunId ?? "";
-    message.stepId = object.stepId ?? "";
-    message.stepRunId = object.stepRunId ?? "";
-    message.actionId = object.actionId ?? "";
+    message.workerId = object.workerId ?? '';
+    message.jobId = object.jobId ?? '';
+    message.jobRunId = object.jobRunId ?? '';
+    message.stepId = object.stepId ?? '';
+    message.stepRunId = object.stepRunId ?? '';
+    message.actionId = object.actionId ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     message.eventType = object.eventType ?? 0;
-    message.eventPayload = object.eventPayload ?? "";
+    message.eventPayload = object.eventPayload ?? '';
     return message;
   },
 };
 
 function createBaseActionEventResponse(): ActionEventResponse {
-  return { tenantId: "", workerId: "" };
+  return { tenantId: '', workerId: '' };
 }
 
 export const ActionEventResponse = {
   encode(message: ActionEventResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       writer.uint32(10).string(message.tenantId);
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       writer.uint32(18).string(message.workerId);
     }
     return writer;
@@ -1394,17 +1397,17 @@ export const ActionEventResponse = {
 
   fromJSON(object: any): ActionEventResponse {
     return {
-      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : "",
-      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : "",
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
     };
   },
 
   toJSON(message: ActionEventResponse): unknown {
     const obj: any = {};
-    if (message.tenantId !== "") {
+    if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
     }
-    if (message.workerId !== "") {
+    if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
     return obj;
@@ -1415,19 +1418,22 @@ export const ActionEventResponse = {
   },
   fromPartial(object: DeepPartial<ActionEventResponse>): ActionEventResponse {
     const message = createBaseActionEventResponse();
-    message.tenantId = object.tenantId ?? "";
-    message.workerId = object.workerId ?? "";
+    message.tenantId = object.tenantId ?? '';
+    message.workerId = object.workerId ?? '';
     return message;
   },
 };
 
 function createBaseSubscribeToWorkflowEventsRequest(): SubscribeToWorkflowEventsRequest {
-  return { workflowRunId: "" };
+  return { workflowRunId: '' };
 }
 
 export const SubscribeToWorkflowEventsRequest = {
-  encode(message: SubscribeToWorkflowEventsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workflowRunId !== "") {
+  encode(
+    message: SubscribeToWorkflowEventsRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.workflowRunId !== '') {
       writer.uint32(10).string(message.workflowRunId);
     }
     return writer;
@@ -1457,12 +1463,14 @@ export const SubscribeToWorkflowEventsRequest = {
   },
 
   fromJSON(object: any): SubscribeToWorkflowEventsRequest {
-    return { workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : "" };
+    return {
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+    };
   },
 
   toJSON(message: SubscribeToWorkflowEventsRequest): unknown {
     const obj: any = {};
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       obj.workflowRunId = message.workflowRunId;
     }
     return obj;
@@ -1471,21 +1479,23 @@ export const SubscribeToWorkflowEventsRequest = {
   create(base?: DeepPartial<SubscribeToWorkflowEventsRequest>): SubscribeToWorkflowEventsRequest {
     return SubscribeToWorkflowEventsRequest.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<SubscribeToWorkflowEventsRequest>): SubscribeToWorkflowEventsRequest {
+  fromPartial(
+    object: DeepPartial<SubscribeToWorkflowEventsRequest>
+  ): SubscribeToWorkflowEventsRequest {
     const message = createBaseSubscribeToWorkflowEventsRequest();
-    message.workflowRunId = object.workflowRunId ?? "";
+    message.workflowRunId = object.workflowRunId ?? '';
     return message;
   },
 };
 
 function createBaseWorkflowEvent(): WorkflowEvent {
   return {
-    workflowRunId: "",
+    workflowRunId: '',
     resourceType: 0,
     eventType: 0,
-    resourceId: "",
+    resourceId: '',
     eventTimestamp: undefined,
-    eventPayload: "",
+    eventPayload: '',
     hangup: false,
     stepRetries: undefined,
     retryCount: undefined,
@@ -1494,7 +1504,7 @@ function createBaseWorkflowEvent(): WorkflowEvent {
 
 export const WorkflowEvent = {
   encode(message: WorkflowEvent, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       writer.uint32(10).string(message.workflowRunId);
     }
     if (message.resourceType !== 0) {
@@ -1503,13 +1513,13 @@ export const WorkflowEvent = {
     if (message.eventType !== 0) {
       writer.uint32(24).int32(message.eventType);
     }
-    if (message.resourceId !== "") {
+    if (message.resourceId !== '') {
       writer.uint32(34).string(message.resourceId);
     }
     if (message.eventTimestamp !== undefined) {
       Timestamp.encode(toTimestamp(message.eventTimestamp), writer.uint32(42).fork()).ldelim();
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       writer.uint32(50).string(message.eventPayload);
     }
     if (message.hangup === true) {
@@ -1605,12 +1615,14 @@ export const WorkflowEvent = {
 
   fromJSON(object: any): WorkflowEvent {
     return {
-      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : "",
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
       resourceType: isSet(object.resourceType) ? resourceTypeFromJSON(object.resourceType) : 0,
       eventType: isSet(object.eventType) ? resourceEventTypeFromJSON(object.eventType) : 0,
-      resourceId: isSet(object.resourceId) ? globalThis.String(object.resourceId) : "",
-      eventTimestamp: isSet(object.eventTimestamp) ? fromJsonTimestamp(object.eventTimestamp) : undefined,
-      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : "",
+      resourceId: isSet(object.resourceId) ? globalThis.String(object.resourceId) : '',
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
+      eventPayload: isSet(object.eventPayload) ? globalThis.String(object.eventPayload) : '',
       hangup: isSet(object.hangup) ? globalThis.Boolean(object.hangup) : false,
       stepRetries: isSet(object.stepRetries) ? globalThis.Number(object.stepRetries) : undefined,
       retryCount: isSet(object.retryCount) ? globalThis.Number(object.retryCount) : undefined,
@@ -1619,7 +1631,7 @@ export const WorkflowEvent = {
 
   toJSON(message: WorkflowEvent): unknown {
     const obj: any = {};
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       obj.workflowRunId = message.workflowRunId;
     }
     if (message.resourceType !== 0) {
@@ -1628,13 +1640,13 @@ export const WorkflowEvent = {
     if (message.eventType !== 0) {
       obj.eventType = resourceEventTypeToJSON(message.eventType);
     }
-    if (message.resourceId !== "") {
+    if (message.resourceId !== '') {
       obj.resourceId = message.resourceId;
     }
     if (message.eventTimestamp !== undefined) {
       obj.eventTimestamp = message.eventTimestamp.toISOString();
     }
-    if (message.eventPayload !== "") {
+    if (message.eventPayload !== '') {
       obj.eventPayload = message.eventPayload;
     }
     if (message.hangup === true) {
@@ -1654,12 +1666,12 @@ export const WorkflowEvent = {
   },
   fromPartial(object: DeepPartial<WorkflowEvent>): WorkflowEvent {
     const message = createBaseWorkflowEvent();
-    message.workflowRunId = object.workflowRunId ?? "";
+    message.workflowRunId = object.workflowRunId ?? '';
     message.resourceType = object.resourceType ?? 0;
     message.eventType = object.eventType ?? 0;
-    message.resourceId = object.resourceId ?? "";
+    message.resourceId = object.resourceId ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
-    message.eventPayload = object.eventPayload ?? "";
+    message.eventPayload = object.eventPayload ?? '';
     message.hangup = object.hangup ?? false;
     message.stepRetries = object.stepRetries ?? undefined;
     message.retryCount = object.retryCount ?? undefined;
@@ -1668,21 +1680,21 @@ export const WorkflowEvent = {
 };
 
 function createBaseOverridesData(): OverridesData {
-  return { stepRunId: "", path: "", value: "", callerFilename: "" };
+  return { stepRunId: '', path: '', value: '', callerFilename: '' };
 }
 
 export const OverridesData = {
   encode(message: OverridesData, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       writer.uint32(10).string(message.stepRunId);
     }
-    if (message.path !== "") {
+    if (message.path !== '') {
       writer.uint32(18).string(message.path);
     }
-    if (message.value !== "") {
+    if (message.value !== '') {
       writer.uint32(26).string(message.value);
     }
-    if (message.callerFilename !== "") {
+    if (message.callerFilename !== '') {
       writer.uint32(34).string(message.callerFilename);
     }
     return writer;
@@ -1734,25 +1746,25 @@ export const OverridesData = {
 
   fromJSON(object: any): OverridesData {
     return {
-      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : "",
-      path: isSet(object.path) ? globalThis.String(object.path) : "",
-      value: isSet(object.value) ? globalThis.String(object.value) : "",
-      callerFilename: isSet(object.callerFilename) ? globalThis.String(object.callerFilename) : "",
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      path: isSet(object.path) ? globalThis.String(object.path) : '',
+      value: isSet(object.value) ? globalThis.String(object.value) : '',
+      callerFilename: isSet(object.callerFilename) ? globalThis.String(object.callerFilename) : '',
     };
   },
 
   toJSON(message: OverridesData): unknown {
     const obj: any = {};
-    if (message.stepRunId !== "") {
+    if (message.stepRunId !== '') {
       obj.stepRunId = message.stepRunId;
     }
-    if (message.path !== "") {
+    if (message.path !== '') {
       obj.path = message.path;
     }
-    if (message.value !== "") {
+    if (message.value !== '') {
       obj.value = message.value;
     }
-    if (message.callerFilename !== "") {
+    if (message.callerFilename !== '') {
       obj.callerFilename = message.callerFilename;
     }
     return obj;
@@ -1763,10 +1775,10 @@ export const OverridesData = {
   },
   fromPartial(object: DeepPartial<OverridesData>): OverridesData {
     const message = createBaseOverridesData();
-    message.stepRunId = object.stepRunId ?? "";
-    message.path = object.path ?? "";
-    message.value = object.value ?? "";
-    message.callerFilename = object.callerFilename ?? "";
+    message.stepRunId = object.stepRunId ?? '';
+    message.path = object.path ?? '';
+    message.value = object.value ?? '';
+    message.callerFilename = object.callerFilename ?? '';
     return message;
   },
 };
@@ -1816,11 +1828,11 @@ export const OverridesDataResponse = {
 
 export type DispatcherDefinition = typeof DispatcherDefinition;
 export const DispatcherDefinition = {
-  name: "Dispatcher",
-  fullName: "Dispatcher",
+  name: 'Dispatcher',
+  fullName: 'Dispatcher',
   methods: {
     register: {
-      name: "Register",
+      name: 'Register',
       requestType: WorkerRegisterRequest,
       requestStream: false,
       responseType: WorkerRegisterResponse,
@@ -1828,7 +1840,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     listen: {
-      name: "Listen",
+      name: 'Listen',
       requestType: WorkerListenRequest,
       requestStream: false,
       responseType: AssignedAction,
@@ -1836,7 +1848,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     subscribeToWorkflowEvents: {
-      name: "SubscribeToWorkflowEvents",
+      name: 'SubscribeToWorkflowEvents',
       requestType: SubscribeToWorkflowEventsRequest,
       requestStream: false,
       responseType: WorkflowEvent,
@@ -1844,7 +1856,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     sendStepActionEvent: {
-      name: "SendStepActionEvent",
+      name: 'SendStepActionEvent',
       requestType: StepActionEvent,
       requestStream: false,
       responseType: ActionEventResponse,
@@ -1852,7 +1864,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     sendGroupKeyActionEvent: {
-      name: "SendGroupKeyActionEvent",
+      name: 'SendGroupKeyActionEvent',
       requestType: GroupKeyActionEvent,
       requestStream: false,
       responseType: ActionEventResponse,
@@ -1860,7 +1872,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     putOverridesData: {
-      name: "PutOverridesData",
+      name: 'PutOverridesData',
       requestType: OverridesData,
       requestStream: false,
       responseType: OverridesDataResponse,
@@ -1868,7 +1880,7 @@ export const DispatcherDefinition = {
       options: {},
     },
     unsubscribe: {
-      name: "Unsubscribe",
+      name: 'Unsubscribe',
       requestType: WorkerUnsubscribeRequest,
       requestStream: false,
       responseType: WorkerUnsubscribeResponse,
@@ -1881,72 +1893,76 @@ export const DispatcherDefinition = {
 export interface DispatcherServiceImplementation<CallContextExt = {}> {
   register(
     request: WorkerRegisterRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<WorkerRegisterResponse>>;
   listen(
     request: WorkerListenRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): ServerStreamingMethodResult<DeepPartial<AssignedAction>>;
   subscribeToWorkflowEvents(
     request: SubscribeToWorkflowEventsRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): ServerStreamingMethodResult<DeepPartial<WorkflowEvent>>;
   sendStepActionEvent(
     request: StepActionEvent,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<ActionEventResponse>>;
   sendGroupKeyActionEvent(
     request: GroupKeyActionEvent,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<ActionEventResponse>>;
   putOverridesData(
     request: OverridesData,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<OverridesDataResponse>>;
   unsubscribe(
     request: WorkerUnsubscribeRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<WorkerUnsubscribeResponse>>;
 }
 
 export interface DispatcherClient<CallOptionsExt = {}> {
   register(
     request: DeepPartial<WorkerRegisterRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<WorkerRegisterResponse>;
   listen(
     request: DeepPartial<WorkerListenRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): AsyncIterable<AssignedAction>;
   subscribeToWorkflowEvents(
     request: DeepPartial<SubscribeToWorkflowEventsRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): AsyncIterable<WorkflowEvent>;
   sendStepActionEvent(
     request: DeepPartial<StepActionEvent>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<ActionEventResponse>;
   sendGroupKeyActionEvent(
     request: DeepPartial<GroupKeyActionEvent>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<ActionEventResponse>;
   putOverridesData(
     request: DeepPartial<OverridesData>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<OverridesDataResponse>;
   unsubscribe(
     request: DeepPartial<WorkerUnsubscribeRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<WorkerUnsubscribeResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends globalThis.Array<infer U>
+    ? globalThis.Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepPartial<U>>
+      : T extends {}
+        ? { [K in keyof T]?: DeepPartial<T[K]> }
+        : Partial<T>;
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = Math.trunc(date.getTime() / 1_000);
@@ -1963,7 +1979,7 @@ function fromTimestamp(t: Timestamp): Date {
 function fromJsonTimestamp(o: any): Date {
   if (o instanceof globalThis.Date) {
     return o;
-  } else if (typeof o === "string") {
+  } else if (typeof o === 'string') {
     return new globalThis.Date(o);
   } else {
     return fromTimestamp(Timestamp.fromJSON(o));
@@ -1974,4 +1990,6 @@ function isSet(value: any): boolean {
   return value !== null && value !== undefined;
 }
 
-export type ServerStreamingMethodResult<Response> = { [Symbol.asyncIterator](): AsyncIterator<Response, void> };
+export type ServerStreamingMethodResult<Response> = {
+  [Symbol.asyncIterator](): AsyncIterator<Response, void>;
+};

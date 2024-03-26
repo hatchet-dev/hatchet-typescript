@@ -1,9 +1,9 @@
 /* eslint-disable */
-import type { CallContext, CallOptions } from "nice-grpc-common";
-import * as _m0 from "protobufjs/minimal";
-import { Timestamp } from "../google/protobuf/timestamp";
+import type { CallContext, CallOptions } from 'nice-grpc-common';
+import * as _m0 from 'protobufjs/minimal';
+import { Timestamp } from '../google/protobuf/timestamp';
 
-export const protobufPackage = "";
+export const protobufPackage = '';
 
 export enum ConcurrencyLimitStrategy {
   CANCEL_IN_PROGRESS = 0,
@@ -16,19 +16,19 @@ export enum ConcurrencyLimitStrategy {
 export function concurrencyLimitStrategyFromJSON(object: any): ConcurrencyLimitStrategy {
   switch (object) {
     case 0:
-    case "CANCEL_IN_PROGRESS":
+    case 'CANCEL_IN_PROGRESS':
       return ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS;
     case 1:
-    case "DROP_NEWEST":
+    case 'DROP_NEWEST':
       return ConcurrencyLimitStrategy.DROP_NEWEST;
     case 2:
-    case "QUEUE_NEWEST":
+    case 'QUEUE_NEWEST':
       return ConcurrencyLimitStrategy.QUEUE_NEWEST;
     case 3:
-    case "GROUP_ROUND_ROBIN":
+    case 'GROUP_ROUND_ROBIN':
       return ConcurrencyLimitStrategy.GROUP_ROUND_ROBIN;
     case -1:
-    case "UNRECOGNIZED":
+    case 'UNRECOGNIZED':
     default:
       return ConcurrencyLimitStrategy.UNRECOGNIZED;
   }
@@ -37,16 +37,16 @@ export function concurrencyLimitStrategyFromJSON(object: any): ConcurrencyLimitS
 export function concurrencyLimitStrategyToJSON(object: ConcurrencyLimitStrategy): string {
   switch (object) {
     case ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS:
-      return "CANCEL_IN_PROGRESS";
+      return 'CANCEL_IN_PROGRESS';
     case ConcurrencyLimitStrategy.DROP_NEWEST:
-      return "DROP_NEWEST";
+      return 'DROP_NEWEST';
     case ConcurrencyLimitStrategy.QUEUE_NEWEST:
-      return "QUEUE_NEWEST";
+      return 'QUEUE_NEWEST';
     case ConcurrencyLimitStrategy.GROUP_ROUND_ROBIN:
-      return "GROUP_ROUND_ROBIN";
+      return 'GROUP_ROUND_ROBIN';
     case ConcurrencyLimitStrategy.UNRECOGNIZED:
     default:
-      return "UNRECOGNIZED";
+      return 'UNRECOGNIZED';
   }
 }
 
@@ -71,9 +71,7 @@ export interface CreateWorkflowVersionOpts {
   /** (required) the workflow jobs */
   jobs: CreateWorkflowJobOpts[];
   /** (optional) the workflow concurrency options */
-  concurrency:
-    | WorkflowConcurrencyOpts
-    | undefined;
+  concurrency: WorkflowConcurrencyOpts | undefined;
   /** (optional) the timeout for the schedule */
   scheduleTimeout?: string | undefined;
 }
@@ -118,8 +116,7 @@ export interface CreateWorkflowStepOpts {
 }
 
 /** ListWorkflowsRequest is the request for ListWorkflows. */
-export interface ListWorkflowsRequest {
-}
+export interface ListWorkflowsRequest {}
 
 export interface ScheduleWorkflowRequest {
   name: string;
@@ -127,20 +124,14 @@ export interface ScheduleWorkflowRequest {
   /** (optional) the input data for the workflow */
   input: string;
   /** (optional) the parent workflow run id */
-  parentId?:
-    | string
-    | undefined;
+  parentId?: string | undefined;
   /** (optional) the parent step run id */
-  parentStepRunId?:
-    | string
-    | undefined;
+  parentStepRunId?: string | undefined;
   /**
    * (optional) the index of the child workflow. if this is set, matches on the index or the
    * child key will be a no-op, even if the schedule has changed.
    */
-  childIndex?:
-    | number
-    | undefined;
+  childIndex?: number | undefined;
   /**
    * (optional) the key for the child. if this is set, matches on the index or the
    * child key will be a no-op, even if the schedule has changed.
@@ -175,21 +166,15 @@ export interface TriggerWorkflowRequest {
   /** (optional) the input data for the workflow */
   input: string;
   /** (optional) the parent workflow run id */
-  parentId?:
-    | string
-    | undefined;
+  parentId?: string | undefined;
   /** (optional) the parent step run id */
-  parentStepRunId?:
-    | string
-    | undefined;
+  parentStepRunId?: string | undefined;
   /**
    * (optional) the index of the child workflow. if this is set, matches on the index or the
    * child key will return an existing workflow run if the parent id, parent step run id, and
    * child index/key match an existing workflow run.
    */
-  childIndex?:
-    | number
-    | undefined;
+  childIndex?: number | undefined;
   /**
    * (optional) the key for the child. if this is set, matches on the index or the
    * child key will return an existing workflow run if the parent id, parent step run id, and
@@ -238,7 +223,9 @@ export const PutWorkflowRequest = {
   },
 
   fromJSON(object: any): PutWorkflowRequest {
-    return { opts: isSet(object.opts) ? CreateWorkflowVersionOpts.fromJSON(object.opts) : undefined };
+    return {
+      opts: isSet(object.opts) ? CreateWorkflowVersionOpts.fromJSON(object.opts) : undefined,
+    };
   },
 
   toJSON(message: PutWorkflowRequest): unknown {
@@ -254,18 +241,19 @@ export const PutWorkflowRequest = {
   },
   fromPartial(object: DeepPartial<PutWorkflowRequest>): PutWorkflowRequest {
     const message = createBasePutWorkflowRequest();
-    message.opts = (object.opts !== undefined && object.opts !== null)
-      ? CreateWorkflowVersionOpts.fromPartial(object.opts)
-      : undefined;
+    message.opts =
+      object.opts !== undefined && object.opts !== null
+        ? CreateWorkflowVersionOpts.fromPartial(object.opts)
+        : undefined;
     return message;
   },
 };
 
 function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
   return {
-    name: "",
-    description: "",
-    version: "",
+    name: '',
+    description: '',
+    version: '',
     eventTriggers: [],
     cronTriggers: [],
     scheduledTriggers: [],
@@ -277,13 +265,13 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
 
 export const CreateWorkflowVersionOpts = {
   encode(message: CreateWorkflowVersionOpts, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
+    if (message.name !== '') {
       writer.uint32(10).string(message.name);
     }
-    if (message.description !== "") {
+    if (message.description !== '') {
       writer.uint32(18).string(message.description);
     }
-    if (message.version !== "") {
+    if (message.version !== '') {
       writer.uint32(26).string(message.version);
     }
     for (const v of message.eventTriggers) {
@@ -388,9 +376,9 @@ export const CreateWorkflowVersionOpts = {
 
   fromJSON(object: any): CreateWorkflowVersionOpts {
     return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
-      version: isSet(object.version) ? globalThis.String(object.version) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
+      description: isSet(object.description) ? globalThis.String(object.description) : '',
+      version: isSet(object.version) ? globalThis.String(object.version) : '',
       eventTriggers: globalThis.Array.isArray(object?.eventTriggers)
         ? object.eventTriggers.map((e: any) => globalThis.String(e))
         : [],
@@ -403,20 +391,24 @@ export const CreateWorkflowVersionOpts = {
       jobs: globalThis.Array.isArray(object?.jobs)
         ? object.jobs.map((e: any) => CreateWorkflowJobOpts.fromJSON(e))
         : [],
-      concurrency: isSet(object.concurrency) ? WorkflowConcurrencyOpts.fromJSON(object.concurrency) : undefined,
-      scheduleTimeout: isSet(object.scheduleTimeout) ? globalThis.String(object.scheduleTimeout) : undefined,
+      concurrency: isSet(object.concurrency)
+        ? WorkflowConcurrencyOpts.fromJSON(object.concurrency)
+        : undefined,
+      scheduleTimeout: isSet(object.scheduleTimeout)
+        ? globalThis.String(object.scheduleTimeout)
+        : undefined,
     };
   },
 
   toJSON(message: CreateWorkflowVersionOpts): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== '') {
       obj.name = message.name;
     }
-    if (message.description !== "") {
+    if (message.description !== '') {
       obj.description = message.description;
     }
-    if (message.version !== "") {
+    if (message.version !== '') {
       obj.version = message.version;
     }
     if (message.eventTriggers?.length) {
@@ -445,28 +437,29 @@ export const CreateWorkflowVersionOpts = {
   },
   fromPartial(object: DeepPartial<CreateWorkflowVersionOpts>): CreateWorkflowVersionOpts {
     const message = createBaseCreateWorkflowVersionOpts();
-    message.name = object.name ?? "";
-    message.description = object.description ?? "";
-    message.version = object.version ?? "";
+    message.name = object.name ?? '';
+    message.description = object.description ?? '';
+    message.version = object.version ?? '';
     message.eventTriggers = object.eventTriggers?.map((e) => e) || [];
     message.cronTriggers = object.cronTriggers?.map((e) => e) || [];
     message.scheduledTriggers = object.scheduledTriggers?.map((e) => e) || [];
     message.jobs = object.jobs?.map((e) => CreateWorkflowJobOpts.fromPartial(e)) || [];
-    message.concurrency = (object.concurrency !== undefined && object.concurrency !== null)
-      ? WorkflowConcurrencyOpts.fromPartial(object.concurrency)
-      : undefined;
+    message.concurrency =
+      object.concurrency !== undefined && object.concurrency !== null
+        ? WorkflowConcurrencyOpts.fromPartial(object.concurrency)
+        : undefined;
     message.scheduleTimeout = object.scheduleTimeout ?? undefined;
     return message;
   },
 };
 
 function createBaseWorkflowConcurrencyOpts(): WorkflowConcurrencyOpts {
-  return { action: "", maxRuns: 0, limitStrategy: 0 };
+  return { action: '', maxRuns: 0, limitStrategy: 0 };
 }
 
 export const WorkflowConcurrencyOpts = {
   encode(message: WorkflowConcurrencyOpts, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.action !== "") {
+    if (message.action !== '') {
       writer.uint32(10).string(message.action);
     }
     if (message.maxRuns !== 0) {
@@ -517,15 +510,17 @@ export const WorkflowConcurrencyOpts = {
 
   fromJSON(object: any): WorkflowConcurrencyOpts {
     return {
-      action: isSet(object.action) ? globalThis.String(object.action) : "",
+      action: isSet(object.action) ? globalThis.String(object.action) : '',
       maxRuns: isSet(object.maxRuns) ? globalThis.Number(object.maxRuns) : 0,
-      limitStrategy: isSet(object.limitStrategy) ? concurrencyLimitStrategyFromJSON(object.limitStrategy) : 0,
+      limitStrategy: isSet(object.limitStrategy)
+        ? concurrencyLimitStrategyFromJSON(object.limitStrategy)
+        : 0,
     };
   },
 
   toJSON(message: WorkflowConcurrencyOpts): unknown {
     const obj: any = {};
-    if (message.action !== "") {
+    if (message.action !== '') {
       obj.action = message.action;
     }
     if (message.maxRuns !== 0) {
@@ -542,7 +537,7 @@ export const WorkflowConcurrencyOpts = {
   },
   fromPartial(object: DeepPartial<WorkflowConcurrencyOpts>): WorkflowConcurrencyOpts {
     const message = createBaseWorkflowConcurrencyOpts();
-    message.action = object.action ?? "";
+    message.action = object.action ?? '';
     message.maxRuns = object.maxRuns ?? 0;
     message.limitStrategy = object.limitStrategy ?? 0;
     return message;
@@ -550,18 +545,18 @@ export const WorkflowConcurrencyOpts = {
 };
 
 function createBaseCreateWorkflowJobOpts(): CreateWorkflowJobOpts {
-  return { name: "", description: "", timeout: "", steps: [] };
+  return { name: '', description: '', timeout: '', steps: [] };
 }
 
 export const CreateWorkflowJobOpts = {
   encode(message: CreateWorkflowJobOpts, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
+    if (message.name !== '') {
       writer.uint32(10).string(message.name);
     }
-    if (message.description !== "") {
+    if (message.description !== '') {
       writer.uint32(18).string(message.description);
     }
-    if (message.timeout !== "") {
+    if (message.timeout !== '') {
       writer.uint32(26).string(message.timeout);
     }
     for (const v of message.steps) {
@@ -616,9 +611,9 @@ export const CreateWorkflowJobOpts = {
 
   fromJSON(object: any): CreateWorkflowJobOpts {
     return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
-      timeout: isSet(object.timeout) ? globalThis.String(object.timeout) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
+      description: isSet(object.description) ? globalThis.String(object.description) : '',
+      timeout: isSet(object.timeout) ? globalThis.String(object.timeout) : '',
       steps: globalThis.Array.isArray(object?.steps)
         ? object.steps.map((e: any) => CreateWorkflowStepOpts.fromJSON(e))
         : [],
@@ -627,13 +622,13 @@ export const CreateWorkflowJobOpts = {
 
   toJSON(message: CreateWorkflowJobOpts): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== '') {
       obj.name = message.name;
     }
-    if (message.description !== "") {
+    if (message.description !== '') {
       obj.description = message.description;
     }
-    if (message.timeout !== "") {
+    if (message.timeout !== '') {
       obj.timeout = message.timeout;
     }
     if (message.steps?.length) {
@@ -647,36 +642,44 @@ export const CreateWorkflowJobOpts = {
   },
   fromPartial(object: DeepPartial<CreateWorkflowJobOpts>): CreateWorkflowJobOpts {
     const message = createBaseCreateWorkflowJobOpts();
-    message.name = object.name ?? "";
-    message.description = object.description ?? "";
-    message.timeout = object.timeout ?? "";
+    message.name = object.name ?? '';
+    message.description = object.description ?? '';
+    message.timeout = object.timeout ?? '';
     message.steps = object.steps?.map((e) => CreateWorkflowStepOpts.fromPartial(e)) || [];
     return message;
   },
 };
 
 function createBaseCreateWorkflowStepOpts(): CreateWorkflowStepOpts {
-  return { readableId: "", action: "", timeout: "", inputs: "", parents: [], userData: "", retries: 0 };
+  return {
+    readableId: '',
+    action: '',
+    timeout: '',
+    inputs: '',
+    parents: [],
+    userData: '',
+    retries: 0,
+  };
 }
 
 export const CreateWorkflowStepOpts = {
   encode(message: CreateWorkflowStepOpts, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.readableId !== "") {
+    if (message.readableId !== '') {
       writer.uint32(10).string(message.readableId);
     }
-    if (message.action !== "") {
+    if (message.action !== '') {
       writer.uint32(18).string(message.action);
     }
-    if (message.timeout !== "") {
+    if (message.timeout !== '') {
       writer.uint32(26).string(message.timeout);
     }
-    if (message.inputs !== "") {
+    if (message.inputs !== '') {
       writer.uint32(34).string(message.inputs);
     }
     for (const v of message.parents) {
       writer.uint32(42).string(v!);
     }
-    if (message.userData !== "") {
+    if (message.userData !== '') {
       writer.uint32(50).string(message.userData);
     }
     if (message.retries !== 0) {
@@ -752,34 +755,36 @@ export const CreateWorkflowStepOpts = {
 
   fromJSON(object: any): CreateWorkflowStepOpts {
     return {
-      readableId: isSet(object.readableId) ? globalThis.String(object.readableId) : "",
-      action: isSet(object.action) ? globalThis.String(object.action) : "",
-      timeout: isSet(object.timeout) ? globalThis.String(object.timeout) : "",
-      inputs: isSet(object.inputs) ? globalThis.String(object.inputs) : "",
-      parents: globalThis.Array.isArray(object?.parents) ? object.parents.map((e: any) => globalThis.String(e)) : [],
-      userData: isSet(object.userData) ? globalThis.String(object.userData) : "",
+      readableId: isSet(object.readableId) ? globalThis.String(object.readableId) : '',
+      action: isSet(object.action) ? globalThis.String(object.action) : '',
+      timeout: isSet(object.timeout) ? globalThis.String(object.timeout) : '',
+      inputs: isSet(object.inputs) ? globalThis.String(object.inputs) : '',
+      parents: globalThis.Array.isArray(object?.parents)
+        ? object.parents.map((e: any) => globalThis.String(e))
+        : [],
+      userData: isSet(object.userData) ? globalThis.String(object.userData) : '',
       retries: isSet(object.retries) ? globalThis.Number(object.retries) : 0,
     };
   },
 
   toJSON(message: CreateWorkflowStepOpts): unknown {
     const obj: any = {};
-    if (message.readableId !== "") {
+    if (message.readableId !== '') {
       obj.readableId = message.readableId;
     }
-    if (message.action !== "") {
+    if (message.action !== '') {
       obj.action = message.action;
     }
-    if (message.timeout !== "") {
+    if (message.timeout !== '') {
       obj.timeout = message.timeout;
     }
-    if (message.inputs !== "") {
+    if (message.inputs !== '') {
       obj.inputs = message.inputs;
     }
     if (message.parents?.length) {
       obj.parents = message.parents;
     }
-    if (message.userData !== "") {
+    if (message.userData !== '') {
       obj.userData = message.userData;
     }
     if (message.retries !== 0) {
@@ -793,12 +798,12 @@ export const CreateWorkflowStepOpts = {
   },
   fromPartial(object: DeepPartial<CreateWorkflowStepOpts>): CreateWorkflowStepOpts {
     const message = createBaseCreateWorkflowStepOpts();
-    message.readableId = object.readableId ?? "";
-    message.action = object.action ?? "";
-    message.timeout = object.timeout ?? "";
-    message.inputs = object.inputs ?? "";
+    message.readableId = object.readableId ?? '';
+    message.action = object.action ?? '';
+    message.timeout = object.timeout ?? '';
+    message.inputs = object.inputs ?? '';
     message.parents = object.parents?.map((e) => e) || [];
-    message.userData = object.userData ?? "";
+    message.userData = object.userData ?? '';
     message.retries = object.retries ?? 0;
     return message;
   },
@@ -849,9 +854,9 @@ export const ListWorkflowsRequest = {
 
 function createBaseScheduleWorkflowRequest(): ScheduleWorkflowRequest {
   return {
-    name: "",
+    name: '',
     schedules: [],
-    input: "",
+    input: '',
     parentId: undefined,
     parentStepRunId: undefined,
     childIndex: undefined,
@@ -861,13 +866,13 @@ function createBaseScheduleWorkflowRequest(): ScheduleWorkflowRequest {
 
 export const ScheduleWorkflowRequest = {
   encode(message: ScheduleWorkflowRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
+    if (message.name !== '') {
       writer.uint32(10).string(message.name);
     }
     for (const v of message.schedules) {
       Timestamp.encode(toTimestamp(v!), writer.uint32(18).fork()).ldelim();
     }
-    if (message.input !== "") {
+    if (message.input !== '') {
       writer.uint32(26).string(message.input);
     }
     if (message.parentId !== undefined) {
@@ -952,13 +957,15 @@ export const ScheduleWorkflowRequest = {
 
   fromJSON(object: any): ScheduleWorkflowRequest {
     return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
       schedules: globalThis.Array.isArray(object?.schedules)
         ? object.schedules.map((e: any) => fromJsonTimestamp(e))
         : [],
-      input: isSet(object.input) ? globalThis.String(object.input) : "",
+      input: isSet(object.input) ? globalThis.String(object.input) : '',
       parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : undefined,
-      parentStepRunId: isSet(object.parentStepRunId) ? globalThis.String(object.parentStepRunId) : undefined,
+      parentStepRunId: isSet(object.parentStepRunId)
+        ? globalThis.String(object.parentStepRunId)
+        : undefined,
       childIndex: isSet(object.childIndex) ? globalThis.Number(object.childIndex) : undefined,
       childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
     };
@@ -966,13 +973,13 @@ export const ScheduleWorkflowRequest = {
 
   toJSON(message: ScheduleWorkflowRequest): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== '') {
       obj.name = message.name;
     }
     if (message.schedules?.length) {
       obj.schedules = message.schedules.map((e) => e.toISOString());
     }
-    if (message.input !== "") {
+    if (message.input !== '') {
       obj.input = message.input;
     }
     if (message.parentId !== undefined) {
@@ -995,9 +1002,9 @@ export const ScheduleWorkflowRequest = {
   },
   fromPartial(object: DeepPartial<ScheduleWorkflowRequest>): ScheduleWorkflowRequest {
     const message = createBaseScheduleWorkflowRequest();
-    message.name = object.name ?? "";
+    message.name = object.name ?? '';
     message.schedules = object.schedules?.map((e) => e) || [];
-    message.input = object.input ?? "";
+    message.input = object.input ?? '';
     message.parentId = object.parentId ?? undefined;
     message.parentStepRunId = object.parentStepRunId ?? undefined;
     message.childIndex = object.childIndex ?? undefined;
@@ -1007,12 +1014,19 @@ export const ScheduleWorkflowRequest = {
 };
 
 function createBaseWorkflowVersion(): WorkflowVersion {
-  return { id: "", createdAt: undefined, updatedAt: undefined, version: "", order: 0, workflowId: "" };
+  return {
+    id: '',
+    createdAt: undefined,
+    updatedAt: undefined,
+    version: '',
+    order: 0,
+    workflowId: '',
+  };
 }
 
 export const WorkflowVersion = {
   encode(message: WorkflowVersion, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.id !== "") {
+    if (message.id !== '') {
       writer.uint32(10).string(message.id);
     }
     if (message.createdAt !== undefined) {
@@ -1021,13 +1035,13 @@ export const WorkflowVersion = {
     if (message.updatedAt !== undefined) {
       Timestamp.encode(toTimestamp(message.updatedAt), writer.uint32(26).fork()).ldelim();
     }
-    if (message.version !== "") {
+    if (message.version !== '') {
       writer.uint32(42).string(message.version);
     }
     if (message.order !== 0) {
       writer.uint32(48).int32(message.order);
     }
-    if (message.workflowId !== "") {
+    if (message.workflowId !== '') {
       writer.uint32(58).string(message.workflowId);
     }
     return writer;
@@ -1093,18 +1107,18 @@ export const WorkflowVersion = {
 
   fromJSON(object: any): WorkflowVersion {
     return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      id: isSet(object.id) ? globalThis.String(object.id) : '',
       createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
       updatedAt: isSet(object.updatedAt) ? fromJsonTimestamp(object.updatedAt) : undefined,
-      version: isSet(object.version) ? globalThis.String(object.version) : "",
+      version: isSet(object.version) ? globalThis.String(object.version) : '',
       order: isSet(object.order) ? globalThis.Number(object.order) : 0,
-      workflowId: isSet(object.workflowId) ? globalThis.String(object.workflowId) : "",
+      workflowId: isSet(object.workflowId) ? globalThis.String(object.workflowId) : '',
     };
   },
 
   toJSON(message: WorkflowVersion): unknown {
     const obj: any = {};
-    if (message.id !== "") {
+    if (message.id !== '') {
       obj.id = message.id;
     }
     if (message.createdAt !== undefined) {
@@ -1113,13 +1127,13 @@ export const WorkflowVersion = {
     if (message.updatedAt !== undefined) {
       obj.updatedAt = message.updatedAt.toISOString();
     }
-    if (message.version !== "") {
+    if (message.version !== '') {
       obj.version = message.version;
     }
     if (message.order !== 0) {
       obj.order = Math.round(message.order);
     }
-    if (message.workflowId !== "") {
+    if (message.workflowId !== '') {
       obj.workflowId = message.workflowId;
     }
     return obj;
@@ -1130,26 +1144,26 @@ export const WorkflowVersion = {
   },
   fromPartial(object: DeepPartial<WorkflowVersion>): WorkflowVersion {
     const message = createBaseWorkflowVersion();
-    message.id = object.id ?? "";
+    message.id = object.id ?? '';
     message.createdAt = object.createdAt ?? undefined;
     message.updatedAt = object.updatedAt ?? undefined;
-    message.version = object.version ?? "";
+    message.version = object.version ?? '';
     message.order = object.order ?? 0;
-    message.workflowId = object.workflowId ?? "";
+    message.workflowId = object.workflowId ?? '';
     return message;
   },
 };
 
 function createBaseWorkflowTriggerEventRef(): WorkflowTriggerEventRef {
-  return { parentId: "", eventKey: "" };
+  return { parentId: '', eventKey: '' };
 }
 
 export const WorkflowTriggerEventRef = {
   encode(message: WorkflowTriggerEventRef, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.parentId !== "") {
+    if (message.parentId !== '') {
       writer.uint32(10).string(message.parentId);
     }
-    if (message.eventKey !== "") {
+    if (message.eventKey !== '') {
       writer.uint32(18).string(message.eventKey);
     }
     return writer;
@@ -1187,17 +1201,17 @@ export const WorkflowTriggerEventRef = {
 
   fromJSON(object: any): WorkflowTriggerEventRef {
     return {
-      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : "",
-      eventKey: isSet(object.eventKey) ? globalThis.String(object.eventKey) : "",
+      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : '',
+      eventKey: isSet(object.eventKey) ? globalThis.String(object.eventKey) : '',
     };
   },
 
   toJSON(message: WorkflowTriggerEventRef): unknown {
     const obj: any = {};
-    if (message.parentId !== "") {
+    if (message.parentId !== '') {
       obj.parentId = message.parentId;
     }
-    if (message.eventKey !== "") {
+    if (message.eventKey !== '') {
       obj.eventKey = message.eventKey;
     }
     return obj;
@@ -1208,22 +1222,22 @@ export const WorkflowTriggerEventRef = {
   },
   fromPartial(object: DeepPartial<WorkflowTriggerEventRef>): WorkflowTriggerEventRef {
     const message = createBaseWorkflowTriggerEventRef();
-    message.parentId = object.parentId ?? "";
-    message.eventKey = object.eventKey ?? "";
+    message.parentId = object.parentId ?? '';
+    message.eventKey = object.eventKey ?? '';
     return message;
   },
 };
 
 function createBaseWorkflowTriggerCronRef(): WorkflowTriggerCronRef {
-  return { parentId: "", cron: "" };
+  return { parentId: '', cron: '' };
 }
 
 export const WorkflowTriggerCronRef = {
   encode(message: WorkflowTriggerCronRef, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.parentId !== "") {
+    if (message.parentId !== '') {
       writer.uint32(10).string(message.parentId);
     }
-    if (message.cron !== "") {
+    if (message.cron !== '') {
       writer.uint32(18).string(message.cron);
     }
     return writer;
@@ -1261,17 +1275,17 @@ export const WorkflowTriggerCronRef = {
 
   fromJSON(object: any): WorkflowTriggerCronRef {
     return {
-      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : "",
-      cron: isSet(object.cron) ? globalThis.String(object.cron) : "",
+      parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : '',
+      cron: isSet(object.cron) ? globalThis.String(object.cron) : '',
     };
   },
 
   toJSON(message: WorkflowTriggerCronRef): unknown {
     const obj: any = {};
-    if (message.parentId !== "") {
+    if (message.parentId !== '') {
       obj.parentId = message.parentId;
     }
-    if (message.cron !== "") {
+    if (message.cron !== '') {
       obj.cron = message.cron;
     }
     return obj;
@@ -1282,16 +1296,16 @@ export const WorkflowTriggerCronRef = {
   },
   fromPartial(object: DeepPartial<WorkflowTriggerCronRef>): WorkflowTriggerCronRef {
     const message = createBaseWorkflowTriggerCronRef();
-    message.parentId = object.parentId ?? "";
-    message.cron = object.cron ?? "";
+    message.parentId = object.parentId ?? '';
+    message.cron = object.cron ?? '';
     return message;
   },
 };
 
 function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
   return {
-    name: "",
-    input: "",
+    name: '',
+    input: '',
     parentId: undefined,
     parentStepRunId: undefined,
     childIndex: undefined,
@@ -1301,10 +1315,10 @@ function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
 
 export const TriggerWorkflowRequest = {
   encode(message: TriggerWorkflowRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.name !== "") {
+    if (message.name !== '') {
       writer.uint32(10).string(message.name);
     }
-    if (message.input !== "") {
+    if (message.input !== '') {
       writer.uint32(18).string(message.input);
     }
     if (message.parentId !== undefined) {
@@ -1382,10 +1396,12 @@ export const TriggerWorkflowRequest = {
 
   fromJSON(object: any): TriggerWorkflowRequest {
     return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      input: isSet(object.input) ? globalThis.String(object.input) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : '',
+      input: isSet(object.input) ? globalThis.String(object.input) : '',
       parentId: isSet(object.parentId) ? globalThis.String(object.parentId) : undefined,
-      parentStepRunId: isSet(object.parentStepRunId) ? globalThis.String(object.parentStepRunId) : undefined,
+      parentStepRunId: isSet(object.parentStepRunId)
+        ? globalThis.String(object.parentStepRunId)
+        : undefined,
       childIndex: isSet(object.childIndex) ? globalThis.Number(object.childIndex) : undefined,
       childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
     };
@@ -1393,10 +1409,10 @@ export const TriggerWorkflowRequest = {
 
   toJSON(message: TriggerWorkflowRequest): unknown {
     const obj: any = {};
-    if (message.name !== "") {
+    if (message.name !== '') {
       obj.name = message.name;
     }
-    if (message.input !== "") {
+    if (message.input !== '') {
       obj.input = message.input;
     }
     if (message.parentId !== undefined) {
@@ -1419,8 +1435,8 @@ export const TriggerWorkflowRequest = {
   },
   fromPartial(object: DeepPartial<TriggerWorkflowRequest>): TriggerWorkflowRequest {
     const message = createBaseTriggerWorkflowRequest();
-    message.name = object.name ?? "";
-    message.input = object.input ?? "";
+    message.name = object.name ?? '';
+    message.input = object.input ?? '';
     message.parentId = object.parentId ?? undefined;
     message.parentStepRunId = object.parentStepRunId ?? undefined;
     message.childIndex = object.childIndex ?? undefined;
@@ -1430,12 +1446,12 @@ export const TriggerWorkflowRequest = {
 };
 
 function createBaseTriggerWorkflowResponse(): TriggerWorkflowResponse {
-  return { workflowRunId: "" };
+  return { workflowRunId: '' };
 }
 
 export const TriggerWorkflowResponse = {
   encode(message: TriggerWorkflowResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       writer.uint32(10).string(message.workflowRunId);
     }
     return writer;
@@ -1465,12 +1481,14 @@ export const TriggerWorkflowResponse = {
   },
 
   fromJSON(object: any): TriggerWorkflowResponse {
-    return { workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : "" };
+    return {
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+    };
   },
 
   toJSON(message: TriggerWorkflowResponse): unknown {
     const obj: any = {};
-    if (message.workflowRunId !== "") {
+    if (message.workflowRunId !== '') {
       obj.workflowRunId = message.workflowRunId;
     }
     return obj;
@@ -1481,7 +1499,7 @@ export const TriggerWorkflowResponse = {
   },
   fromPartial(object: DeepPartial<TriggerWorkflowResponse>): TriggerWorkflowResponse {
     const message = createBaseTriggerWorkflowResponse();
-    message.workflowRunId = object.workflowRunId ?? "";
+    message.workflowRunId = object.workflowRunId ?? '';
     return message;
   },
 };
@@ -1489,11 +1507,11 @@ export const TriggerWorkflowResponse = {
 /** WorkflowService represents a set of RPCs for managing workflows. */
 export type WorkflowServiceDefinition = typeof WorkflowServiceDefinition;
 export const WorkflowServiceDefinition = {
-  name: "WorkflowService",
-  fullName: "WorkflowService",
+  name: 'WorkflowService',
+  fullName: 'WorkflowService',
   methods: {
     putWorkflow: {
-      name: "PutWorkflow",
+      name: 'PutWorkflow',
       requestType: PutWorkflowRequest,
       requestStream: false,
       responseType: WorkflowVersion,
@@ -1501,7 +1519,7 @@ export const WorkflowServiceDefinition = {
       options: {},
     },
     scheduleWorkflow: {
-      name: "ScheduleWorkflow",
+      name: 'ScheduleWorkflow',
       requestType: ScheduleWorkflowRequest,
       requestStream: false,
       responseType: WorkflowVersion,
@@ -1509,7 +1527,7 @@ export const WorkflowServiceDefinition = {
       options: {},
     },
     triggerWorkflow: {
-      name: "TriggerWorkflow",
+      name: 'TriggerWorkflow',
       requestType: TriggerWorkflowRequest,
       requestStream: false,
       responseType: TriggerWorkflowResponse,
@@ -1522,40 +1540,44 @@ export const WorkflowServiceDefinition = {
 export interface WorkflowServiceImplementation<CallContextExt = {}> {
   putWorkflow(
     request: PutWorkflowRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<WorkflowVersion>>;
   scheduleWorkflow(
     request: ScheduleWorkflowRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<WorkflowVersion>>;
   triggerWorkflow(
     request: TriggerWorkflowRequest,
-    context: CallContext & CallContextExt,
+    context: CallContext & CallContextExt
   ): Promise<DeepPartial<TriggerWorkflowResponse>>;
 }
 
 export interface WorkflowServiceClient<CallOptionsExt = {}> {
   putWorkflow(
     request: DeepPartial<PutWorkflowRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<WorkflowVersion>;
   scheduleWorkflow(
     request: DeepPartial<ScheduleWorkflowRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<WorkflowVersion>;
   triggerWorkflow(
     request: DeepPartial<TriggerWorkflowRequest>,
-    options?: CallOptions & CallOptionsExt,
+    options?: CallOptions & CallOptionsExt
   ): Promise<TriggerWorkflowResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends globalThis.Array<infer U>
+    ? globalThis.Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepPartial<U>>
+      : T extends {}
+        ? { [K in keyof T]?: DeepPartial<T[K]> }
+        : Partial<T>;
 
 function toTimestamp(date: Date): Timestamp {
   const seconds = Math.trunc(date.getTime() / 1_000);
@@ -1572,7 +1594,7 @@ function fromTimestamp(t: Timestamp): Date {
 function fromJsonTimestamp(o: any): Date {
   if (o instanceof globalThis.Date) {
     return o;
-  } else if (typeof o === "string") {
+  } else if (typeof o === 'string') {
     return new globalThis.Date(o);
   } else {
     return fromTimestamp(Timestamp.fromJSON(o));

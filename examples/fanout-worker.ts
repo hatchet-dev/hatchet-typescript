@@ -23,6 +23,8 @@ const parentWorkflow: Workflow = {
           .spawnWorfklow<string>('child-workflow', { input: 'child-input' })
           .result();
 
+        console.log('spawned workflow result:', res);
+
         return { spawned: [res] };
       },
     },

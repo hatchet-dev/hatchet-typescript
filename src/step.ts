@@ -42,26 +42,29 @@ class ChildWorkflowRef<T> {
   }
 
   async result(): Promise<T> {
+    const workflowRunId = await this.workflowRunId;
+    const listener = await this.client.listener.get(workflowRunId);
+
     return new Promise((resolve, reject) => {
-      const f = async () => {
-        for await (const event of await this.stream()) {
+      (async () => {
+        for await (const event of await listener.stream()) {
           if (
             event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED ||
             event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED ||
             event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT
           ) {
             reject(new HatchetError(event.type));
+            listener.close();
             return;
           }
 
           if (event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
             resolve(JSON.parse(event.payload) as T);
+            listener.close();
             return;
           }
         }
-      };
-
-      f();
+      })();
     });
   }
 

@@ -5,10 +5,8 @@ import { Action } from './clients/dispatcher/action-listener';
 import { LogLevel } from './clients/event/event-client';
 import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
-import { AdminClient } from './clients/admin';
 import { HatchetClient } from './clients/hatchet-client';
-import {  StepRunEventType } from './clients/listener/listener-client';
-import { WorkflowRunStatus } from './clients/rest/generated/data-contracts';
+import { RunEventType } from './clients/listener/listener-client';
 
 export const CreateStepSchema = z.object({
   name: z.string(),
@@ -37,7 +35,7 @@ class ChildWorkflowRef<T> {
     this.client = client;
   }
 
-  async stream(): Promise<AsyncGenerator<{ type: StepRunEventType; payload: string; }, void, unknown>>{
+  async stream(): Promise<AsyncGenerator<{ type: RunEventType; payload: string; }, void, unknown>>{
     const workflowRunId = await this.workflowRunId;
 
 
@@ -53,7 +51,7 @@ class ChildWorkflowRef<T> {
       for await (const event of await this.stream()) {
         console.log('event received', event);
 
-        if(event.type === StepRunEventType.STEP_RUN_EVENT_TYPE_COMPLETED){
+        if(event.type === RunEventType.STEP_RUN_EVENT_TYPE_COMPLETED){
           return resolve(event.payload as T);
         }
       }

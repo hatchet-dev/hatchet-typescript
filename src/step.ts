@@ -7,6 +7,8 @@ import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
 import { AdminClient } from './clients/admin';
 import { HatchetClient } from './clients/hatchet-client';
+import {  StepRunEventType } from './clients/listener/listener-client';
+import { WorkflowRunStatus } from './clients/rest/generated/data-contracts';
 
 export const CreateStepSchema = z.object({
   name: z.string(),
@@ -26,11 +28,47 @@ interface ContextData<T, K> {
   user_data: K;
 }
 
-interface ChildWorkflowRef<T> {
-  workflowRunId: string;
-  toPromise(): Promise<T>
-  toJSON(): string;
+class ChildWorkflowRef<T> {
+  workflowRunId: Promise<string>;
+  client: HatchetClient;
+
+  constructor(workflowRunId: Promise<string>, client: HatchetClient) {
+    this.workflowRunId = workflowRunId;
+    this.client = client;
+  }
+
+  async stream(): Promise<AsyncGenerator<{ type: StepRunEventType; payload: string; }, void, unknown>>{
+    const workflowRunId = await this.workflowRunId;
+
+
+    
+    return this.client.listener.stream(await this.workflowRunId);
+  }
+
+  async result(): Promise<T> {
+    return new Promise(async (resolve, reject) => {
+      console.log('waiting for workflow to complete');
+
+
+      for await (const event of await this.stream()) {
+        console.log('event received', event);
+
+        if(event.type === StepRunEventType.STEP_RUN_EVENT_TYPE_COMPLETED){
+          return resolve(event.payload as T);
+        }
+      }
+
+    });
+  }
+
+  async toJSON(): Promise<string> {
+    return JSON.stringify({
+      workflowRunId: await this.workflowRunId,
+    });
+  }
+
 }
+
 
 export class Context<T, K> {
   data: ContextData<T, K>;
@@ -122,7 +160,7 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
-  async spawnWorfklow<K=any>(workflowName: string, input: T, key?: string): Promise<string> {
+  spawnWorfklow<K=unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<K> {
     const { workflowRunId, stepRunId } = this.action;
 
     const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {
@@ -134,16 +172,17 @@ export class Context<T, K> {
 
     this.spawnIndex++;
 
-    const childWorkflowRunId = await childWorkflowRunIdPromise;
-
-    return childWorkflowRunId;
+    return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
   }
 
-  // spawnScheduledWorfklow(workflowName: string, input: T, key?: string): void {
+  // TODO spawnScheduledWorfklow(workflowName: string, input: T, key?: string): void {
   //   this.client.admin.schedule_workflow(workflowName, input, user_data);
   // }
 
   // async join(refs: ChildWorkflowRef<K>[]): Promise<Array<K>> {
+
+  //   this.
+
   //   this.client.admin.join(refs);
   // }
 

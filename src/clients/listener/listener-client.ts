@@ -8,6 +8,8 @@ import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
 import sleep from '@hatchet/util/sleep';
+import { Api } from '../rest';
+import { WorkflowRunStatus } from '../rest/generated/data-contracts';
 
 const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5; // seconds
 const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 5;
@@ -30,17 +32,51 @@ export class ListenerClient {
   config: ClientConfig;
   client: PbDispatcherClient;
   logger: Logger;
+  api: Api;
 
-  constructor(config: ClientConfig, channel: Channel, factory: ClientFactory) {
+  constructor(config: ClientConfig, channel: Channel, factory: ClientFactory, api: Api) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
     this.logger = new Logger(`Listener`, config.log_level);
+    this.api = api;
   }
+
+  async getWorkflowRun(workflowRunId: string) {
+    try {
+      const res = await this.api.workflowRunGet(this.config.tenant_id, workflowRunId);
+
+      const stepRuns = res.data.jobRuns?.[0]?.stepRuns ?? [];
+
+      if(res.data.status === WorkflowRunStatus.SUCCEEDED){
+        const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
+          console.log(stepRun.output)
+          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || "{}");
+          return acc;
+        }, {});
+
+        return {
+          type: StepRunEventType.STEP_RUN_EVENT_TYPE_COMPLETED,
+          payload: JSON.stringify(stepRunOutput),
+        };
+
+      }
+      return undefined;
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+
 
   async *stream(workflowRunId: string) {
     let listener = this.client.subscribeToWorkflowEvents({
       workflowRunId,
     });
+
+    const res = await this.getWorkflowRun(workflowRunId)
+    if(res){
+      yield res
+    }
+
 
     try {
       for await (const workflowEvent of listener) {

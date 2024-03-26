@@ -105,7 +105,7 @@ export class HatchetClient {
     this.event = new EventClient(this.config, this.channel, clientFactory);
     this.dispatcher = new DispatcherClient(this.config, this.channel, clientFactory);
     this.admin = new AdminClient(this.config, this.channel, clientFactory, this.api, this.tenantId);
-    this.listener = new ListenerClient(this.config, this.channel, clientFactory);
+    this.listener = new ListenerClient(this.config, this.channel, clientFactory, this.api);
 
     this.logger = new Logger('HatchetClient', this.config.log_level);
 

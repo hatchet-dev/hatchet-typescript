@@ -14,8 +14,9 @@ import sleep from '@hatchet/util/sleep';
 import { Api } from '../rest';
 import { WorkflowRunStatus } from '../rest/generated/data-contracts';
 
-const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5; // seconds
-const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 5;
+const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
+const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 5;
+const DEFAULT_EVENT_LISTENER_POLL_INTERVAL = 1000; // milliseconds
 
 // eslint-disable-next-line no-shadow
 export enum RunEventType {
@@ -130,9 +131,9 @@ export class PollingAsyncListener {
   async retrySubscribe(workflowRunId: string) {
     let retries = 0;
 
-    while (retries < DEFAULT_ACTION_LISTENER_RETRY_COUNT) {
+    while (retries < DEFAULT_EVENT_LISTENER_RETRY_COUNT) {
       try {
-        await sleep(DEFAULT_ACTION_LISTENER_RETRY_INTERVAL);
+        await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL);
 
         const listener = this.client.client.subscribeToWorkflowEvents({
           workflowRunId,
@@ -145,7 +146,7 @@ export class PollingAsyncListener {
     }
 
     throw new HatchetError(
-      `Could not subscribe to the worker after ${DEFAULT_ACTION_LISTENER_RETRY_COUNT} retries`
+      `Could not subscribe to the worker after ${DEFAULT_EVENT_LISTENER_RETRY_COUNT} retries`
     );
   }
 
@@ -200,7 +201,7 @@ export class PollingAsyncListener {
       } catch (e: any) {
         // TODO error handling
       }
-    }, 1000);
+    }, DEFAULT_EVENT_LISTENER_POLL_INTERVAL);
   }
 
   close() {

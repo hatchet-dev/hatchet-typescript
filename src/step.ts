@@ -2,10 +2,11 @@ import HatchetError from '@util/errors/hatchet-error';
 import * as z from 'zod';
 import { HatchetTimeoutSchema } from './workflow';
 import { Action } from './clients/dispatcher/action-listener';
-import { DispatcherClient } from './clients/dispatcher/dispatcher-client';
-import { EventClient, LogLevel } from './clients/event/event-client';
+import { LogLevel } from './clients/event/event-client';
 import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
+import { AdminClient } from './clients/admin';
+import { HatchetClient } from './clients/hatchet-client';
 
 export const CreateStepSchema = z.object({
   name: z.string(),
@@ -25,23 +26,31 @@ interface ContextData<T, K> {
   user_data: K;
 }
 
+interface ChildWorkflowRef<T> {
+  workflowRunId: string;
+  toPromise(): Promise<T>
+  toJSON(): string;
+}
+
 export class Context<T, K> {
   data: ContextData<T, K>;
   input: T;
   controller = new AbortController();
   action: Action;
-  client: DispatcherClient;
-  eventClient: EventClient;
+  client: HatchetClient;
+
   overridesData: Record<string, any> = {};
   logger: Logger;
 
-  constructor(action: Action, client: DispatcherClient, eventClient: EventClient) {
+  spawnIndex: number = 0;
+
+  constructor(action: Action, client: HatchetClient) {
     try {
       const data = parseJSON(action.actionPayload);
       this.data = data;
       this.action = action;
       this.client = client;
-      this.eventClient = eventClient;
+
       this.logger = new Logger(`Context Logger`, client.config.log_level);
 
       // if this is a getGroupKeyRunId, the data is the workflow input
@@ -92,7 +101,7 @@ export class Context<T, K> {
       return this.overridesData[name];
     }
 
-    this.client.putOverridesData({
+    this.client.dispatcher.putOverridesData({
       stepRunId: this.action.stepRunId,
       path: name,
       value: JSON.stringify(defaultValue),
@@ -110,8 +119,35 @@ export class Context<T, K> {
       return;
     }
 
-    this.eventClient.putLog(stepRunId, message, level);
+    this.client.event.putLog(stepRunId, message, level);
   }
+
+  async spawnWorfklow<K=any>(workflowName: string, input: T, key?: string): Promise<string> {
+    const { workflowRunId, stepRunId } = this.action;
+
+    const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {
+      parentId: workflowRunId,
+      parentStepRunId: stepRunId,
+      childKey: key,
+      childIndex: this.spawnIndex
+    });
+
+    this.spawnIndex++;
+
+    const childWorkflowRunId = await childWorkflowRunIdPromise;
+
+    return childWorkflowRunId;
+  }
+
+  // spawnScheduledWorfklow(workflowName: string, input: T, key?: string): void {
+  //   this.client.admin.schedule_workflow(workflowName, input, user_data);
+  // }
+
+  // async join(refs: ChildWorkflowRef<K>[]): Promise<Array<K>> {
+  //   this.client.admin.join(refs);
+  // }
+
+
 }
 
 export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep> | NextStep | void;

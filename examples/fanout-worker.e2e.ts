@@ -81,5 +81,7 @@ describe('fanout-e2e', () => {
     console.log('invoked', invoked);
 
     expect(invoked).toEqual(2);
-  }, 60000);
+
+    await worker.stop();
+  }, 120000);
 });

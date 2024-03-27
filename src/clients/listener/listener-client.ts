@@ -125,7 +125,7 @@ export class PollingAsyncListener {
       }
     }
 
-    this.close();
+    setTimeout(() => this.close(), DEFAULT_EVENT_LISTENER_POLL_INTERVAL * 5);
   }
 
   async retrySubscribe(workflowRunId: string) {
@@ -188,15 +188,12 @@ export class PollingAsyncListener {
   }
 
   async polling(workflowRunId: string) {
-    const eventEmitter = new EventEmitter();
-    const queue: Array<StepRunEvent | undefined> = [];
-
     this.pollInterval = setInterval(async () => {
       try {
         const result = await this.getWorkflowRun(workflowRunId);
         if (result) {
-          queue.push(result);
-          eventEmitter.emit('event');
+          this.emit(result);
+          this.close();
         }
       } catch (e: any) {
         // TODO error handling

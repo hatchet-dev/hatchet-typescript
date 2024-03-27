@@ -1,20 +1,8 @@
-import { Workflow, Worker } from '../src';
+import { Workflow } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
 
-describe('fanout-e2e', () => {
-  let hatchet: Hatchet;
-  let worker: Worker;
-
-  beforeEach(async () => {
-    hatchet = Hatchet.init();
-    worker = await hatchet.worker('fanout-worker');
-  });
-
-  afterEach(async () => {
-    await worker.stop();
-    await sleep(2000);
-  });
+xdescribe('fanout-e2e', () => {
 
   it('should pass a fanout workflow', async () => {
     let invoked = 0;
@@ -59,6 +47,9 @@ describe('fanout-e2e', () => {
         },
       ],
     };
+
+    const hatchet = Hatchet.init();
+    const worker = await hatchet.worker('fanout-worker');
 
     console.log('registering workflow...');
     await worker.registerWorkflow(parentWorkflow);

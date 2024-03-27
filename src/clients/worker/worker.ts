@@ -167,7 +167,7 @@ export class Worker {
           const event = this.getStepActionEvent(
             action,
             StepActionEventType.STEP_EVENT_TYPE_FAILED,
-            error
+            error?.message || error
           );
           this.client.dispatcher.sendStepActionEvent(event);
           // delete the run from the futures

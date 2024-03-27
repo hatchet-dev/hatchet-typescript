@@ -4,7 +4,7 @@
 current_branch=$(git rev-parse --abbrev-ref HEAD)
 
 # 2. Check a different repo and determine if a branch with the same name exists
-git ls-remote --heads git@github.com:hatchet-dev/hatchet.git $current_branch | grep -q refs/heads/$current_branch
+git ls-remote --heads https://github.com/hatchet-dev/hatchet.git $current_branch | grep -q refs/heads/$current_branch
 branch_exists=$?
 
 # 3. If it does, update the .gitmodules to set `branch = {the branch name}`

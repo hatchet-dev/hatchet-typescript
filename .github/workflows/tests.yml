@@ -118,8 +118,6 @@ jobs:
           go run ./cmd/hatchet-api --config ./generated/ &
           
           sleep 20
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - name: E2E tests
         run: |
           cd hatchet/

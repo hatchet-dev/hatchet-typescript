@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # 1. Get the current branch name
-current_branch=$(git rev-parse --abbrev-ref HEAD)
+current_branch=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+
+if [ -z "$current_branch" ]; then
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+fi
 
 # 2. Check a different repo and determine if a branch with the same name exists
 git ls-remote --heads https://github.com/hatchet-dev/hatchet.git $current_branch | grep -q refs/heads/$current_branch

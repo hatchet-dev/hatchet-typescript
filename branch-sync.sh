@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 1. Get the current branch name
-current_branch=$(echo $GITHUB_REF | sed 's/refs\/heads\///')
+current_branch=$(echo $GITHUB_HEAD_REF | sed 's/refs\/heads\///')
 
 if [ -z "$current_branch" ]; then
     current_branch=$(git rev-parse --abbrev-ref HEAD)

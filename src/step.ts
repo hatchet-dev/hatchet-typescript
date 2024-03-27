@@ -180,16 +180,6 @@ export class Context<T, K> {
     return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
   }
 
-  // TODO spawnScheduledWorfklow(workflowName: string, input: T, key?: string): void {
-  //   this.client.admin.schedule_workflow(workflowName, input, user_data);
-  // }
-
-  // async join(refs: ChildWorkflowRef<K>[]): Promise<Array<K>> {
-
-  //   this.
-
-  //   this.client.admin.join(refs);
-  // }
 }
 
 export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep> | NextStep | void;

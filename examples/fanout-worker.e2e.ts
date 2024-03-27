@@ -65,8 +65,6 @@ xdescribe('fanout-e2e', () => {
 
     await hatchet.admin.run_workflow('parent-workflow', { input: 'parent-input' });
 
-    // TODO we should likely return a ChildWorkflowRef from run_workflow...?
-
     await sleep(10000);
 
     console.log('invoked', invoked);

@@ -1,8 +1,8 @@
 /* eslint-disable */
-import * as _m0 from "protobufjs/minimal";
-import Long = require("long");
+import * as _m0 from 'protobufjs/minimal';
+import Long = require('long');
 
-export const protobufPackage = "google.protobuf";
+export const protobufPackage = 'google.protobuf';
 
 /**
  * Wrapper message for `double`.
@@ -494,12 +494,12 @@ export const BoolValue = {
 };
 
 function createBaseStringValue(): StringValue {
-  return { value: "" };
+  return { value: '' };
 }
 
 export const StringValue = {
   encode(message: StringValue, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.value !== "") {
+    if (message.value !== '') {
       writer.uint32(10).string(message.value);
     }
     return writer;
@@ -529,12 +529,12 @@ export const StringValue = {
   },
 
   fromJSON(object: any): StringValue {
-    return { value: isSet(object.value) ? globalThis.String(object.value) : "" };
+    return { value: isSet(object.value) ? globalThis.String(object.value) : '' };
   },
 
   toJSON(message: StringValue): unknown {
     const obj: any = {};
-    if (message.value !== "") {
+    if (message.value !== '') {
       obj.value = message.value;
     }
     return obj;
@@ -545,7 +545,7 @@ export const StringValue = {
   },
   fromPartial(object: DeepPartial<StringValue>): StringValue {
     const message = createBaseStringValue();
-    message.value = object.value ?? "";
+    message.value = object.value ?? '';
     return message;
   },
 };
@@ -609,7 +609,7 @@ export const BytesValue = {
 
 function bytesFromBase64(b64: string): Uint8Array {
   if (globalThis.Buffer) {
-    return Uint8Array.from(globalThis.Buffer.from(b64, "base64"));
+    return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'));
   } else {
     const bin = globalThis.atob(b64);
     const arr = new Uint8Array(bin.length);
@@ -622,27 +622,31 @@ function bytesFromBase64(b64: string): Uint8Array {
 
 function base64FromBytes(arr: Uint8Array): string {
   if (globalThis.Buffer) {
-    return globalThis.Buffer.from(arr).toString("base64");
+    return globalThis.Buffer.from(arr).toString('base64');
   } else {
     const bin: string[] = [];
     arr.forEach((byte) => {
       bin.push(globalThis.String.fromCharCode(byte));
     });
-    return globalThis.btoa(bin.join(""));
+    return globalThis.btoa(bin.join(''));
   }
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-export type DeepPartial<T> = T extends Builtin ? T
-  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends globalThis.Array<infer U>
+    ? globalThis.Array<DeepPartial<U>>
+    : T extends ReadonlyArray<infer U>
+      ? ReadonlyArray<DeepPartial<U>>
+      : T extends {}
+        ? { [K in keyof T]?: DeepPartial<T[K]> }
+        : Partial<T>;
 
 function longToNumber(long: Long): number {
   if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+    throw new globalThis.Error('Value is larger than Number.MAX_SAFE_INTEGER');
   }
   return long.toNumber();
 }

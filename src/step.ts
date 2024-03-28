@@ -165,7 +165,7 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
-  spawnWorfklow<P = unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<P> {
+  spawnWorkflow<P = unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
     const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {
@@ -179,7 +179,6 @@ export class Context<T, K> {
 
     return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
   }
-
 }
 
 export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep> | NextStep | void;

@@ -20,7 +20,7 @@ const parentWorkflow: Workflow = {
       timeout: '10s',
       run: async (ctx) => {
         const res = await ctx
-          .spawnWorfklow<string>('child-workflow', { input: 'child-input' })
+          .spawnWorkflow<string>('child-workflow', { input: 'child-input' })
           .result();
 
         console.log('spawned workflow result:', res);

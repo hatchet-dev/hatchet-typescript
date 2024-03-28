@@ -62,6 +62,14 @@ const resourceTypeMap: Record<
   [ResourceType.UNRECOGNIZED]: undefined,
 };
 
+const workflowStatusMap: Record<WorkflowRunStatus, RunEventType | undefined> = {
+  [WorkflowRunStatus.SUCCEEDED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
+  [WorkflowRunStatus.FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+  [WorkflowRunStatus.CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
+  [WorkflowRunStatus.PENDING]: undefined,
+  [WorkflowRunStatus.RUNNING]: undefined,
+};
+
 export interface StepRunEvent {
   type: RunEventType;
   payload: string;
@@ -155,28 +163,16 @@ export class PollingAsyncListener {
       const res = await this.client.api.workflowRunGet(this.client.config.tenant_id, workflowRunId);
 
       const stepRuns = res.data.jobRuns?.[0]?.stepRuns ?? [];
+      const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
+        acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
+        return acc;
+      }, {});
 
-      if (res.data.status === WorkflowRunStatus.SUCCEEDED) {
-        const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
-          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
-          return acc;
-        }, {});
-
+      if (Object.keys(workflowStatusMap).includes(res.data.status)) {
+        const type = workflowStatusMap[res.data.status];
+        if (!type) return undefined;
         return {
-          type: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
-          payload: JSON.stringify(stepRunOutput),
-        };
-      }
-
-      // TODO - handle other statuses
-      if (res.data.status === WorkflowRunStatus.FAILED) {
-        const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
-          acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
-          return acc;
-        }, {});
-
-        return {
-          type: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
+          type,
           payload: JSON.stringify(stepRunOutput),
         };
       }

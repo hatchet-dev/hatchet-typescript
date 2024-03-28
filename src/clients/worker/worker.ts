@@ -35,6 +35,8 @@ export class Worker {
 
   logger: Logger;
 
+  registeredWorkflowPromises: Array<Promise<any>> = [];
+
   constructor(
     client: HatchetClient,
     options: { name: string; handleKill?: boolean; maxRuns?: number }
@@ -68,7 +70,7 @@ export class Worker {
           }
         : undefined;
 
-      await this.client.admin.put_workflow({
+      const registeredWorkflow = this.client.admin.put_workflow({
         name: workflow.id,
         description: workflow.description,
         version: workflow.version || '',
@@ -94,6 +96,8 @@ export class Worker {
           },
         ],
       });
+      this.registeredWorkflowPromises.push(registeredWorkflow);
+      await registeredWorkflow;
     } catch (e: any) {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }
@@ -347,6 +351,9 @@ export class Worker {
   }
 
   async start() {
+    // ensure all workflows are registered
+    await Promise.all(this.registeredWorkflowPromises);
+
     try {
       this.listener = await this.client.dispatcher.getActionListener({
         workerName: this.name,

@@ -68,13 +68,23 @@ export class AdminClient {
    * @param input an object containing the input to the workflow
    * @returns the ID of the new workflow run
    */
-  async run_workflow(workflowName: string, input: object) {
+  async run_workflow<T = object>(
+    workflowName: string,
+    input: T,
+    options?: {
+      parentId?: string | undefined;
+      parentStepRunId?: string | undefined;
+      childIndex?: number | undefined;
+      childKey?: string | undefined;
+    }
+  ) {
     try {
       const inputStr = JSON.stringify(input);
 
       const resp = await this.client.triggerWorkflow({
         name: workflowName,
         input: inputStr,
+        ...options,
       });
 
       return resp.workflowRunId;

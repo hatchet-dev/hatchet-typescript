@@ -69,5 +69,7 @@ describe('e2e', () => {
     console.log('invoked', invoked);
 
     expect(invoked).toEqual(2);
+
+    await worker.stop();
   }, 60000);
 });

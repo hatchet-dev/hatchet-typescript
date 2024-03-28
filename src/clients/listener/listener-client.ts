@@ -16,7 +16,7 @@ import { WorkflowRunStatus } from '../rest/generated/data-contracts';
 
 const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
 const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 5;
-const DEFAULT_EVENT_LISTENER_POLL_INTERVAL = 1000; // milliseconds
+const DEFAULT_EVENT_LISTENER_POLL_INTERVAL = 5000; // milliseconds
 
 // eslint-disable-next-line no-shadow
 export enum RunEventType {

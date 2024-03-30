@@ -11,6 +11,12 @@ import { DispatcherClient } from './dispatcher-client';
 const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5000; // milliseconds
 const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 5;
 
+// eslint-disable-next-line no-shadow
+enum ListenStrategy {
+  LISTEN_STRATEGY_V1 = 1,
+  LISTEN_STRATEGY_V2 = 2,
+}
+
 export interface Action {
   tenantId: string;
   jobId: string;
@@ -36,6 +42,8 @@ export class ActionListener {
   retryInterval: number = DEFAULT_ACTION_LISTENER_RETRY_INTERVAL;
   retryCount: number = DEFAULT_ACTION_LISTENER_RETRY_COUNT;
   done = false;
+  listenStrategy = ListenStrategy.LISTEN_STRATEGY_V2;
+  heartbeatInterval: any;
 
   constructor(
     client: DispatcherClient,
@@ -75,13 +83,71 @@ export class ActionListener {
             break;
           }
 
+          if (
+            (await client.getListenStrategy()) === ListenStrategy.LISTEN_STRATEGY_V2 &&
+            e.code === Status.UNIMPLEMENTED
+          ) {
+            client.setListenStrategy(ListenStrategy.LISTEN_STRATEGY_V1);
+          }
+
           client.incrementRetries();
         }
       }
     })(this);
 
+  async setListenStrategy(strategy: ListenStrategy) {
+    this.listenStrategy = strategy;
+  }
+
+  async getListenStrategy(): Promise<ListenStrategy> {
+    return this.listenStrategy;
+  }
+
   async incrementRetries() {
     this.retries += 1;
+  }
+
+  async heartbeat() {
+    if (this.heartbeatInterval) {
+      return;
+    }
+
+    // start with a heartbeat
+    try {
+      await this.client.heartbeat({
+        workerId: this.workerId,
+        heartbeatAt: new Date(),
+      });
+    } catch (e: any) {
+      this.logger.error(`Failed to send heartbeat: ${e.message}`);
+
+      if (e.code === Status.UNIMPLEMENTED) {
+        return;
+      }
+    }
+
+    this.heartbeatInterval = setInterval(async () => {
+      try {
+        await this.client.heartbeat({
+          workerId: this.workerId,
+          heartbeatAt: new Date(),
+        });
+      } catch (e: any) {
+        if (e.code === Status.UNIMPLEMENTED) {
+          // break out of interval
+          this.closeHeartbeat();
+          return;
+        }
+
+        this.logger.error(`Failed to send heartbeat: ${e.message}`);
+      }
+    }, 4000);
+  }
+
+  closeHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+    }
   }
 
   async getListenClient(): Promise<AsyncIterable<AssignedAction>> {
@@ -109,9 +175,19 @@ export class ActionListener {
     }
 
     try {
-      return this.client.listen({
+      if (this.listenStrategy === ListenStrategy.LISTEN_STRATEGY_V1) {
+        return this.client.listen({
+          workerId: this.workerId,
+        });
+      }
+
+      const res = this.client.listenV2({
         workerId: this.workerId,
       });
+
+      this.heartbeat();
+
+      return res;
     } catch (e: any) {
       this.retries += 1;
       this.logger.error(`Attempt ${this.retries}: Failed to connect, retrying...`); // Optional: log retry attempt
@@ -122,6 +198,7 @@ export class ActionListener {
 
   async unregister() {
     this.done = true;
+    this.closeHeartbeat();
     try {
       return this.client.unsubscribe({
         workerId: this.workerId,

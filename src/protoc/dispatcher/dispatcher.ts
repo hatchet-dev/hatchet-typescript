@@ -374,6 +374,15 @@ export interface OverridesData {
 
 export interface OverridesDataResponse {}
 
+export interface HeartbeatRequest {
+  /** the id of the worker */
+  workerId: string;
+  /** heartbeatAt is the time the worker sent the heartbeat */
+  heartbeatAt: Date | undefined;
+}
+
+export interface HeartbeatResponse {}
+
 function createBaseWorkerRegisterRequest(): WorkerRegisterRequest {
   return { workerName: '', actions: [], services: [], maxRuns: undefined };
 }
@@ -1826,6 +1835,123 @@ export const OverridesDataResponse = {
   },
 };
 
+function createBaseHeartbeatRequest(): HeartbeatRequest {
+  return { workerId: '', heartbeatAt: undefined };
+}
+
+export const HeartbeatRequest = {
+  encode(message: HeartbeatRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.workerId !== '') {
+      writer.uint32(10).string(message.workerId);
+    }
+    if (message.heartbeatAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.heartbeatAt), writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HeartbeatRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHeartbeatRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workerId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.heartbeatAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HeartbeatRequest {
+    return {
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+      heartbeatAt: isSet(object.heartbeatAt) ? fromJsonTimestamp(object.heartbeatAt) : undefined,
+    };
+  },
+
+  toJSON(message: HeartbeatRequest): unknown {
+    const obj: any = {};
+    if (message.workerId !== '') {
+      obj.workerId = message.workerId;
+    }
+    if (message.heartbeatAt !== undefined) {
+      obj.heartbeatAt = message.heartbeatAt.toISOString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<HeartbeatRequest>): HeartbeatRequest {
+    return HeartbeatRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<HeartbeatRequest>): HeartbeatRequest {
+    const message = createBaseHeartbeatRequest();
+    message.workerId = object.workerId ?? '';
+    message.heartbeatAt = object.heartbeatAt ?? undefined;
+    return message;
+  },
+};
+
+function createBaseHeartbeatResponse(): HeartbeatResponse {
+  return {};
+}
+
+export const HeartbeatResponse = {
+  encode(_: HeartbeatResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): HeartbeatResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHeartbeatResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): HeartbeatResponse {
+    return {};
+  },
+
+  toJSON(_: HeartbeatResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<HeartbeatResponse>): HeartbeatResponse {
+    return HeartbeatResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<HeartbeatResponse>): HeartbeatResponse {
+    const message = createBaseHeartbeatResponse();
+    return message;
+  },
+};
+
 export type DispatcherDefinition = typeof DispatcherDefinition;
 export const DispatcherDefinition = {
   name: 'Dispatcher',
@@ -1845,6 +1971,27 @@ export const DispatcherDefinition = {
       requestStream: false,
       responseType: AssignedAction,
       responseStream: true,
+      options: {},
+    },
+    /**
+     * ListenV2 is like listen, but implementation does not include heartbeats. This should only used by SDKs
+     * against engine version v0.18.1+
+     */
+    listenV2: {
+      name: 'ListenV2',
+      requestType: WorkerListenRequest,
+      requestStream: false,
+      responseType: AssignedAction,
+      responseStream: true,
+      options: {},
+    },
+    /** Heartbeat is a method for workers to send heartbeats to the dispatcher */
+    heartbeat: {
+      name: 'Heartbeat',
+      requestType: HeartbeatRequest,
+      requestStream: false,
+      responseType: HeartbeatResponse,
+      responseStream: false,
       options: {},
     },
     subscribeToWorkflowEvents: {
@@ -1899,6 +2046,19 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: WorkerListenRequest,
     context: CallContext & CallContextExt
   ): ServerStreamingMethodResult<DeepPartial<AssignedAction>>;
+  /**
+   * ListenV2 is like listen, but implementation does not include heartbeats. This should only used by SDKs
+   * against engine version v0.18.1+
+   */
+  listenV2(
+    request: WorkerListenRequest,
+    context: CallContext & CallContextExt
+  ): ServerStreamingMethodResult<DeepPartial<AssignedAction>>;
+  /** Heartbeat is a method for workers to send heartbeats to the dispatcher */
+  heartbeat(
+    request: HeartbeatRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<HeartbeatResponse>>;
   subscribeToWorkflowEvents(
     request: SubscribeToWorkflowEventsRequest,
     context: CallContext & CallContextExt
@@ -1930,6 +2090,19 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<WorkerListenRequest>,
     options?: CallOptions & CallOptionsExt
   ): AsyncIterable<AssignedAction>;
+  /**
+   * ListenV2 is like listen, but implementation does not include heartbeats. This should only used by SDKs
+   * against engine version v0.18.1+
+   */
+  listenV2(
+    request: DeepPartial<WorkerListenRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): AsyncIterable<AssignedAction>;
+  /** Heartbeat is a method for workers to send heartbeats to the dispatcher */
+  heartbeat(
+    request: DeepPartial<HeartbeatRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<HeartbeatResponse>;
   subscribeToWorkflowEvents(
     request: DeepPartial<SubscribeToWorkflowEventsRequest>,
     options?: CallOptions & CallOptionsExt

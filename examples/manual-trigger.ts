@@ -4,8 +4,9 @@ const hatchet = Hatchet.init();
 
 async function main() {
   const workflowRunId = await hatchet.admin.run_workflow('simple-workflow', {});
+  const stream = await hatchet.listener.stream(workflowRunId);
 
-  for await (const event of hatchet.listener.stream(workflowRunId)) {
+  for await (const event of stream) {
     console.log('event received', event);
   }
 }

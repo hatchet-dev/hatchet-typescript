@@ -10,3 +10,5 @@ OUT_DIR="./src/protoc"
   --ts_proto_opt=outputServices=nice-grpc,outputServices=generic-definitions,useExactTypes=false \
   --proto_path=./hatchet/api-contracts \
   ./hatchet/api-contracts/**/*.proto
+
+pnpm lint:fix

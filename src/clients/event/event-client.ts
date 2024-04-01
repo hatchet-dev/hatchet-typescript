@@ -66,4 +66,32 @@ export class EventClient {
       this.logger.warn(`Could not put log: ${e.message}`);
     }
   }
+
+  putStream(stepRunId: string, data: string | Uint8Array) {
+    const createdAt = new Date();
+
+    let dataBytes: Uint8Array;
+    if (typeof data === 'string') {
+      dataBytes = new TextEncoder().encode(data);
+    } else if (data instanceof Uint8Array) {
+      dataBytes = data;
+    } else {
+      throw new Error('Invalid data type. Expected string or Uint8Array.');
+    }
+
+    try {
+      retrier(
+        async () =>
+          this.client.putStreamEvent({
+            stepRunId,
+            createdAt,
+            message: dataBytes,
+          }),
+        this.logger
+      );
+    } catch (e: any) {
+      // log a warning, but this is not a fatal error
+      this.logger.warn(`Could not put log: ${e.message}`);
+    }
+  }
 }

@@ -33,6 +33,19 @@ export interface PutLogRequest {
 
 export interface PutLogResponse {}
 
+export interface PutStreamEventRequest {
+  /** the step run id for the request */
+  stepRunId: string;
+  /** when the stream event was created */
+  createdAt: Date | undefined;
+  /** the stream event message */
+  message: Uint8Array;
+  /** associated stream event metadata */
+  metadata: string;
+}
+
+export interface PutStreamEventResponse {}
+
 export interface PushEventRequest {
   /** the key for the event */
   key: string;
@@ -330,6 +343,153 @@ export const PutLogResponse = {
   },
 };
 
+function createBasePutStreamEventRequest(): PutStreamEventRequest {
+  return { stepRunId: '', createdAt: undefined, message: new Uint8Array(0), metadata: '' };
+}
+
+export const PutStreamEventRequest = {
+  encode(message: PutStreamEventRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.stepRunId !== '') {
+      writer.uint32(10).string(message.stepRunId);
+    }
+    if (message.createdAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.createdAt), writer.uint32(18).fork()).ldelim();
+    }
+    if (message.message.length !== 0) {
+      writer.uint32(26).bytes(message.message);
+    }
+    if (message.metadata !== '') {
+      writer.uint32(42).string(message.metadata);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PutStreamEventRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePutStreamEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.stepRunId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.createdAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.message = reader.bytes();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.metadata = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PutStreamEventRequest {
+    return {
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      createdAt: isSet(object.createdAt) ? fromJsonTimestamp(object.createdAt) : undefined,
+      message: isSet(object.message) ? bytesFromBase64(object.message) : new Uint8Array(0),
+      metadata: isSet(object.metadata) ? globalThis.String(object.metadata) : '',
+    };
+  },
+
+  toJSON(message: PutStreamEventRequest): unknown {
+    const obj: any = {};
+    if (message.stepRunId !== '') {
+      obj.stepRunId = message.stepRunId;
+    }
+    if (message.createdAt !== undefined) {
+      obj.createdAt = message.createdAt.toISOString();
+    }
+    if (message.message.length !== 0) {
+      obj.message = base64FromBytes(message.message);
+    }
+    if (message.metadata !== '') {
+      obj.metadata = message.metadata;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<PutStreamEventRequest>): PutStreamEventRequest {
+    return PutStreamEventRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<PutStreamEventRequest>): PutStreamEventRequest {
+    const message = createBasePutStreamEventRequest();
+    message.stepRunId = object.stepRunId ?? '';
+    message.createdAt = object.createdAt ?? undefined;
+    message.message = object.message ?? new Uint8Array(0);
+    message.metadata = object.metadata ?? '';
+    return message;
+  },
+};
+
+function createBasePutStreamEventResponse(): PutStreamEventResponse {
+  return {};
+}
+
+export const PutStreamEventResponse = {
+  encode(_: PutStreamEventResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PutStreamEventResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePutStreamEventResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): PutStreamEventResponse {
+    return {};
+  },
+
+  toJSON(_: PutStreamEventResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<PutStreamEventResponse>): PutStreamEventResponse {
+    return PutStreamEventResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<PutStreamEventResponse>): PutStreamEventResponse {
+    const message = createBasePutStreamEventResponse();
+    return message;
+  },
+};
+
 function createBasePushEventRequest(): PushEventRequest {
   return { key: '', payload: '', eventTimestamp: undefined };
 }
@@ -507,6 +667,14 @@ export const EventsServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    putStreamEvent: {
+      name: 'PutStreamEvent',
+      requestType: PutStreamEventRequest,
+      requestStream: false,
+      responseType: PutStreamEventResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -523,6 +691,10 @@ export interface EventsServiceImplementation<CallContextExt = {}> {
     request: PutLogRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<PutLogResponse>>;
+  putStreamEvent(
+    request: PutStreamEventRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<PutStreamEventResponse>>;
 }
 
 export interface EventsServiceClient<CallOptionsExt = {}> {
@@ -538,6 +710,35 @@ export interface EventsServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<PutLogRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<PutLogResponse>;
+  putStreamEvent(
+    request: DeepPartial<PutStreamEventRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<PutStreamEventResponse>;
+}
+
+function bytesFromBase64(b64: string): Uint8Array {
+  if (globalThis.Buffer) {
+    return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'));
+  } else {
+    const bin = globalThis.atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; ++i) {
+      arr[i] = bin.charCodeAt(i);
+    }
+    return arr;
+  }
+}
+
+function base64FromBytes(arr: Uint8Array): string {
+  if (globalThis.Buffer) {
+    return globalThis.Buffer.from(arr).toString('base64');
+  } else {
+    const bin: string[] = [];
+    arr.forEach((byte) => {
+      bin.push(globalThis.String.fromCharCode(byte));
+    });
+    return globalThis.btoa(bin.join(''));
+  }
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

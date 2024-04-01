@@ -180,6 +180,7 @@ export enum ResourceEventType {
   RESOURCE_EVENT_TYPE_FAILED = 3,
   RESOURCE_EVENT_TYPE_CANCELLED = 4,
   RESOURCE_EVENT_TYPE_TIMED_OUT = 5,
+  RESOURCE_EVENT_TYPE_STREAM = 6,
   UNRECOGNIZED = -1,
 }
 
@@ -203,6 +204,9 @@ export function resourceEventTypeFromJSON(object: any): ResourceEventType {
     case 5:
     case 'RESOURCE_EVENT_TYPE_TIMED_OUT':
       return ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT;
+    case 6:
+    case 'RESOURCE_EVENT_TYPE_STREAM':
+      return ResourceEventType.RESOURCE_EVENT_TYPE_STREAM;
     case -1:
     case 'UNRECOGNIZED':
     default:
@@ -224,6 +228,8 @@ export function resourceEventTypeToJSON(object: ResourceEventType): string {
       return 'RESOURCE_EVENT_TYPE_CANCELLED';
     case ResourceEventType.RESOURCE_EVENT_TYPE_TIMED_OUT:
       return 'RESOURCE_EVENT_TYPE_TIMED_OUT';
+    case ResourceEventType.RESOURCE_EVENT_TYPE_STREAM:
+      return 'RESOURCE_EVENT_TYPE_STREAM';
     case ResourceEventType.UNRECOGNIZED:
     default:
       return 'UNRECOGNIZED';

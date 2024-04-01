@@ -165,6 +165,18 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
+  async putStream(data: string | Uint8Array) {
+    const { stepRunId } = this.action;
+
+    if (!stepRunId) {
+      // log a warning
+      this.logger.warn('cannot log from context without stepRunId');
+      return;
+    }
+
+    await this.client.event.putStream(stepRunId, data);
+  }
+
   spawnWorkflow<P = unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 

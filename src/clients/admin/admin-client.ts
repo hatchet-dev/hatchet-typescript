@@ -1,6 +1,7 @@
 import { Channel, ClientFactory } from 'nice-grpc';
 import {
   CreateWorkflowVersionOpts,
+  RateLimitDuration,
   WorkflowServiceClient,
   WorkflowServiceDefinition,
 } from '@hatchet/protoc/workflows';
@@ -56,6 +57,26 @@ export class AdminClient {
   async put_workflow(workflow: CreateWorkflowVersionOpts) {
     try {
       await retrier(async () => this.client.putWorkflow({ opts: workflow }), this.logger);
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+
+  async put_rate_limit(
+    key: string,
+    limit: number,
+    duration: RateLimitDuration = RateLimitDuration.SECOND
+  ) {
+    try {
+      await retrier(
+        async () =>
+          this.client.putRateLimit({
+            key,
+            limit,
+            duration,
+          }),
+        this.logger
+      );
     } catch (e: any) {
       throw new HatchetError(e.message);
     }

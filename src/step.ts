@@ -9,11 +9,17 @@ import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
 import { RunEventType } from './clients/listener/listener-client';
 
+export const CreateRateLimitSchema = z.object({
+  key: z.string(),
+  units: z.number().min(1),
+});
+
 export const CreateStepSchema = z.object({
   name: z.string(),
   parents: z.array(z.string()).optional(),
   timeout: HatchetTimeoutSchema.optional(),
   retries: z.number().optional(),
+  rate_limits: z.array(CreateRateLimitSchema).optional(),
 });
 
 type JSONPrimitive = string | number | boolean | null | Array<JSONPrimitive>;

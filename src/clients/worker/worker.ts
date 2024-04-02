@@ -55,7 +55,12 @@ export class Worker {
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
+  // @deprecated
   async registerWorkflow(initWorkflow: Workflow) {
+    return this.register_workflow(initWorkflow);
+  }
+
+  async register_workflow(initWorkflow: Workflow) {
     const workflow: Workflow = {
       ...initWorkflow,
       id: this.client.config.namespace + initWorkflow.id,
@@ -92,6 +97,7 @@ export class Worker {
               parents: step.parents ?? [],
               userData: '{}',
               retries: step.retries || 0,
+              rateLimits: step.rate_limits ?? [], // Add the missing rateLimits property
             })),
           },
         ],

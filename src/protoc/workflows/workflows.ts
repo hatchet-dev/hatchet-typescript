@@ -50,6 +50,45 @@ export function concurrencyLimitStrategyToJSON(object: ConcurrencyLimitStrategy)
   }
 }
 
+export enum RateLimitDuration {
+  SECOND = 0,
+  MINUTE = 1,
+  HOUR = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function rateLimitDurationFromJSON(object: any): RateLimitDuration {
+  switch (object) {
+    case 0:
+    case 'SECOND':
+      return RateLimitDuration.SECOND;
+    case 1:
+    case 'MINUTE':
+      return RateLimitDuration.MINUTE;
+    case 2:
+    case 'HOUR':
+      return RateLimitDuration.HOUR;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return RateLimitDuration.UNRECOGNIZED;
+  }
+}
+
+export function rateLimitDurationToJSON(object: RateLimitDuration): string {
+  switch (object) {
+    case RateLimitDuration.SECOND:
+      return 'SECOND';
+    case RateLimitDuration.MINUTE:
+      return 'MINUTE';
+    case RateLimitDuration.HOUR:
+      return 'HOUR';
+    case RateLimitDuration.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
 export interface PutWorkflowRequest {
   opts: CreateWorkflowVersionOpts | undefined;
 }
@@ -113,6 +152,15 @@ export interface CreateWorkflowStepOpts {
   userData: string;
   /** (optional) the number of retries for the step, default 0 */
   retries: number;
+  /** (optional) the rate limits for the step */
+  rateLimits: CreateStepRateLimit[];
+}
+
+export interface CreateStepRateLimit {
+  /** (required) the key for the rate limit */
+  key: string;
+  /** (required) the number of units this step consumes */
+  units: number;
 }
 
 /** ListWorkflowsRequest is the request for ListWorkflows. */
@@ -186,6 +234,17 @@ export interface TriggerWorkflowRequest {
 export interface TriggerWorkflowResponse {
   workflowRunId: string;
 }
+
+export interface PutRateLimitRequest {
+  /** (required) the global key for the rate limit */
+  key: string;
+  /** (required) the max limit for the rate limit (per unit of time) */
+  limit: number;
+  /** (required) the duration of time for the rate limit (second|minute|hour) */
+  duration: RateLimitDuration;
+}
+
+export interface PutRateLimitResponse {}
 
 function createBasePutWorkflowRequest(): PutWorkflowRequest {
   return { opts: undefined };
@@ -659,6 +718,7 @@ function createBaseCreateWorkflowStepOpts(): CreateWorkflowStepOpts {
     parents: [],
     userData: '',
     retries: 0,
+    rateLimits: [],
   };
 }
 
@@ -684,6 +744,9 @@ export const CreateWorkflowStepOpts = {
     }
     if (message.retries !== 0) {
       writer.uint32(56).int32(message.retries);
+    }
+    for (const v of message.rateLimits) {
+      CreateStepRateLimit.encode(v!, writer.uint32(66).fork()).ldelim();
     }
     return writer;
   },
@@ -744,6 +807,13 @@ export const CreateWorkflowStepOpts = {
 
           message.retries = reader.int32();
           continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.rateLimits.push(CreateStepRateLimit.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -764,6 +834,9 @@ export const CreateWorkflowStepOpts = {
         : [],
       userData: isSet(object.userData) ? globalThis.String(object.userData) : '',
       retries: isSet(object.retries) ? globalThis.Number(object.retries) : 0,
+      rateLimits: globalThis.Array.isArray(object?.rateLimits)
+        ? object.rateLimits.map((e: any) => CreateStepRateLimit.fromJSON(e))
+        : [],
     };
   },
 
@@ -790,6 +863,9 @@ export const CreateWorkflowStepOpts = {
     if (message.retries !== 0) {
       obj.retries = Math.round(message.retries);
     }
+    if (message.rateLimits?.length) {
+      obj.rateLimits = message.rateLimits.map((e) => CreateStepRateLimit.toJSON(e));
+    }
     return obj;
   },
 
@@ -805,6 +881,81 @@ export const CreateWorkflowStepOpts = {
     message.parents = object.parents?.map((e) => e) || [];
     message.userData = object.userData ?? '';
     message.retries = object.retries ?? 0;
+    message.rateLimits = object.rateLimits?.map((e) => CreateStepRateLimit.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseCreateStepRateLimit(): CreateStepRateLimit {
+  return { key: '', units: 0 };
+}
+
+export const CreateStepRateLimit = {
+  encode(message: CreateStepRateLimit, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.units !== 0) {
+      writer.uint32(16).int32(message.units);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CreateStepRateLimit {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateStepRateLimit();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.units = reader.int32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CreateStepRateLimit {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      units: isSet(object.units) ? globalThis.Number(object.units) : 0,
+    };
+  },
+
+  toJSON(message: CreateStepRateLimit): unknown {
+    const obj: any = {};
+    if (message.key !== '') {
+      obj.key = message.key;
+    }
+    if (message.units !== 0) {
+      obj.units = Math.round(message.units);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<CreateStepRateLimit>): CreateStepRateLimit {
+    return CreateStepRateLimit.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<CreateStepRateLimit>): CreateStepRateLimit {
+    const message = createBaseCreateStepRateLimit();
+    message.key = object.key ?? '';
+    message.units = object.units ?? 0;
     return message;
   },
 };
@@ -1504,6 +1655,138 @@ export const TriggerWorkflowResponse = {
   },
 };
 
+function createBasePutRateLimitRequest(): PutRateLimitRequest {
+  return { key: '', limit: 0, duration: 0 };
+}
+
+export const PutRateLimitRequest = {
+  encode(message: PutRateLimitRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.limit !== 0) {
+      writer.uint32(16).int32(message.limit);
+    }
+    if (message.duration !== 0) {
+      writer.uint32(24).int32(message.duration);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PutRateLimitRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePutRateLimitRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.limit = reader.int32();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.duration = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): PutRateLimitRequest {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      limit: isSet(object.limit) ? globalThis.Number(object.limit) : 0,
+      duration: isSet(object.duration) ? rateLimitDurationFromJSON(object.duration) : 0,
+    };
+  },
+
+  toJSON(message: PutRateLimitRequest): unknown {
+    const obj: any = {};
+    if (message.key !== '') {
+      obj.key = message.key;
+    }
+    if (message.limit !== 0) {
+      obj.limit = Math.round(message.limit);
+    }
+    if (message.duration !== 0) {
+      obj.duration = rateLimitDurationToJSON(message.duration);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<PutRateLimitRequest>): PutRateLimitRequest {
+    return PutRateLimitRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<PutRateLimitRequest>): PutRateLimitRequest {
+    const message = createBasePutRateLimitRequest();
+    message.key = object.key ?? '';
+    message.limit = object.limit ?? 0;
+    message.duration = object.duration ?? 0;
+    return message;
+  },
+};
+
+function createBasePutRateLimitResponse(): PutRateLimitResponse {
+  return {};
+}
+
+export const PutRateLimitResponse = {
+  encode(_: PutRateLimitResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): PutRateLimitResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePutRateLimitResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): PutRateLimitResponse {
+    return {};
+  },
+
+  toJSON(_: PutRateLimitResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<PutRateLimitResponse>): PutRateLimitResponse {
+    return PutRateLimitResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<PutRateLimitResponse>): PutRateLimitResponse {
+    const message = createBasePutRateLimitResponse();
+    return message;
+  },
+};
+
 /** WorkflowService represents a set of RPCs for managing workflows. */
 export type WorkflowServiceDefinition = typeof WorkflowServiceDefinition;
 export const WorkflowServiceDefinition = {
@@ -1534,6 +1817,14 @@ export const WorkflowServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    putRateLimit: {
+      name: 'PutRateLimit',
+      requestType: PutRateLimitRequest,
+      requestStream: false,
+      responseType: PutRateLimitResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -1550,6 +1841,10 @@ export interface WorkflowServiceImplementation<CallContextExt = {}> {
     request: TriggerWorkflowRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<TriggerWorkflowResponse>>;
+  putRateLimit(
+    request: PutRateLimitRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<PutRateLimitResponse>>;
 }
 
 export interface WorkflowServiceClient<CallOptionsExt = {}> {
@@ -1565,6 +1860,10 @@ export interface WorkflowServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<TriggerWorkflowRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<TriggerWorkflowResponse>;
+  putRateLimit(
+    request: DeepPartial<PutRateLimitRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<PutRateLimitResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

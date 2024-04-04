@@ -48,7 +48,7 @@ jobs:
           version: "25.1"
 
       - name: Install Task
-        uses: arduino/setup-task@v1
+        uses: arduino/setup-task@v2
 
       - name: Setup Go
         uses: actions/setup-go@v5

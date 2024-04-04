@@ -45,6 +45,7 @@ const opts: CreateWorkflowVersionOpts = {
           userData: `{
             "example": "value"
           }`,
+          rateLimits: [],
         },
       ],
     },

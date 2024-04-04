@@ -17,6 +17,7 @@ import {
   CreateAPITokenRequest,
   CreateAPITokenResponse,
   CreatePullRequestFromStepRun,
+  CreateSNSIntegrationRequest,
   CreateTenantInviteRequest,
   CreateTenantRequest,
   EventData,
@@ -34,6 +35,7 @@ import {
   ListGithubBranchesResponse,
   ListGithubReposResponse,
   ListPullRequestsResponse,
+  ListSNSIntegrations,
   LogLineLevelField,
   LogLineList,
   LogLineOrderByDirection,
@@ -43,6 +45,7 @@ import {
   RejectInviteRequest,
   ReplayEventRequest,
   RerunStepRunRequest,
+  SNSIntegration,
   StepRun,
   Tenant,
   TenantInvite,
@@ -51,6 +54,7 @@ import {
   TriggerWorkflowRunRequest,
   UpdateTenantInviteRequest,
   User,
+  UserChangePasswordRequest,
   UserLoginRequest,
   UserRegisterRequest,
   UserTenantMembershipsList,
@@ -59,8 +63,10 @@ import {
   Workflow,
   WorkflowID,
   WorkflowList,
+  WorkflowMetrics,
   WorkflowRun,
   WorkflowRunList,
+  WorkflowRunStatus,
   WorkflowRunStatusList,
   WorkflowVersion,
   WorkflowVersionDefinition,
@@ -248,6 +254,58 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
   /**
+   * @description List SNS integrations
+   *
+   * @tags SNS
+   * @name SnsList
+   * @summary List SNS integrations
+   * @request GET:/api/v1/tenants/{tenant}/sns
+   * @secure
+   */
+  snsList = (tenant: string, params: RequestParams = {}) =>
+    this.request<ListSNSIntegrations, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/sns`,
+      method: 'GET',
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Create SNS integration
+   *
+   * @tags SNS
+   * @name SnsCreate
+   * @summary Create SNS integration
+   * @request POST:/api/v1/tenants/{tenant}/sns
+   * @secure
+   */
+  snsCreate = (tenant: string, data: CreateSNSIntegrationRequest, params: RequestParams = {}) =>
+    this.request<SNSIntegration, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/sns`,
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Delete SNS integration
+   *
+   * @tags SNS
+   * @name SnsDelete
+   * @summary Delete SNS integration
+   * @request DELETE:/api/v1/sns/{sns}
+   * @secure
+   */
+  snsDelete = (sns: string, params: RequestParams = {}) =>
+    this.request<void, APIErrors>({
+      path: `/api/v1/sns/${sns}`,
+      method: 'DELETE',
+      secure: true,
+      ...params,
+    });
+  /**
    * @description Gets the current user
    *
    * @tags User
@@ -261,6 +319,25 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       path: `/api/v1/users/current`,
       method: 'GET',
       secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Update a user password.
+   *
+   * @tags User
+   * @name UserUpdatePassword
+   * @summary Change user password
+   * @request POST:/api/v1/users/password
+   * @secure
+   */
+  userUpdatePassword = (data: UserChangePasswordRequest, params: RequestParams = {}) =>
+    this.request<User, APIErrors>({
+      path: `/api/v1/users/password`,
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: 'json',
       ...params,
     });
@@ -800,6 +877,33 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
   /**
+   * @description Get the metrics for a workflow version
+   *
+   * @tags Workflow
+   * @name WorkflowGetMetrics
+   * @summary Get workflow metrics
+   * @request GET:/api/v1/workflows/{workflow}/metrics
+   * @secure
+   */
+  workflowGetMetrics = (
+    workflow: string,
+    query?: {
+      /** A status of workflow runs to filter by */
+      status?: WorkflowRunStatus;
+      /** A group key to filter metrics by */
+      groupKey?: string;
+    },
+    params: RequestParams = {}
+  ) =>
+    this.request<WorkflowMetrics, APIErrors>({
+      path: `/api/v1/workflows/${workflow}/metrics`,
+      method: 'GET',
+      query: query,
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
    * @description Create a pull request for a workflow
    *
    * @tags Workflow
@@ -916,6 +1020,20 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
        * @maxLength 36
        */
       workflowId?: string;
+      /**
+       * The parent workflow run id
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      parentWorkflowRunId?: string;
+      /**
+       * The parent step run id
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      parentStepRunId?: string;
     },
     params: RequestParams = {}
   ) =>
@@ -1008,6 +1126,23 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       body: data,
       secure: true,
       type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Attempts to cancel a step run
+   *
+   * @tags Step Run
+   * @name StepRunUpdateCancel
+   * @summary Attempts to cancel a step run
+   * @request POST:/api/v1/tenants/{tenant}/step-runs/{step-run}/cancel
+   * @secure
+   */
+  stepRunUpdateCancel = (tenant: string, stepRun: string, params: RequestParams = {}) =>
+    this.request<StepRun, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/step-runs/${stepRun}/cancel`,
+      method: 'POST',
+      secure: true,
       format: 'json',
       ...params,
     });

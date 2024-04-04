@@ -11,6 +11,14 @@ import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 
 import { Api } from '../rest';
+import { WorkflowRunStatus } from '../rest/generated/data-contracts';
+
+type WorkflowMetricsQuery = {
+  workflowId?: string;
+  workflowName?: string;
+  status?: WorkflowRunStatus;
+  groupKey?: string;
+};
 
 /**
  * AdminClient is a client for interacting with the Hatchet Admin API. This allows you to configure, trigger,
@@ -186,5 +194,35 @@ export class AdminClient {
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
+  }
+
+  /**
+   * Get the metrics for a workflow.
+   *
+   * @param workflowId the ID of the workflow to get metrics for
+   * @param workflowName the name of the workflow to get metrics for
+   * @param query an object containing query parameters to filter the metrics
+   */
+  get_workflow_metrics({ workflowId, workflowName, status, groupKey }: WorkflowMetricsQuery) {
+    const params = {
+      status,
+      groupKey,
+    };
+
+    if (workflowName) {
+      this.list_workflows().then((res) => {
+        const workflow = res.rows?.find((row) => row.name === workflowName);
+
+        if (workflow) {
+          return this.api.workflowGetMetrics(workflow.metadata.id, params);
+        }
+
+        throw new Error(`Workflow ${workflowName} not found`);
+      });
+    } else if (workflowId) {
+      return this.api.workflowGetMetrics(workflowId, params);
+    }
+
+    throw new Error('Must provide either a workflowId or workflowName');
   }
 }

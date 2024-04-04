@@ -117,6 +117,8 @@ export interface User {
   email: string;
   /** Whether the user has verified their email address. */
   emailVerified: boolean;
+  /** Whether the user has a password set. */
+  hasPassword?: boolean;
 }
 
 export interface UserTenantPublic {
@@ -137,6 +139,13 @@ export interface UserLoginRequest {
   email: string;
   /** The password of the user. */
   password: string;
+}
+
+export interface UserChangePasswordRequest {
+  /** The password of the user. */
+  password: string;
+  /** The new password for the user. */
+  newPassword: string;
 }
 
 export interface UserRegisterRequest {
@@ -277,6 +286,11 @@ export interface EventWorkflowRunSummary {
    * @format int64
    */
   running?: number;
+  /**
+   * The number of queued runs.
+   * @format int64
+   */
+  queued?: number;
   /**
    * The number of succeeded runs.
    * @format int64
@@ -463,6 +477,20 @@ export interface WorkflowRun {
   startedAt?: string;
   /** @format date-time */
   finishedAt?: string;
+  /**
+   * @format uuid
+   * @minLength 36
+   * @maxLength 36
+   * @example "bb214807-246e-43a5-a25d-41761d1cff9e"
+   */
+  parentId?: string;
+  /**
+   * @format uuid
+   * @minLength 36
+   * @maxLength 36
+   * @example "bb214807-246e-43a5-a25d-41761d1cff9e"
+   */
+  parentStepRunId?: string;
 }
 
 export interface WorkflowRunList {
@@ -476,6 +504,7 @@ export enum WorkflowRunStatus {
   SUCCEEDED = 'SUCCEEDED',
   FAILED = 'FAILED',
   CANCELLED = 'CANCELLED',
+  QUEUED = 'QUEUED',
 }
 
 export type WorkflowRunStatusList = WorkflowRunStatus[];
@@ -539,6 +568,7 @@ export interface StepRun {
   step?: Step;
   children?: string[];
   parents?: string[];
+  childWorkflowRuns?: string[];
   workerId?: string;
   input?: string;
   output?: string;
@@ -735,3 +765,33 @@ export enum LogLineOrderByDirection {
 export type LogLineSearch = string;
 
 export type LogLineLevelField = LogLineLevel[];
+
+export interface SNSIntegration {
+  metadata: APIResourceMeta;
+  /**
+   * The unique identifier for the tenant that the SNS integration belongs to.
+   * @format uuid
+   */
+  tenantId: string;
+  /** The Amazon Resource Name (ARN) of the SNS topic. */
+  topicArn: string;
+  /** The URL to send SNS messages to. */
+  ingestUrl?: string;
+}
+
+export interface ListSNSIntegrations {
+  pagination: PaginationResponse;
+  rows: SNSIntegration[];
+}
+
+export interface CreateSNSIntegrationRequest {
+  /** The Amazon Resource Name (ARN) of the SNS topic. */
+  topicArn: string;
+}
+
+export interface WorkflowMetrics {
+  /** The number of runs for a specific group key (passed via filter) */
+  groupKeyRunsCount?: number;
+  /** The total number of concurrency group keys. */
+  groupKeyCount?: number;
+}

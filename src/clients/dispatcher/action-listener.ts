@@ -9,7 +9,7 @@ import { Logger } from '@hatchet/util/logger';
 import { DispatcherClient } from './dispatcher-client';
 
 const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5000; // milliseconds
-const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 5;
+const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 20;
 
 // eslint-disable-next-line no-shadow
 enum ListenStrategy {
@@ -65,8 +65,11 @@ export class ActionListener {
         if (client.done) {
           break;
         }
+
         try {
-          for await (const assignedAction of await client.getListenClient()) {
+          const listenClient = await client.getListenClient();
+
+          for await (const assignedAction of listenClient) {
             const action: Action = {
               ...assignedAction,
             };
@@ -74,13 +77,11 @@ export class ActionListener {
             yield action;
           }
         } catch (e: any) {
+          client.logger.info('Listener error');
+
           // if this is a HatchetError, we should throw this error
           if (e instanceof HatchetError) {
             throw e;
-          }
-
-          if (e.code === Status.CANCELLED) {
-            break;
           }
 
           if (
@@ -91,10 +92,12 @@ export class ActionListener {
           }
 
           client.incrementRetries();
+          client.logger.error(`Listener encountered an error: ${e.message}`);
+          client.logger.info(`Retrying in ${client.retryInterval}ms...`);
+          await sleep(client.retryInterval);
         }
       }
     })(this);
-
   async setListenStrategy(strategy: ListenStrategy) {
     this.listenStrategy = strategy;
   }
@@ -112,21 +115,7 @@ export class ActionListener {
       return;
     }
 
-    // start with a heartbeat
-    try {
-      await this.client.heartbeat({
-        workerId: this.workerId,
-        heartbeatAt: new Date(),
-      });
-    } catch (e: any) {
-      this.logger.error(`Failed to send heartbeat: ${e.message}`);
-
-      if (e.code === Status.UNIMPLEMENTED) {
-        return;
-      }
-    }
-
-    this.heartbeatInterval = setInterval(async () => {
+    const beat = async () => {
       try {
         await this.client.heartbeat({
           workerId: this.workerId,
@@ -141,7 +130,11 @@ export class ActionListener {
 
         this.logger.error(`Failed to send heartbeat: ${e.message}`);
       }
-    }, 4000);
+    };
+
+    // start with a heartbeat
+    beat();
+    this.heartbeatInterval = setInterval(beat, 4000);
   }
 
   closeHeartbeat() {
@@ -176,9 +169,11 @@ export class ActionListener {
 
     try {
       if (this.listenStrategy === ListenStrategy.LISTEN_STRATEGY_V1) {
-        return this.client.listen({
+        const result = this.client.listen({
           workerId: this.workerId,
         });
+        this.logger.info('Connection established using LISTEN_STRATEGY_V1');
+        return result;
       }
 
       const res = this.client.listenV2({
@@ -186,13 +181,19 @@ export class ActionListener {
       });
 
       this.heartbeat();
-
+      this.logger.info('Connection established using LISTEN_STRATEGY_V2');
       return res;
     } catch (e: any) {
       this.retries += 1;
-      this.logger.error(`Attempt ${this.retries}: Failed to connect, retrying...`); // Optional: log retry attempt
+      this.logger.error(`Attempt ${this.retries}: Failed to connect, retrying...`);
 
-      return this.getListenClient();
+      if (e.code === Status.UNAVAILABLE) {
+        // Connection lost, reset heartbeat interval and retry connection
+        this.closeHeartbeat();
+        return this.getListenClient();
+      }
+
+      throw e;
     }
   }
 

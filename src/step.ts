@@ -94,6 +94,7 @@ export class Context<T, K> {
   spawnIndex: number = 0;
 
   constructor(action: Action, client: HatchetClient) {
+    console.log(action)
     try {
       const data = parseJSON(action.actionPayload);
       this.data = data;
@@ -131,6 +132,10 @@ export class Context<T, K> {
 
   workflowInput(): T {
     return this.input;
+  }
+
+  workflowName(): string {
+    return this.action.jobName;
   }
 
   userData(): K {

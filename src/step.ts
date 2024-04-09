@@ -133,6 +133,10 @@ export class Context<T, K> {
     return this.input;
   }
 
+  workflowName(): string {
+    return this.action.jobName;
+  }
+
   userData(): K {
     return this.data?.user_data;
   }

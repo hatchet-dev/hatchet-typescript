@@ -262,8 +262,11 @@ export class Worker {
       this.futures[action.getGroupKeyRunId] = future;
 
       // Send the action event to the dispatcher
-      const event = this.getStepActionEvent(action, StepActionEventType.STEP_EVENT_TYPE_STARTED);
-      this.client.dispatcher.sendStepActionEvent(event);
+      const event = this.getGroupKeyActionEvent(
+        action,
+        GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_STARTED
+      );
+      this.client.dispatcher.sendGroupKeyActionEvent(event);
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }

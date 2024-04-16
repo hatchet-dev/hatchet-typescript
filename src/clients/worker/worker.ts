@@ -171,7 +171,7 @@ export class Worker {
         }
       };
 
-      const failure = async (error: any) => {
+      const failure = (error: any) => {
         this.logger.error(`Step run ${action.stepRunId} failed: ${error.message}`);
 
         try {

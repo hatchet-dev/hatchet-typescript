@@ -99,15 +99,17 @@ export class PollingAsyncListener {
   }
 
   async listen(workflowRunId: string) {
-    let listener = this.client.client.subscribeToWorkflowEvents({
-      workflowRunId,
-    });
+    // eslint-disable-next-line prefer-const
+    let [listener, res] = await Promise.all([
+      this.retrySubscribe(workflowRunId),
+      this.getWorkflowRun(workflowRunId),
+    ]);
 
-    const res = await this.getWorkflowRun(workflowRunId);
+    // close the poll as soon as we get a stream connection
+    this.close();
 
     if (res) {
       this.emit(res);
-      this.close();
     }
 
     try {
@@ -137,6 +139,7 @@ export class PollingAsyncListener {
       }
     }
 
+    // we will close the listener after 5 poll intervals
     setTimeout(() => this.close(), DEFAULT_EVENT_LISTENER_POLL_INTERVAL * 5);
   }
 
@@ -145,7 +148,7 @@ export class PollingAsyncListener {
 
     while (retries < DEFAULT_EVENT_LISTENER_RETRY_COUNT) {
       try {
-        await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL);
+        if (retries > 0) await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL);
 
         const listener = this.client.client.subscribeToWorkflowEvents({
           workflowRunId,

@@ -43,7 +43,7 @@ export class DispatcherClient {
 
   async sendStepActionEvent(in_: StepActionEvent) {
     try {
-      return retrier(async () => this.client.sendStepActionEvent(in_), this.logger);
+      return await retrier(async () => this.client.sendStepActionEvent(in_), this.logger);
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
@@ -51,17 +51,15 @@ export class DispatcherClient {
 
   async sendGroupKeyActionEvent(in_: GroupKeyActionEvent) {
     try {
-      return retrier(async () => this.client.sendGroupKeyActionEvent(in_), this.logger);
+      return await retrier(async () => this.client.sendGroupKeyActionEvent(in_), this.logger);
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
   }
 
   async putOverridesData(in_: DeepPartial<OverridesData>) {
-    try {
-      return retrier(async () => this.client.putOverridesData(in_), this.logger);
-    } catch (e: any) {
-      throw new HatchetError(e.message);
-    }
+    return retrier(async () => this.client.putOverridesData(in_), this.logger).catch((e) => {
+      this.logger.warn(`Could not put overrides data: ${e.message}`);
+    });
   }
 }

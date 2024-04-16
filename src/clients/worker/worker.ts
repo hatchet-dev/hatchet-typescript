@@ -160,7 +160,9 @@ export class Worker {
             StepActionEventType.STEP_EVENT_TYPE_COMPLETED,
             result
           );
-          this.client.dispatcher.sendStepActionEvent(event);
+          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
+            this.logger.error(`Could not send action event: ${e.message}`);
+          });
 
           // delete the run from the futures
           delete this.futures[action.stepRunId];
@@ -169,7 +171,7 @@ export class Worker {
         }
       };
 
-      const failure = (error: any) => {
+      const failure = async (error: any) => {
         this.logger.error(`Step run ${action.stepRunId} failed: ${error.message}`);
 
         try {
@@ -179,7 +181,9 @@ export class Worker {
             StepActionEventType.STEP_EVENT_TYPE_FAILED,
             error?.message || error
           );
-          this.client.dispatcher.sendStepActionEvent(event);
+          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
+            this.logger.error(`Could not send action event: ${e.message}`);
+          });
           // delete the run from the futures
           delete this.futures[action.stepRunId];
         } catch (e: any) {
@@ -192,7 +196,9 @@ export class Worker {
 
       // Send the action event to the dispatcher
       const event = this.getStepActionEvent(action, StepActionEventType.STEP_EVENT_TYPE_STARTED);
-      this.client.dispatcher.sendStepActionEvent(event);
+      this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
+        this.logger.error(`Could not send action event: ${e.message}`);
+      });
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }
@@ -231,7 +237,9 @@ export class Worker {
             GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_COMPLETED,
             result
           );
-          this.client.dispatcher.sendGroupKeyActionEvent(event);
+          this.client.dispatcher.sendGroupKeyActionEvent(event).catch((e) => {
+            this.logger.error(`Could not send action event: ${e.message}`);
+          });
 
           // delete the run from the futures
           delete this.futures[key];
@@ -250,7 +258,9 @@ export class Worker {
             GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_FAILED,
             error
           );
-          this.client.dispatcher.sendGroupKeyActionEvent(event);
+          this.client.dispatcher.sendGroupKeyActionEvent(event).catch((e) => {
+            this.logger.error(`Could not send action event: ${e.message}`);
+          });
           // delete the run from the futures
           delete this.futures[key];
         } catch (e: any) {
@@ -266,7 +276,9 @@ export class Worker {
         action,
         GroupKeyActionEventType.GROUP_KEY_EVENT_TYPE_STARTED
       );
-      this.client.dispatcher.sendGroupKeyActionEvent(event);
+      this.client.dispatcher.sendGroupKeyActionEvent(event).catch((e) => {
+        this.logger.error(`Could not send action event: ${e.message}`);
+      });
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }

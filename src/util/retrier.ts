@@ -1,7 +1,7 @@
 import { Logger } from './logger';
 import sleep from './sleep';
 
-const DEFAULT_RETRY_INTERVAL = 5;
+const DEFAULT_RETRY_INTERVAL = 5; // seconds
 const DEFAULT_RETRY_COUNT = 5;
 
 export async function retrier<T>(

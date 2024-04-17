@@ -87,7 +87,6 @@ export class Worker {
         jobs: [
           {
             name: workflow.id,
-            timeout: workflow.timeout || '60s',
             description: workflow.description,
             steps: workflow.steps.map<CreateWorkflowStepOpts>((step) => ({
               readableId: step.name,

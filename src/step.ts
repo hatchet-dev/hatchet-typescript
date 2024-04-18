@@ -54,10 +54,10 @@ class ChildWorkflowRef<T> {
     return listener.stream();
   }
 
-  async result(): Promise<T[]> {
+  async result(): Promise<T> {
     const listener = await this.stream();
 
-    return new Promise<T[]>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       (async () => {
         for await (const event of await listener) {
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
@@ -66,7 +66,7 @@ class ChildWorkflowRef<T> {
               return;
             }
 
-            resolve(event.results as T[]);
+            resolve(event.results as T);
             return;
           }
         }

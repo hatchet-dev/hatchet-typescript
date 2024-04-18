@@ -124,6 +124,7 @@ export class ActionListener {
       } catch (e: any) {
         if (e.code === Status.UNIMPLEMENTED) {
           // break out of interval
+          this.logger.error('Heartbeat not implemented, closing heartbeat');
           this.closeHeartbeat();
           return;
         }
@@ -140,6 +141,7 @@ export class ActionListener {
   closeHeartbeat() {
     if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
   }
 

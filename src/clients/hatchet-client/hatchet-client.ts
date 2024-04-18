@@ -5,7 +5,6 @@ import { DispatcherClient } from '@clients/dispatcher/dispatcher-client';
 import { AdminClient } from '@clients/admin/admin-client';
 import {
   CallOptions,
-  Channel,
   ChannelCredentials,
   ClientMiddlewareCall,
   Metadata,
@@ -52,8 +51,6 @@ const addTokenMiddleware = (token: string) =>
 export class HatchetClient {
   config: ClientConfig;
   credentials: ChannelCredentials;
-  channel: Channel;
-
   event: EventClient;
   dispatcher: DispatcherClient;
   admin: AdminClient;
@@ -88,24 +85,32 @@ export class HatchetClient {
     this.credentials =
       options?.credentials ?? ConfigLoader.createCredentials(this.config.tls_config);
 
-    this.channel = createChannel(this.config.host_port, this.credentials, {
-      'grpc.ssl_target_name_override': this.config.tls_config.server_name,
-      'grpc.keepalive_timeout_ms': 60 * 1000,
-      'grpc.client_idle_timeout_ms': 60 * 1000,
-      // Send keepalive pings every 10 seconds, default is 2 hours.
-      'grpc.keepalive_time_ms': 10 * 1000,
-      // Allow keepalive pings when there are no gRPC calls.
-      'grpc.keepalive_permit_without_calls': 1,
-    });
+    const channelFactory = () =>
+      createChannel(this.config.host_port, this.credentials, {
+        'grpc.ssl_target_name_override': this.config.tls_config.server_name,
+        'grpc.keepalive_timeout_ms': 60 * 1000,
+        'grpc.client_idle_timeout_ms': 60 * 1000,
+        // Send keepalive pings every 10 seconds, default is 2 hours.
+        'grpc.keepalive_time_ms': 10 * 1000,
+        // Allow keepalive pings when there are no gRPC calls.
+        'grpc.keepalive_permit_without_calls': 1,
+      });
 
     const clientFactory = createClientFactory().use(addTokenMiddleware(this.config.token));
 
     this.tenantId = this.config.tenant_id;
     this.api = api(this.config.api_url, this.config.token, axiosOpts);
-    this.event = new EventClient(this.config, this.channel, clientFactory);
-    this.dispatcher = new DispatcherClient(this.config, this.channel, clientFactory);
-    this.admin = new AdminClient(this.config, this.channel, clientFactory, this.api, this.tenantId);
-    this.listener = new ListenerClient(this.config, this.channel, clientFactory, this.api);
+    this.event = new EventClient(this.config, channelFactory(), clientFactory);
+    this.dispatcher = new DispatcherClient(this.config, channelFactory(), clientFactory);
+    this.admin = new AdminClient(
+      this.config,
+      channelFactory(),
+      clientFactory,
+      this.api,
+      this.tenantId
+    );
+
+    this.listener = new ListenerClient(this.config, channelFactory(), clientFactory, this.api);
 
     this.logger = new Logger('HatchetClient', this.config.log_level);
 

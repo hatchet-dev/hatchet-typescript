@@ -89,6 +89,7 @@
   },
   "dependencies": {
     "@types/qs": "^6.9.11",
+    "abort-controller-x": "^0.4.3",
     "axios": "^1.6.7",
     "long": "^5.2.3",
     "nice-grpc": "^2.1.7",

@@ -35,25 +35,31 @@ interface ContextData<T, K> {
 
 class ChildWorkflowRef<T> {
   workflowRunId: Promise<string>;
+  parentWorkflowRunId: string;
   client: HatchetClient;
 
-  constructor(workflowRunId: Promise<string>, client: HatchetClient) {
+  constructor(workflowRunId: Promise<string>, parentWorkflowRunId: string, client: HatchetClient) {
     this.workflowRunId = workflowRunId;
+    this.parentWorkflowRunId = parentWorkflowRunId;
     this.client = client;
   }
 
   async stream(): Promise<AsyncGenerator<WorkflowRunEvent, void, unknown>> {
     const workflowRunId = await this.workflowRunId;
-    return this.client.listener.stream(workflowRunId);
+    const listener = await this.client.listener.getChildListener(
+      workflowRunId,
+      this.parentWorkflowRunId
+    );
+
+    return listener.stream();
   }
 
   async result(): Promise<T[]> {
-    const workflowRunId = await this.workflowRunId;
-    const listener = await this.client.listener.get(workflowRunId);
+    const listener = await this.stream();
 
     return new Promise<T[]>((resolve, reject) => {
       (async () => {
-        for await (const event of await listener.stream()) {
+        for await (const event of await listener) {
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
             if (event.results.some((r) => !!r.error)) {
               reject(event.results);
@@ -193,7 +199,7 @@ export class Context<T, K> {
 
     this.spawnIndex += 1;
 
-    return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
+    return new ChildWorkflowRef(childWorkflowRunIdPromise, workflowRunId, this.client);
   }
 }
 

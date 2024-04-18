@@ -61,6 +61,7 @@ export class GrpcPooledListener {
       for await (const event of this.listener) {
         const emitter = this.subscribers[event.workflowRunId];
         if (emitter) {
+          emitter.responseEmitter.emit('response', event);
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
             delete this.subscribers[event.workflowRunId];
             if (Object.keys(this.subscribers).length === 0) {

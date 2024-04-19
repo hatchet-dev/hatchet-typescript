@@ -30,7 +30,7 @@ export function runThreaded(scriptPath: string, options: WorkerOptions) {
 
   return new Worker(ex, {
     ...options,
-    eval: isTs,
+    eval: isTs ? true : undefined,
   });
 }
 

@@ -95,8 +95,12 @@ export class ActionListener {
 
           client.incrementRetries();
           client.logger.error(`Listener encountered an error: ${e.message}`);
-          client.logger.info(`Retrying in ${client.retryInterval}ms...`);
-          await sleep(client.retryInterval);
+          if (client.retries > 1) {
+            client.logger.info(`Retrying in ${client.retryInterval}ms...`);
+            await sleep(client.retryInterval);
+          } else {
+            client.logger.info(`Retrying`);
+          }
         }
       }
     })(this);

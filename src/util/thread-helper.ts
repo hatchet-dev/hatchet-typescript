@@ -6,6 +6,8 @@ export function runThreaded(scriptPath: string, options: WorkerOptions) {
 
   const isTs = /\.ts$/.test(resolvedPath);
 
+  // NOTE: if the file is typescript, we are in the SDK dev environment and need to so some funky work.
+  // otherwise, we pass the file directly to the worker.
   const ex = isTs
     ? `
     const wk = require('worker_threads');

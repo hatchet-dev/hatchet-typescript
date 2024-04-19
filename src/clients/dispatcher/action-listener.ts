@@ -11,6 +11,8 @@ import { DispatcherClient } from './dispatcher-client';
 const DEFAULT_ACTION_LISTENER_RETRY_INTERVAL = 5000; // milliseconds
 const DEFAULT_ACTION_LISTENER_RETRY_COUNT = 20;
 
+const HEARTBEAT_INTERVAL = 4000;
+
 // eslint-disable-next-line no-shadow
 enum ListenStrategy {
   LISTEN_STRATEGY_V1 = 1,
@@ -44,6 +46,8 @@ export class ActionListener {
   done = false;
   listenStrategy = ListenStrategy.LISTEN_STRATEGY_V2;
   heartbeatInterval: any;
+
+  timeLastHeartbeat: number = new Date().getTime();
 
   constructor(
     client: DispatcherClient,
@@ -117,10 +121,23 @@ export class ActionListener {
 
     const beat = async () => {
       try {
+        this.logger.debug('Heartbeat sending...');
         await this.client.heartbeat({
           workerId: this.workerId,
           heartbeatAt: new Date(),
         });
+        const now = new Date().getTime();
+
+        const actualInterval = now - this.timeLastHeartbeat;
+
+        if (actualInterval > HEARTBEAT_INTERVAL * 1.2) {
+          this.logger.warn(
+            `Heartbeat interval delay (${actualInterval}ms >> ${HEARTBEAT_INTERVAL}ms)`
+          );
+        }
+
+        this.logger.debug(`Heartbeat sent ${actualInterval}ms ago`);
+        this.timeLastHeartbeat = now;
       } catch (e: any) {
         if (e.code === Status.UNIMPLEMENTED) {
           // break out of interval
@@ -135,7 +152,7 @@ export class ActionListener {
 
     // start with a heartbeat
     await beat();
-    this.heartbeatInterval = setInterval(beat, 4000);
+    this.heartbeatInterval = setInterval(beat, HEARTBEAT_INTERVAL);
   }
 
   closeHeartbeat() {

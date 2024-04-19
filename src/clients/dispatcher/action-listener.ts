@@ -134,7 +134,7 @@ export class ActionListener {
     };
 
     // start with a heartbeat
-    beat();
+    await beat();
     this.heartbeatInterval = setInterval(beat, 4000);
   }
 
@@ -182,7 +182,7 @@ export class ActionListener {
         workerId: this.workerId,
       });
 
-      this.heartbeat();
+      await this.heartbeat();
       this.logger.info('Connection established using LISTEN_STRATEGY_V2');
       return res;
     } catch (e: any) {
@@ -203,7 +203,7 @@ export class ActionListener {
     this.done = true;
     this.closeHeartbeat();
     try {
-      return this.client.unsubscribe({
+      return await this.client.unsubscribe({
         workerId: this.workerId,
       });
     } catch (e: any) {

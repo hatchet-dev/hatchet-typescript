@@ -90,7 +90,7 @@ export class ConfigLoader {
         (this.env('HATCHET_CLIENT_LOG_LEVEL') as LogLevel) ??
         'INFO',
       tenant_id: tenantId,
-      namespace: namespace ? `${namespace}_` : '',
+      namespace: namespace ? `${namespace}_`.toLowerCase() : '',
     };
   }
 

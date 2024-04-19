@@ -66,7 +66,15 @@ class ChildWorkflowRef<T> {
               return;
             }
 
-            resolve(event.results as T);
+            const result = event.results.reduce(
+              (acc, r) => ({
+                ...acc,
+                [r.stepReadableId]: JSON.parse(r.output || '{}'),
+              }),
+              {} as T
+            );
+
+            resolve(result);
             return;
           }
         }

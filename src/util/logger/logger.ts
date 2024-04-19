@@ -20,7 +20,18 @@ export class Logger {
 
   private log(level: LogLevel, message: string, color: string = '33'): void {
     if (LogLevelEnum[level] >= LogLevelEnum[this.logLevel]) {
-      console.log(`🪓 \x1b[${color}m [${level}/${this.context}] ${message}\x1b[0m`);
+      const time = new Date().toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      // eslint-disable-next-line no-console
+      console.log(
+        `🪓 ${process.pid} | ${time} \x1b[${color}m [${level}/${this.context}] ${message}\x1b[0m`
+      );
     }
   }
 

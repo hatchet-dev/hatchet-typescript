@@ -148,8 +148,8 @@ export class ActionListener {
   async getListenClient(): Promise<AsyncIterable<AssignedAction>> {
     const currentTime = Math.floor(Date.now());
 
-    // subtract 1000 from the last connection attempt to account for the time it takes to establish the listener
-    if (currentTime - this.lastConnectionAttempt - 1000 > this.retryInterval) {
+    // attempt to account for the time it takes to establish the listener
+    if (currentTime - this.lastConnectionAttempt > this.retryInterval * 4) {
       this.retries = 0;
     }
 

@@ -18,7 +18,7 @@ export class Logger {
     this.context = context;
   }
 
-  private log(level: LogLevel, message: string, color: string = '33'): void {
+  private log(level: LogLevel, message: string, color?: string): void {
     if (LogLevelEnum[level] >= LogLevelEnum[this.logLevel]) {
       const time = new Date().toLocaleString('en-US', {
         month: '2-digit',
@@ -30,7 +30,7 @@ export class Logger {
       });
       // eslint-disable-next-line no-console
       console.log(
-        `🪓 ${process.pid} | ${time} \x1b[${color}m [${level}/${this.context}] ${message}\x1b[0m`
+        `🪓 ${process.pid} | ${time} ${color && `\x1b[${color}m`} [${level}/${this.context}] ${message}\x1b[0m`
       );
     }
   }
@@ -40,7 +40,7 @@ export class Logger {
   }
 
   info(message: string): void {
-    this.log('INFO', message, '90');
+    this.log('INFO', message);
   }
 
   green(message: string): void {

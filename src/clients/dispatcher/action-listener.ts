@@ -141,7 +141,7 @@ export class ActionListener {
         const result = this.client.listen({
           workerId: this.workerId,
         });
-        this.logger.info('Connection established using LISTEN_STRATEGY_V1');
+        this.logger.green('Connection established using LISTEN_STRATEGY_V1');
         return result;
       }
 
@@ -150,7 +150,7 @@ export class ActionListener {
       });
 
       await this.heartbeat.start();
-      this.logger.info('Connection established using LISTEN_STRATEGY_V2');
+      this.logger.green('Connection established using LISTEN_STRATEGY_V2');
       return res;
     } catch (e: any) {
       this.retries += 1;

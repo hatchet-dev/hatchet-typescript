@@ -43,6 +43,10 @@ export class Logger {
     this.log('INFO', message, '30');
   }
 
+  green(message: string): void {
+    this.log('INFO', message, '32');
+  }
+
   warn(message: string): void {
     this.log('WARN', message, '93');
   }

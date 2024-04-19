@@ -87,11 +87,3 @@ heartbeat.start();
 parentPort?.on('stop', () => {
   heartbeat.stop();
 });
-
-// console.log('workerData', workerData);
-
-// parentPort?.on('start', (message: any ) => {
-//     console.log('message', message);
-//   heartbeat.stop();
-// });
-// parentPort?.postMessage(heartbeat.start());

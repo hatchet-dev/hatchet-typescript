@@ -40,7 +40,7 @@ export class Logger {
   }
 
   info(message: string): void {
-    this.log('INFO', message, '30');
+    this.log('INFO', message, '90');
   }
 
   green(message: string): void {

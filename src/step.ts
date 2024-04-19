@@ -7,7 +7,7 @@ import { LogLevel } from './clients/event/event-client';
 import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
-import { RunEventType } from './clients/listener/listener-client';
+import { WorkflowRunEvent, WorkflowRunEventType } from './protoc/dispatcher';
 
 export const CreateRateLimitSchema = z.object({
   key: z.string(),
@@ -35,38 +35,38 @@ interface ContextData<T, K> {
 
 class ChildWorkflowRef<T> {
   workflowRunId: Promise<string>;
+  parentWorkflowRunId: string;
   client: HatchetClient;
 
-  constructor(workflowRunId: Promise<string>, client: HatchetClient) {
+  constructor(workflowRunId: Promise<string>, parentWorkflowRunId: string, client: HatchetClient) {
     this.workflowRunId = workflowRunId;
+    this.parentWorkflowRunId = parentWorkflowRunId;
     this.client = client;
   }
 
-  async stream(): Promise<AsyncGenerator<{ type: RunEventType; payload: string }, void, unknown>> {
+  async stream(): Promise<AsyncGenerator<WorkflowRunEvent, void, unknown>> {
     const workflowRunId = await this.workflowRunId;
-    return this.client.listener.stream(workflowRunId);
+    const listener = await this.client.listener.getChildListener(
+      workflowRunId,
+      this.parentWorkflowRunId
+    );
+
+    return listener.stream();
   }
 
   async result(): Promise<T> {
-    const workflowRunId = await this.workflowRunId;
-    const listener = await this.client.listener.get(workflowRunId);
+    const listener = await this.stream();
 
-    return new Promise((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       (async () => {
-        for await (const event of await listener.stream()) {
-          if (
-            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED ||
-            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED ||
-            event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_TIMED_OUT
-          ) {
-            reject(new HatchetError(event.type));
-            listener.close();
-            return;
-          }
+        for await (const event of await listener) {
+          if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
+            if (event.results.some((r) => !!r.error)) {
+              reject(event.results);
+              return;
+            }
 
-          if (event.type === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
-            resolve(JSON.parse(event.payload) as T);
-            listener.close();
+            resolve(event.results as T);
             return;
           }
         }
@@ -199,7 +199,7 @@ export class Context<T, K> {
 
     this.spawnIndex += 1;
 
-    return new ChildWorkflowRef(childWorkflowRunIdPromise, this.client);
+    return new ChildWorkflowRef(childWorkflowRunIdPromise, workflowRunId, this.client);
   }
 }
 

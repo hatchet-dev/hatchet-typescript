@@ -113,6 +113,8 @@ export interface CreateWorkflowVersionOpts {
   concurrency: WorkflowConcurrencyOpts | undefined;
   /** (optional) the timeout for the schedule */
   scheduleTimeout?: string | undefined;
+  /** (optional) the input for the cron trigger */
+  cronInput?: string | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -130,8 +132,6 @@ export interface CreateWorkflowJobOpts {
   name: string;
   /** (optional) the job description */
   description: string;
-  /** (optional) the job timeout */
-  timeout: string;
   /** (required) the job steps */
   steps: CreateWorkflowStepOpts[];
 }
@@ -319,6 +319,7 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     jobs: [],
     concurrency: undefined,
     scheduleTimeout: undefined,
+    cronInput: undefined,
   };
 }
 
@@ -350,6 +351,9 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.scheduleTimeout !== undefined) {
       writer.uint32(74).string(message.scheduleTimeout);
+    }
+    if (message.cronInput !== undefined) {
+      writer.uint32(82).string(message.cronInput);
     }
     return writer;
   },
@@ -424,6 +428,13 @@ export const CreateWorkflowVersionOpts = {
 
           message.scheduleTimeout = reader.string();
           continue;
+        case 10:
+          if (tag !== 82) {
+            break;
+          }
+
+          message.cronInput = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -456,6 +467,7 @@ export const CreateWorkflowVersionOpts = {
       scheduleTimeout: isSet(object.scheduleTimeout)
         ? globalThis.String(object.scheduleTimeout)
         : undefined,
+      cronInput: isSet(object.cronInput) ? globalThis.String(object.cronInput) : undefined,
     };
   },
 
@@ -488,6 +500,9 @@ export const CreateWorkflowVersionOpts = {
     if (message.scheduleTimeout !== undefined) {
       obj.scheduleTimeout = message.scheduleTimeout;
     }
+    if (message.cronInput !== undefined) {
+      obj.cronInput = message.cronInput;
+    }
     return obj;
   },
 
@@ -508,6 +523,7 @@ export const CreateWorkflowVersionOpts = {
         ? WorkflowConcurrencyOpts.fromPartial(object.concurrency)
         : undefined;
     message.scheduleTimeout = object.scheduleTimeout ?? undefined;
+    message.cronInput = object.cronInput ?? undefined;
     return message;
   },
 };
@@ -604,7 +620,7 @@ export const WorkflowConcurrencyOpts = {
 };
 
 function createBaseCreateWorkflowJobOpts(): CreateWorkflowJobOpts {
-  return { name: '', description: '', timeout: '', steps: [] };
+  return { name: '', description: '', steps: [] };
 }
 
 export const CreateWorkflowJobOpts = {
@@ -614,9 +630,6 @@ export const CreateWorkflowJobOpts = {
     }
     if (message.description !== '') {
       writer.uint32(18).string(message.description);
-    }
-    if (message.timeout !== '') {
-      writer.uint32(26).string(message.timeout);
     }
     for (const v of message.steps) {
       CreateWorkflowStepOpts.encode(v!, writer.uint32(34).fork()).ldelim();
@@ -645,13 +658,6 @@ export const CreateWorkflowJobOpts = {
 
           message.description = reader.string();
           continue;
-        case 3:
-          if (tag !== 26) {
-            break;
-          }
-
-          message.timeout = reader.string();
-          continue;
         case 4:
           if (tag !== 34) {
             break;
@@ -672,7 +678,6 @@ export const CreateWorkflowJobOpts = {
     return {
       name: isSet(object.name) ? globalThis.String(object.name) : '',
       description: isSet(object.description) ? globalThis.String(object.description) : '',
-      timeout: isSet(object.timeout) ? globalThis.String(object.timeout) : '',
       steps: globalThis.Array.isArray(object?.steps)
         ? object.steps.map((e: any) => CreateWorkflowStepOpts.fromJSON(e))
         : [],
@@ -687,9 +692,6 @@ export const CreateWorkflowJobOpts = {
     if (message.description !== '') {
       obj.description = message.description;
     }
-    if (message.timeout !== '') {
-      obj.timeout = message.timeout;
-    }
     if (message.steps?.length) {
       obj.steps = message.steps.map((e) => CreateWorkflowStepOpts.toJSON(e));
     }
@@ -703,7 +705,6 @@ export const CreateWorkflowJobOpts = {
     const message = createBaseCreateWorkflowJobOpts();
     message.name = object.name ?? '';
     message.description = object.description ?? '';
-    message.timeout = object.timeout ?? '';
     message.steps = object.steps?.map((e) => CreateWorkflowStepOpts.fromPartial(e)) || [];
     return message;
   },

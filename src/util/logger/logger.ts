@@ -18,26 +18,26 @@ export class Logger {
     this.context = context;
   }
 
-  private log(level: LogLevel, message: string): void {
+  private log(level: LogLevel, message: string, color: string = '33'): void {
     if (LogLevelEnum[level] >= LogLevelEnum[this.logLevel]) {
-      console.log(`🪓 [${level}/${this.context}] ${message}`);
+      console.log(`🪓 \x1b[${color}m [${level}/${this.context}] ${message}\x1b[0m`);
     }
   }
 
   debug(message: string): void {
-    this.log('DEBUG', message);
+    this.log('DEBUG', message, '35');
   }
 
   info(message: string): void {
-    this.log('INFO', message);
+    this.log('INFO', message, '30');
   }
 
   warn(message: string): void {
-    this.log('WARN', message);
+    this.log('WARN', message, '93');
   }
 
   error(message: string): void {
-    this.log('ERROR', message);
+    this.log('ERROR', message, '91');
   }
 }
 

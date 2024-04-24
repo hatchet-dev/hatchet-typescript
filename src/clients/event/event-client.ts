@@ -50,21 +50,19 @@ export class EventClient {
   putLog(stepRunId: string, log: string, level?: LogLevel) {
     const createdAt = new Date();
 
-    try {
-      retrier(
-        async () =>
-          this.client.putLog({
-            stepRunId,
-            createdAt,
-            message: log,
-            level: level || LogLevel.INFO,
-          }),
-        this.logger
-      );
-    } catch (e: any) {
+    retrier(
+      async () =>
+        this.client.putLog({
+          stepRunId,
+          createdAt,
+          message: log,
+          level: level || LogLevel.INFO,
+        }),
+      this.logger
+    ).catch((e: any) => {
       // log a warning, but this is not a fatal error
       this.logger.warn(`Could not put log: ${e.message}`);
-    }
+    });
   }
 
   putStream(stepRunId: string, data: string | Uint8Array) {
@@ -79,19 +77,17 @@ export class EventClient {
       throw new Error('Invalid data type. Expected string or Uint8Array.');
     }
 
-    try {
-      retrier(
-        async () =>
-          this.client.putStreamEvent({
-            stepRunId,
-            createdAt,
-            message: dataBytes,
-          }),
-        this.logger
-      );
-    } catch (e: any) {
+    retrier(
+      async () =>
+        this.client.putStreamEvent({
+          stepRunId,
+          createdAt,
+          message: dataBytes,
+        }),
+      this.logger
+    ).catch((e: any) => {
       // log a warning, but this is not a fatal error
       this.logger.warn(`Could not put log: ${e.message}`);
-    }
+    });
   }
 }

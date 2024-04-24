@@ -236,6 +236,33 @@ export function resourceEventTypeToJSON(object: ResourceEventType): string {
   }
 }
 
+export enum WorkflowRunEventType {
+  WORKFLOW_RUN_EVENT_TYPE_FINISHED = 0,
+  UNRECOGNIZED = -1,
+}
+
+export function workflowRunEventTypeFromJSON(object: any): WorkflowRunEventType {
+  switch (object) {
+    case 0:
+    case 'WORKFLOW_RUN_EVENT_TYPE_FINISHED':
+      return WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return WorkflowRunEventType.UNRECOGNIZED;
+  }
+}
+
+export function workflowRunEventTypeToJSON(object: WorkflowRunEventType): string {
+  switch (object) {
+    case WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED:
+      return 'WORKFLOW_RUN_EVENT_TYPE_FINISHED';
+    case WorkflowRunEventType.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
 export interface WorkerRegisterRequest {
   /** the name of the worker */
   workerName: string;
@@ -347,6 +374,11 @@ export interface SubscribeToWorkflowEventsRequest {
   workflowRunId: string;
 }
 
+export interface SubscribeToWorkflowRunsRequest {
+  /** the id of the workflow run */
+  workflowRunId: string;
+}
+
 export interface WorkflowEvent {
   /** the id of the workflow run */
   workflowRunId: string;
@@ -365,6 +397,22 @@ export interface WorkflowEvent {
   stepRetries?: number | undefined;
   /** (optional) the retry count of this step */
   retryCount?: number | undefined;
+}
+
+export interface WorkflowRunEvent {
+  /** the id of the workflow run */
+  workflowRunId: string;
+  eventType: WorkflowRunEventType;
+  eventTimestamp: Date | undefined;
+  results: StepRunResult[];
+}
+
+export interface StepRunResult {
+  stepRunId: string;
+  stepReadableId: string;
+  jobRunId: string;
+  error?: string | undefined;
+  output?: string | undefined;
 }
 
 export interface OverridesData {
@@ -1503,6 +1551,68 @@ export const SubscribeToWorkflowEventsRequest = {
   },
 };
 
+function createBaseSubscribeToWorkflowRunsRequest(): SubscribeToWorkflowRunsRequest {
+  return { workflowRunId: '' };
+}
+
+export const SubscribeToWorkflowRunsRequest = {
+  encode(
+    message: SubscribeToWorkflowRunsRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.workflowRunId !== '') {
+      writer.uint32(10).string(message.workflowRunId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SubscribeToWorkflowRunsRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSubscribeToWorkflowRunsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workflowRunId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SubscribeToWorkflowRunsRequest {
+    return {
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+    };
+  },
+
+  toJSON(message: SubscribeToWorkflowRunsRequest): unknown {
+    const obj: any = {};
+    if (message.workflowRunId !== '') {
+      obj.workflowRunId = message.workflowRunId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<SubscribeToWorkflowRunsRequest>): SubscribeToWorkflowRunsRequest {
+    return SubscribeToWorkflowRunsRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<SubscribeToWorkflowRunsRequest>): SubscribeToWorkflowRunsRequest {
+    const message = createBaseSubscribeToWorkflowRunsRequest();
+    message.workflowRunId = object.workflowRunId ?? '';
+    return message;
+  },
+};
+
 function createBaseWorkflowEvent(): WorkflowEvent {
   return {
     workflowRunId: '',
@@ -1690,6 +1800,233 @@ export const WorkflowEvent = {
     message.hangup = object.hangup ?? false;
     message.stepRetries = object.stepRetries ?? undefined;
     message.retryCount = object.retryCount ?? undefined;
+    return message;
+  },
+};
+
+function createBaseWorkflowRunEvent(): WorkflowRunEvent {
+  return { workflowRunId: '', eventType: 0, eventTimestamp: undefined, results: [] };
+}
+
+export const WorkflowRunEvent = {
+  encode(message: WorkflowRunEvent, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.workflowRunId !== '') {
+      writer.uint32(10).string(message.workflowRunId);
+    }
+    if (message.eventType !== 0) {
+      writer.uint32(16).int32(message.eventType);
+    }
+    if (message.eventTimestamp !== undefined) {
+      Timestamp.encode(toTimestamp(message.eventTimestamp), writer.uint32(26).fork()).ldelim();
+    }
+    for (const v of message.results) {
+      StepRunResult.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): WorkflowRunEvent {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWorkflowRunEvent();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workflowRunId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.eventType = reader.int32() as any;
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.eventTimestamp = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.results.push(StepRunResult.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WorkflowRunEvent {
+    return {
+      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+      eventType: isSet(object.eventType) ? workflowRunEventTypeFromJSON(object.eventType) : 0,
+      eventTimestamp: isSet(object.eventTimestamp)
+        ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
+      results: globalThis.Array.isArray(object?.results)
+        ? object.results.map((e: any) => StepRunResult.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: WorkflowRunEvent): unknown {
+    const obj: any = {};
+    if (message.workflowRunId !== '') {
+      obj.workflowRunId = message.workflowRunId;
+    }
+    if (message.eventType !== 0) {
+      obj.eventType = workflowRunEventTypeToJSON(message.eventType);
+    }
+    if (message.eventTimestamp !== undefined) {
+      obj.eventTimestamp = message.eventTimestamp.toISOString();
+    }
+    if (message.results?.length) {
+      obj.results = message.results.map((e) => StepRunResult.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<WorkflowRunEvent>): WorkflowRunEvent {
+    return WorkflowRunEvent.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<WorkflowRunEvent>): WorkflowRunEvent {
+    const message = createBaseWorkflowRunEvent();
+    message.workflowRunId = object.workflowRunId ?? '';
+    message.eventType = object.eventType ?? 0;
+    message.eventTimestamp = object.eventTimestamp ?? undefined;
+    message.results = object.results?.map((e) => StepRunResult.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseStepRunResult(): StepRunResult {
+  return { stepRunId: '', stepReadableId: '', jobRunId: '', error: undefined, output: undefined };
+}
+
+export const StepRunResult = {
+  encode(message: StepRunResult, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.stepRunId !== '') {
+      writer.uint32(10).string(message.stepRunId);
+    }
+    if (message.stepReadableId !== '') {
+      writer.uint32(18).string(message.stepReadableId);
+    }
+    if (message.jobRunId !== '') {
+      writer.uint32(26).string(message.jobRunId);
+    }
+    if (message.error !== undefined) {
+      writer.uint32(34).string(message.error);
+    }
+    if (message.output !== undefined) {
+      writer.uint32(42).string(message.output);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): StepRunResult {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStepRunResult();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.stepRunId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.stepReadableId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.jobRunId = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.error = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.output = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): StepRunResult {
+    return {
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      stepReadableId: isSet(object.stepReadableId) ? globalThis.String(object.stepReadableId) : '',
+      jobRunId: isSet(object.jobRunId) ? globalThis.String(object.jobRunId) : '',
+      error: isSet(object.error) ? globalThis.String(object.error) : undefined,
+      output: isSet(object.output) ? globalThis.String(object.output) : undefined,
+    };
+  },
+
+  toJSON(message: StepRunResult): unknown {
+    const obj: any = {};
+    if (message.stepRunId !== '') {
+      obj.stepRunId = message.stepRunId;
+    }
+    if (message.stepReadableId !== '') {
+      obj.stepReadableId = message.stepReadableId;
+    }
+    if (message.jobRunId !== '') {
+      obj.jobRunId = message.jobRunId;
+    }
+    if (message.error !== undefined) {
+      obj.error = message.error;
+    }
+    if (message.output !== undefined) {
+      obj.output = message.output;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<StepRunResult>): StepRunResult {
+    return StepRunResult.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<StepRunResult>): StepRunResult {
+    const message = createBaseStepRunResult();
+    message.stepRunId = object.stepRunId ?? '';
+    message.stepReadableId = object.stepReadableId ?? '';
+    message.jobRunId = object.jobRunId ?? '';
+    message.error = object.error ?? undefined;
+    message.output = object.output ?? undefined;
     return message;
   },
 };
@@ -2008,6 +2345,14 @@ export const DispatcherDefinition = {
       responseStream: true,
       options: {},
     },
+    subscribeToWorkflowRuns: {
+      name: 'SubscribeToWorkflowRuns',
+      requestType: SubscribeToWorkflowRunsRequest,
+      requestStream: true,
+      responseType: WorkflowRunEvent,
+      responseStream: true,
+      options: {},
+    },
     sendStepActionEvent: {
       name: 'SendStepActionEvent',
       requestType: StepActionEvent,
@@ -2069,6 +2414,10 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: SubscribeToWorkflowEventsRequest,
     context: CallContext & CallContextExt
   ): ServerStreamingMethodResult<DeepPartial<WorkflowEvent>>;
+  subscribeToWorkflowRuns(
+    request: AsyncIterable<SubscribeToWorkflowRunsRequest>,
+    context: CallContext & CallContextExt
+  ): ServerStreamingMethodResult<DeepPartial<WorkflowRunEvent>>;
   sendStepActionEvent(
     request: StepActionEvent,
     context: CallContext & CallContextExt
@@ -2113,6 +2462,10 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<SubscribeToWorkflowEventsRequest>,
     options?: CallOptions & CallOptionsExt
   ): AsyncIterable<WorkflowEvent>;
+  subscribeToWorkflowRuns(
+    request: AsyncIterable<DeepPartial<SubscribeToWorkflowRunsRequest>>,
+    options?: CallOptions & CallOptionsExt
+  ): AsyncIterable<WorkflowRunEvent>;
   sendStepActionEvent(
     request: DeepPartial<StepActionEvent>,
     options?: CallOptions & CallOptionsExt

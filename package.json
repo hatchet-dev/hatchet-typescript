@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.4.3",
+  "version": "0.5.6",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -89,6 +89,7 @@
   },
   "dependencies": {
     "@types/qs": "^6.9.11",
+    "abort-controller-x": "^0.4.3",
     "axios": "^1.6.7",
     "long": "^5.2.3",
     "nice-grpc": "^2.1.7",

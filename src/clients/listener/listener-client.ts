@@ -13,6 +13,7 @@ import { Logger } from '@hatchet/util/logger';
 import sleep from '@hatchet/util/sleep';
 import { Api } from '../rest';
 import { WorkflowRunStatus } from '../rest/generated/data-contracts';
+import { GrpcPooledListener } from './child-listener-client';
 
 const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
 const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 5;
@@ -225,11 +226,25 @@ export class ListenerClient {
   logger: Logger;
   api: Api;
 
+  childListeners: Record<string, GrpcPooledListener> = {};
+
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory, api: Api) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
     this.logger = new Logger(`Listener`, config.log_level);
     this.api = api;
+  }
+
+  getChildListener(workflowRunId: string, parentWorkflowRunId: string) {
+    if (!this.childListeners[parentWorkflowRunId]) {
+      this.childListeners[parentWorkflowRunId] = new GrpcPooledListener(this, () => {
+        // cleanup listener when all children are done
+        delete this.childListeners[parentWorkflowRunId];
+      });
+    }
+    return this.childListeners[parentWorkflowRunId].subscribe({
+      workflowRunId,
+    });
   }
 
   get(workflowRunId: string) {

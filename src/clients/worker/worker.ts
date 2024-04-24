@@ -87,7 +87,6 @@ export class Worker {
         jobs: [
           {
             name: workflow.id,
-            timeout: workflow.timeout || '60s',
             description: workflow.description,
             steps: workflow.steps.map<CreateWorkflowStepOpts>((step) => ({
               readableId: step.name,
@@ -174,12 +173,19 @@ export class Worker {
       const failure = (error: any) => {
         this.logger.error(`Step run ${action.stepRunId} failed: ${error.message}`);
 
+        if (error.stack) {
+          this.logger.error(error.stack);
+        }
+
         try {
           // Send the action event to the dispatcher
           const event = this.getStepActionEvent(
             action,
             StepActionEventType.STEP_EVENT_TYPE_FAILED,
-            error?.message || error
+            {
+              message: error?.message,
+              stack: error?.stack,
+            }
           );
           this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
             this.logger.error(`Could not send action event: ${e.message}`);

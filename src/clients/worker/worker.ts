@@ -12,6 +12,7 @@ import HatchetPromise from '@util/hatchet-promise/hatchet-promise';
 import { Workflow } from '@hatchet/workflow';
 import {
   ConcurrencyLimitStrategy,
+  CreateWorkflowJobOpts,
   CreateWorkflowStepOpts,
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
@@ -75,6 +76,25 @@ export class Worker {
           }
         : undefined;
 
+      const onFailureJob: CreateWorkflowJobOpts | undefined = workflow.onFailure
+        ? {
+            name: `${workflow.id}-on-failure`,
+            description: workflow.description,
+            steps: [
+              {
+                readableId: workflow.onFailure.name,
+                action: `${workflow.id}-on-failure:${workflow.onFailure.name}`,
+                timeout: workflow.onFailure.timeout || '60s',
+                inputs: '{}',
+                parents: [],
+                userData: '{}',
+                retries: workflow.onFailure.retries || 0,
+                rateLimits: workflow.onFailure.rate_limits ?? [],
+              },
+            ],
+          }
+        : undefined;
+
       const registeredWorkflow = this.client.admin.put_workflow({
         name: workflow.id,
         description: workflow.description,
@@ -84,6 +104,7 @@ export class Worker {
         scheduledTriggers: [],
         concurrency,
         scheduleTimeout: workflow.scheduleTimeout,
+        onFailureJob,
         jobs: [
           {
             name: workflow.id,
@@ -112,9 +133,16 @@ export class Worker {
       return acc;
     }, {});
 
+    const onFailureAction = workflow.onFailure
+      ? {
+          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
+        }
+      : {};
+
     this.action_registry = {
       ...this.action_registry,
       ...newActions,
+      ...onFailureAction,
     };
 
     this.action_registry = workflow.concurrency?.name

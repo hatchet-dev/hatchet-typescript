@@ -115,6 +115,8 @@ export interface CreateWorkflowVersionOpts {
   scheduleTimeout?: string | undefined;
   /** (optional) the input for the cron trigger */
   cronInput?: string | undefined;
+  /** (optional) the job to run on failure */
+  onFailureJob?: CreateWorkflowJobOpts | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -322,6 +324,7 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     concurrency: undefined,
     scheduleTimeout: undefined,
     cronInput: undefined,
+    onFailureJob: undefined,
   };
 }
 
@@ -356,6 +359,9 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.cronInput !== undefined) {
       writer.uint32(82).string(message.cronInput);
+    }
+    if (message.onFailureJob !== undefined) {
+      CreateWorkflowJobOpts.encode(message.onFailureJob, writer.uint32(90).fork()).ldelim();
     }
     return writer;
   },
@@ -437,6 +443,13 @@ export const CreateWorkflowVersionOpts = {
 
           message.cronInput = reader.string();
           continue;
+        case 11:
+          if (tag !== 90) {
+            break;
+          }
+
+          message.onFailureJob = CreateWorkflowJobOpts.decode(reader, reader.uint32());
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -470,6 +483,9 @@ export const CreateWorkflowVersionOpts = {
         ? globalThis.String(object.scheduleTimeout)
         : undefined,
       cronInput: isSet(object.cronInput) ? globalThis.String(object.cronInput) : undefined,
+      onFailureJob: isSet(object.onFailureJob)
+        ? CreateWorkflowJobOpts.fromJSON(object.onFailureJob)
+        : undefined,
     };
   },
 
@@ -505,6 +521,9 @@ export const CreateWorkflowVersionOpts = {
     if (message.cronInput !== undefined) {
       obj.cronInput = message.cronInput;
     }
+    if (message.onFailureJob !== undefined) {
+      obj.onFailureJob = CreateWorkflowJobOpts.toJSON(message.onFailureJob);
+    }
     return obj;
   },
 
@@ -526,6 +545,10 @@ export const CreateWorkflowVersionOpts = {
         : undefined;
     message.scheduleTimeout = object.scheduleTimeout ?? undefined;
     message.cronInput = object.cronInput ?? undefined;
+    message.onFailureJob =
+      object.onFailureJob !== undefined && object.onFailureJob !== null
+        ? CreateWorkflowJobOpts.fromPartial(object.onFailureJob)
+        : undefined;
     return message;
   },
 };

@@ -229,6 +229,8 @@ export interface TriggerWorkflowRequest {
    * child index/key match an existing workflow run.
    */
   childKey?: string | undefined;
+  /** (optional) additional metadata for the workflow */
+  additionalMetadata?: string | undefined;
 }
 
 export interface TriggerWorkflowResponse {
@@ -1462,6 +1464,7 @@ function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
     parentStepRunId: undefined,
     childIndex: undefined,
     childKey: undefined,
+    additionalMetadata: undefined,
   };
 }
 
@@ -1484,6 +1487,9 @@ export const TriggerWorkflowRequest = {
     }
     if (message.childKey !== undefined) {
       writer.uint32(50).string(message.childKey);
+    }
+    if (message.additionalMetadata !== undefined) {
+      writer.uint32(58).string(message.additionalMetadata);
     }
     return writer;
   },
@@ -1537,6 +1543,13 @@ export const TriggerWorkflowRequest = {
 
           message.childKey = reader.string();
           continue;
+        case 7:
+          if (tag !== 58) {
+            break;
+          }
+
+          message.additionalMetadata = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1556,6 +1569,9 @@ export const TriggerWorkflowRequest = {
         : undefined,
       childIndex: isSet(object.childIndex) ? globalThis.Number(object.childIndex) : undefined,
       childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
+      additionalMetadata: isSet(object.additionalMetadata)
+        ? globalThis.String(object.additionalMetadata)
+        : undefined,
     };
   },
 
@@ -1579,6 +1595,9 @@ export const TriggerWorkflowRequest = {
     if (message.childKey !== undefined) {
       obj.childKey = message.childKey;
     }
+    if (message.additionalMetadata !== undefined) {
+      obj.additionalMetadata = message.additionalMetadata;
+    }
     return obj;
   },
 
@@ -1593,6 +1612,7 @@ export const TriggerWorkflowRequest = {
     message.parentStepRunId = object.parentStepRunId ?? undefined;
     message.childIndex = object.childIndex ?? undefined;
     message.childKey = object.childKey ?? undefined;
+    message.additionalMetadata = object.additionalMetadata ?? undefined;
     return message;
   },
 };

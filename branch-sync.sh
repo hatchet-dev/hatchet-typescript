@@ -17,7 +17,10 @@ if [ $branch_exists -eq 0 ]; then
     git add .gitmodules
     echo "Updated .gitmodules with branch $current_branch"
 else
-    echo "Branch $current_branch does not exist in the remote repository"
+    echo "Branch $current_branch does not exist in the remote repository. Pulling main branch instead."
+    git config -f .gitmodules submodule.hatchet.branch main
+    git add .gitmodules
+    echo "Updated .gitmodules with branch main"
 fi
 
 # 4. Initialize and update the submodule

@@ -16,6 +16,8 @@ export interface Event {
   payload: string;
   /** when the event was generated */
   eventTimestamp: Date | undefined;
+  /** the payload for the event */
+  additionalMetadata?: string | undefined;
 }
 
 export interface PutLogRequest {
@@ -53,6 +55,8 @@ export interface PushEventRequest {
   payload: string;
   /** when the event was generated */
   eventTimestamp: Date | undefined;
+  /** metadata for the event */
+  additionalMetadata?: string | undefined;
 }
 
 export interface ReplayEventRequest {
@@ -61,7 +65,14 @@ export interface ReplayEventRequest {
 }
 
 function createBaseEvent(): Event {
-  return { tenantId: '', eventId: '', key: '', payload: '', eventTimestamp: undefined };
+  return {
+    tenantId: '',
+    eventId: '',
+    key: '',
+    payload: '',
+    eventTimestamp: undefined,
+    additionalMetadata: undefined,
+  };
 }
 
 export const Event = {
@@ -80,6 +91,9 @@ export const Event = {
     }
     if (message.eventTimestamp !== undefined) {
       Timestamp.encode(toTimestamp(message.eventTimestamp), writer.uint32(42).fork()).ldelim();
+    }
+    if (message.additionalMetadata !== undefined) {
+      writer.uint32(50).string(message.additionalMetadata);
     }
     return writer;
   },
@@ -126,6 +140,13 @@ export const Event = {
 
           message.eventTimestamp = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.additionalMetadata = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -143,6 +164,9 @@ export const Event = {
       payload: isSet(object.payload) ? globalThis.String(object.payload) : '',
       eventTimestamp: isSet(object.eventTimestamp)
         ? fromJsonTimestamp(object.eventTimestamp)
+        : undefined,
+      additionalMetadata: isSet(object.additionalMetadata)
+        ? globalThis.String(object.additionalMetadata)
         : undefined,
     };
   },
@@ -164,6 +188,9 @@ export const Event = {
     if (message.eventTimestamp !== undefined) {
       obj.eventTimestamp = message.eventTimestamp.toISOString();
     }
+    if (message.additionalMetadata !== undefined) {
+      obj.additionalMetadata = message.additionalMetadata;
+    }
     return obj;
   },
 
@@ -177,6 +204,7 @@ export const Event = {
     message.key = object.key ?? '';
     message.payload = object.payload ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
+    message.additionalMetadata = object.additionalMetadata ?? undefined;
     return message;
   },
 };
@@ -491,7 +519,7 @@ export const PutStreamEventResponse = {
 };
 
 function createBasePushEventRequest(): PushEventRequest {
-  return { key: '', payload: '', eventTimestamp: undefined };
+  return { key: '', payload: '', eventTimestamp: undefined, additionalMetadata: undefined };
 }
 
 export const PushEventRequest = {
@@ -504,6 +532,9 @@ export const PushEventRequest = {
     }
     if (message.eventTimestamp !== undefined) {
       Timestamp.encode(toTimestamp(message.eventTimestamp), writer.uint32(26).fork()).ldelim();
+    }
+    if (message.additionalMetadata !== undefined) {
+      writer.uint32(34).string(message.additionalMetadata);
     }
     return writer;
   },
@@ -536,6 +567,13 @@ export const PushEventRequest = {
 
           message.eventTimestamp = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.additionalMetadata = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -552,6 +590,9 @@ export const PushEventRequest = {
       eventTimestamp: isSet(object.eventTimestamp)
         ? fromJsonTimestamp(object.eventTimestamp)
         : undefined,
+      additionalMetadata: isSet(object.additionalMetadata)
+        ? globalThis.String(object.additionalMetadata)
+        : undefined,
     };
   },
 
@@ -566,6 +607,9 @@ export const PushEventRequest = {
     if (message.eventTimestamp !== undefined) {
       obj.eventTimestamp = message.eventTimestamp.toISOString();
     }
+    if (message.additionalMetadata !== undefined) {
+      obj.additionalMetadata = message.additionalMetadata;
+    }
     return obj;
   },
 
@@ -577,6 +621,7 @@ export const PushEventRequest = {
     message.key = object.key ?? '';
     message.payload = object.payload ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
+    message.additionalMetadata = object.additionalMetadata ?? undefined;
     return message;
   },
 };
@@ -717,7 +762,7 @@ export interface EventsServiceClient<CallOptionsExt = {}> {
 }
 
 function bytesFromBase64(b64: string): Uint8Array {
-  if (globalThis.Buffer) {
+  if ((globalThis as any).Buffer) {
     return Uint8Array.from(globalThis.Buffer.from(b64, 'base64'));
   } else {
     const bin = globalThis.atob(b64);
@@ -730,7 +775,7 @@ function bytesFromBase64(b64: string): Uint8Array {
 }
 
 function base64FromBytes(arr: Uint8Array): string {
-  if (globalThis.Buffer) {
+  if ((globalThis as any).Buffer) {
     return globalThis.Buffer.from(arr).toString('base64');
   } else {
     const bin: string[] = [];

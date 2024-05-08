@@ -105,6 +105,7 @@ export class AdminClient {
       parentStepRunId?: string | undefined;
       childIndex?: number | undefined;
       childKey?: string | undefined;
+      additionalMetadata?: Record<string, string> | undefined;
     }
   ) {
     try {
@@ -114,6 +115,9 @@ export class AdminClient {
         name: workflowName,
         input: inputStr,
         ...options,
+        additionalMetadata: options?.additionalMetadata
+          ? JSON.stringify(options?.additionalMetadata)
+          : undefined,
       });
 
       return resp.workflowRunId;

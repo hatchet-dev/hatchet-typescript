@@ -17,6 +17,10 @@ export enum LogLevel {
   DEBUG = 'DEBUG',
 }
 
+export interface PushEventOptions {
+  additionalMetadata?: Record<string, string>;
+}
+
 export class EventClient {
   config: ClientConfig;
   client: EventsServiceClient;
@@ -29,13 +33,16 @@ export class EventClient {
     this.logger = new Logger(`Dispatcher`, config.log_level);
   }
 
-  push<T>(type: string, input: T) {
+  push<T>(type: string, input: T, options: PushEventOptions = {}) {
     const namespacedType = `${this.config.namespace ?? ''}${type}`;
 
     const req: PushEventRequest = {
       key: namespacedType,
       payload: JSON.stringify(input),
       eventTimestamp: new Date(),
+      additionalMetadata: options.additionalMetadata
+        ? JSON.stringify(options.additionalMetadata)
+        : undefined,
     };
 
     try {

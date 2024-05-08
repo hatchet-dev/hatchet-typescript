@@ -54,6 +54,10 @@ export enum RateLimitDuration {
   SECOND = 0,
   MINUTE = 1,
   HOUR = 2,
+  DAY = 3,
+  WEEK = 4,
+  MONTH = 5,
+  YEAR = 6,
   UNRECOGNIZED = -1,
 }
 
@@ -68,6 +72,18 @@ export function rateLimitDurationFromJSON(object: any): RateLimitDuration {
     case 2:
     case 'HOUR':
       return RateLimitDuration.HOUR;
+    case 3:
+    case 'DAY':
+      return RateLimitDuration.DAY;
+    case 4:
+    case 'WEEK':
+      return RateLimitDuration.WEEK;
+    case 5:
+    case 'MONTH':
+      return RateLimitDuration.MONTH;
+    case 6:
+    case 'YEAR':
+      return RateLimitDuration.YEAR;
     case -1:
     case 'UNRECOGNIZED':
     default:
@@ -83,6 +99,14 @@ export function rateLimitDurationToJSON(object: RateLimitDuration): string {
       return 'MINUTE';
     case RateLimitDuration.HOUR:
       return 'HOUR';
+    case RateLimitDuration.DAY:
+      return 'DAY';
+    case RateLimitDuration.WEEK:
+      return 'WEEK';
+    case RateLimitDuration.MONTH:
+      return 'MONTH';
+    case RateLimitDuration.YEAR:
+      return 'YEAR';
     case RateLimitDuration.UNRECOGNIZED:
     default:
       return 'UNRECOGNIZED';

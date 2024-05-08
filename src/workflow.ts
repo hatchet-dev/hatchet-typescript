@@ -34,9 +34,13 @@ export const CreateWorkflowSchema = z.object({
   description: z.string(),
   version: z.string().optional(),
   scheduleTimeout: z.string().optional(),
+  /**
+   * @deprecated Workflow timeout is deprecated. Use step timeouts instead.
+   */
   timeout: HatchetTimeoutSchema.optional(),
   on: OnConfigSchema,
   steps: StepsSchema,
+  onFailure: CreateStepSchema?.optional(),
 });
 
 export interface Workflow extends z.infer<typeof CreateWorkflowSchema> {
@@ -44,4 +48,5 @@ export interface Workflow extends z.infer<typeof CreateWorkflowSchema> {
     key: (ctx: any) => string;
   };
   steps: CreateStep<any, any>[];
+  onFailure?: CreateStep<any, any>;
 }

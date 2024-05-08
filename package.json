@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.5.7",
+  "version": "0.6.0",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -38,6 +38,7 @@
     "example:rate": "npm run exec -- ./examples/rate-limit/events.ts",
     "worker:fanout": "npm run exec -- ./examples/fanout-worker.ts",
     "worker:simple": "npm run exec -- ./examples/simple-worker.ts",
+    "worker:on-failure": "npm run exec -- ./examples/on-failure.ts",
     "manual:trigger": "npm run exec -- ./examples/manual-trigger.ts",
     "worker:dag": "npm run exec -- ./examples/dag-worker.ts",
     "worker:concurrency": "npm run exec -- ./examples/concurrency/cancel-in-progress/concurrency-worker.ts",

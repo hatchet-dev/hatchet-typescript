@@ -447,6 +447,13 @@ export interface RefreshTimeoutResponse {
   timeoutAt: Date | undefined;
 }
 
+export interface ReleaseSlotRequest {
+  /** the id of the step run to release */
+  stepRunId: string;
+}
+
+export interface ReleaseSlotResponse {}
+
 function createBaseWorkerRegisterRequest(): WorkerRegisterRequest {
   return { workerName: '', actions: [], services: [], maxRuns: undefined };
 }
@@ -2438,6 +2445,106 @@ export const RefreshTimeoutResponse = {
   },
 };
 
+function createBaseReleaseSlotRequest(): ReleaseSlotRequest {
+  return { stepRunId: '' };
+}
+
+export const ReleaseSlotRequest = {
+  encode(message: ReleaseSlotRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.stepRunId !== '') {
+      writer.uint32(10).string(message.stepRunId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ReleaseSlotRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseSlotRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.stepRunId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseSlotRequest {
+    return { stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '' };
+  },
+
+  toJSON(message: ReleaseSlotRequest): unknown {
+    const obj: any = {};
+    if (message.stepRunId !== '') {
+      obj.stepRunId = message.stepRunId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<ReleaseSlotRequest>): ReleaseSlotRequest {
+    return ReleaseSlotRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<ReleaseSlotRequest>): ReleaseSlotRequest {
+    const message = createBaseReleaseSlotRequest();
+    message.stepRunId = object.stepRunId ?? '';
+    return message;
+  },
+};
+
+function createBaseReleaseSlotResponse(): ReleaseSlotResponse {
+  return {};
+}
+
+export const ReleaseSlotResponse = {
+  encode(_: ReleaseSlotResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): ReleaseSlotResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseSlotResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): ReleaseSlotResponse {
+    return {};
+  },
+
+  toJSON(_: ReleaseSlotResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create(base?: DeepPartial<ReleaseSlotResponse>): ReleaseSlotResponse {
+    return ReleaseSlotResponse.fromPartial(base ?? {});
+  },
+  fromPartial(_: DeepPartial<ReleaseSlotResponse>): ReleaseSlotResponse {
+    const message = createBaseReleaseSlotResponse();
+    return message;
+  },
+};
+
 export type DispatcherDefinition = typeof DispatcherDefinition;
 export const DispatcherDefinition = {
   name: 'Dispatcher',
@@ -2536,6 +2643,14 @@ export const DispatcherDefinition = {
       responseStream: false,
       options: {},
     },
+    releaseSlot: {
+      name: 'ReleaseSlot',
+      requestType: ReleaseSlotRequest,
+      requestStream: false,
+      responseType: ReleaseSlotResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -2589,6 +2704,10 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: RefreshTimeoutRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<RefreshTimeoutResponse>>;
+  releaseSlot(
+    request: ReleaseSlotRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<ReleaseSlotResponse>>;
 }
 
 export interface DispatcherClient<CallOptionsExt = {}> {
@@ -2641,6 +2760,10 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<RefreshTimeoutRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<RefreshTimeoutResponse>;
+  releaseSlot(
+    request: DeepPartial<ReleaseSlotRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<ReleaseSlotResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

@@ -62,4 +62,15 @@ export class DispatcherClient {
       this.logger.warn(`Could not put overrides data: ${e.message}`);
     });
   }
+
+  async refreshTimeout(incrementTimeoutBy: string, stepRunId: string) {
+    try {
+      return this.client.refreshTimeout({
+        stepRunId,
+        incrementTimeoutBy,
+      });
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
 }

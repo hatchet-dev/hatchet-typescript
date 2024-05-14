@@ -183,6 +183,24 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
+  /**
+   * Refreshes the timeout for the current step.
+   * @param incrementBy - The interval by which to increment the timeout.
+   *                     The interval should be specified in the format of '10s' for 10 seconds,
+   *                     '1m' for 1 minute, or '1d' for 1 day.
+   */
+  async refreshTimeout(incrementBy: string) {
+    const { stepRunId } = this.action;
+
+    if (!stepRunId) {
+      // log a warning
+      this.logger.warn('cannot log from context without stepRunId');
+      return;
+    }
+
+    await this.client.dispatcher.refreshTimeout(incrementBy, stepRunId);
+  }
+
   async putStream(data: string | Uint8Array) {
     const { stepRunId } = this.action;
 

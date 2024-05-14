@@ -201,7 +201,11 @@ export class Context<T, K> {
     await this.client.event.putStream(stepRunId, data);
   }
 
-  spawnWorkflow<P = unknown>(workflowName: string, input: T, key?: string): ChildWorkflowRef<P> {
+  spawnWorkflow<P = unknown, Q = unknown>(
+    workflowName: string,
+    input: Q,
+    key?: string
+  ): ChildWorkflowRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
     const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {

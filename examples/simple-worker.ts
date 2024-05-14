@@ -9,7 +9,7 @@ const sleep = (ms: number) =>
   });
 
 const workflow: Workflow = {
-  id: 'simple-workflow-pen',
+  id: 'simple-workflow',
   description: 'test',
   on: {
     event: 'user:create',
@@ -17,43 +17,11 @@ const workflow: Workflow = {
   steps: [
     {
       name: 'step1',
-      retries: 2,
-      timeout: '10s',
       run: async (ctx) => {
-        console.log('RESOURCE INTENSIVE PROCESS...');
-
-        try {
-
-          ctx.controller.signal.addEventListener('abort', () => {
-            throw new Error('ABORTED IMMEDIATELY!');
-          });
-        } catch (e) {
-          console.log('error', e);
-        }
-
-
-        await sleep(11_000);
-        console.log('check abort')
-        if (ctx.controller.signal.aborted) {
-          console.log('ABORTED!');
-          throw new Error('ABORTED!');
-        }
-
-        // await ctx.releaseSlot();
-        await sleep(10_000);
-        console.log('executed step1!');
-        return { step1: 'step1 results!' };
-      },
-    },
-    {
-      name: 'step1a',
-      retries: 2,
-      timeout: '10s',
-      run: async (ctx) => {
-        console.log('RESOURCE INTENSIVE PROCESS...');
+        console.log('starting step1 with the following input', ctx.workflowInput());
+        console.log('waiting 5 seconds...');
         await sleep(5000);
-        // await ctx.releaseSlot();
-        await sleep(60_000);
+        ctx.putStream('step1 stream');
         console.log('executed step1!');
         return { step1: 'step1 results!' };
       },
@@ -70,7 +38,7 @@ const workflow: Workflow = {
 };
 
 async function main() {
-  const worker = await hatchet.worker('example-worker', 5);
+  const worker = await hatchet.worker('example-worker');
   await worker.registerWorkflow(workflow);
   worker.start();
 }

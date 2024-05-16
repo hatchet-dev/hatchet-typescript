@@ -194,7 +194,7 @@ export class Context<T, K> {
 
     if (!stepRunId) {
       // log a warning
-      this.logger.warn('cannot log from context without stepRunId');
+      this.logger.warn('cannot refresh timeout from context without stepRunId');
       return;
     }
 

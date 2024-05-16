@@ -437,6 +437,16 @@ export interface HeartbeatRequest {
 
 export interface HeartbeatResponse {}
 
+export interface RefreshTimeoutRequest {
+  /** the id of the step run to release */
+  stepRunId: string;
+  incrementTimeoutBy: string;
+}
+
+export interface RefreshTimeoutResponse {
+  timeoutAt: Date | undefined;
+}
+
 export interface ReleaseSlotRequest {
   /** the id of the step run to release */
   stepRunId: string;
@@ -2302,6 +2312,139 @@ export const HeartbeatResponse = {
   },
 };
 
+function createBaseRefreshTimeoutRequest(): RefreshTimeoutRequest {
+  return { stepRunId: '', incrementTimeoutBy: '' };
+}
+
+export const RefreshTimeoutRequest = {
+  encode(message: RefreshTimeoutRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.stepRunId !== '') {
+      writer.uint32(10).string(message.stepRunId);
+    }
+    if (message.incrementTimeoutBy !== '') {
+      writer.uint32(18).string(message.incrementTimeoutBy);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): RefreshTimeoutRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRefreshTimeoutRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.stepRunId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.incrementTimeoutBy = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RefreshTimeoutRequest {
+    return {
+      stepRunId: isSet(object.stepRunId) ? globalThis.String(object.stepRunId) : '',
+      incrementTimeoutBy: isSet(object.incrementTimeoutBy)
+        ? globalThis.String(object.incrementTimeoutBy)
+        : '',
+    };
+  },
+
+  toJSON(message: RefreshTimeoutRequest): unknown {
+    const obj: any = {};
+    if (message.stepRunId !== '') {
+      obj.stepRunId = message.stepRunId;
+    }
+    if (message.incrementTimeoutBy !== '') {
+      obj.incrementTimeoutBy = message.incrementTimeoutBy;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RefreshTimeoutRequest>): RefreshTimeoutRequest {
+    return RefreshTimeoutRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RefreshTimeoutRequest>): RefreshTimeoutRequest {
+    const message = createBaseRefreshTimeoutRequest();
+    message.stepRunId = object.stepRunId ?? '';
+    message.incrementTimeoutBy = object.incrementTimeoutBy ?? '';
+    return message;
+  },
+};
+
+function createBaseRefreshTimeoutResponse(): RefreshTimeoutResponse {
+  return { timeoutAt: undefined };
+}
+
+export const RefreshTimeoutResponse = {
+  encode(message: RefreshTimeoutResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.timeoutAt !== undefined) {
+      Timestamp.encode(toTimestamp(message.timeoutAt), writer.uint32(10).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): RefreshTimeoutResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRefreshTimeoutResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.timeoutAt = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RefreshTimeoutResponse {
+    return { timeoutAt: isSet(object.timeoutAt) ? fromJsonTimestamp(object.timeoutAt) : undefined };
+  },
+
+  toJSON(message: RefreshTimeoutResponse): unknown {
+    const obj: any = {};
+    if (message.timeoutAt !== undefined) {
+      obj.timeoutAt = message.timeoutAt.toISOString();
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<RefreshTimeoutResponse>): RefreshTimeoutResponse {
+    return RefreshTimeoutResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<RefreshTimeoutResponse>): RefreshTimeoutResponse {
+    const message = createBaseRefreshTimeoutResponse();
+    message.timeoutAt = object.timeoutAt ?? undefined;
+    return message;
+  },
+};
+
 function createBaseReleaseSlotRequest(): ReleaseSlotRequest {
   return { stepRunId: '' };
 }
@@ -2492,6 +2635,14 @@ export const DispatcherDefinition = {
       responseStream: false,
       options: {},
     },
+    refreshTimeout: {
+      name: 'RefreshTimeout',
+      requestType: RefreshTimeoutRequest,
+      requestStream: false,
+      responseType: RefreshTimeoutResponse,
+      responseStream: false,
+      options: {},
+    },
     releaseSlot: {
       name: 'ReleaseSlot',
       requestType: ReleaseSlotRequest,
@@ -2549,6 +2700,10 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: WorkerUnsubscribeRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<WorkerUnsubscribeResponse>>;
+  refreshTimeout(
+    request: RefreshTimeoutRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<RefreshTimeoutResponse>>;
   releaseSlot(
     request: ReleaseSlotRequest,
     context: CallContext & CallContextExt
@@ -2601,6 +2756,10 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<WorkerUnsubscribeRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<WorkerUnsubscribeResponse>;
+  refreshTimeout(
+    request: DeepPartial<RefreshTimeoutRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<RefreshTimeoutResponse>;
   releaseSlot(
     request: DeepPartial<ReleaseSlotRequest>,
     options?: CallOptions & CallOptionsExt

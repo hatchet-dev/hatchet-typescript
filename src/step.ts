@@ -183,6 +183,12 @@ export class Context<T, K> {
     this.client.event.putLog(stepRunId, message, level);
   }
 
+  async releaseSlot(): Promise<void> {
+    await this.client.dispatcher.client.releaseSlot({
+      stepRunId: this.action.stepRunId,
+    });
+  }
+
   async putStream(data: string | Uint8Array) {
     const { stepRunId } = this.action;
 

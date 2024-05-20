@@ -33,11 +33,6 @@ describe('e2e', () => {
         {
           name: 'step1',
           run: async (ctx) => {
-            console.log('invoked!! ✅✅✅✅✅✅✅');
-            console.log('invoked!! ✅✅✅✅✅✅✅');
-            console.log('invoked!! ✅✅✅✅✅✅✅');
-            console.log('invoked!! ✅✅✅✅✅✅✅');
-            console.log('invoked!! ✅✅✅✅✅✅✅');
             invoked += 1;
             return { message: `${ctx.workflowName()} results!` };
           },
@@ -57,7 +52,7 @@ describe('e2e', () => {
     await worker.registerWorkflow(workflow);
 
     const secret = 'secret';
-    const server = createServer(await worker.handler(secret));
+    const server = createServer(await worker.httpHandler(secret));
 
     await new Promise((resolve) => {
       server.listen(port, () => {

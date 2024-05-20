@@ -425,39 +425,34 @@ export class Worker {
     }
   }
 
-  async handler(secret: string) {
+  async httpHandler(secret: string) {
     // ensure all workflows are registered
     await Promise.all(this.registeredWorkflowPromises);
 
     return (req: IncomingMessage, res: ServerResponse) => {
       const handle = async () => {
         const signature = req.headers['x-hatchet-signature'];
+        if (!signature) {
+          this.logger.error('No signature provided');
+          res.writeHead(401);
+          res.end();
+          return;
+        }
 
         const body = await getBody(req);
 
-        // verfy hmac
+        // verify hmac signature
         const actualSignature = createHmac('sha256', secret).update(body).digest('hex');
-        console.log('signature', signature);
-        console.log('actualSignature', actualSignature);
         if (actualSignature !== signature) {
           this.logger.error(`Invalid signature, expected ${actualSignature}, got ${signature}`);
-          res.writeHead(401, 'Invalid signature');
+          res.writeHead(401);
           res.end();
           return;
         }
 
         const action = ActionObject.parse(JSON.parse(body));
-        const type = action.actionType || ActionType.START_STEP_RUN;
 
-        if (type === ActionType.START_STEP_RUN) {
-          this.handleStartStepRun(action);
-        } else if (type === ActionType.CANCEL_STEP_RUN) {
-          this.handleCancelStepRun(action);
-        } else if (type === ActionType.START_GET_GROUP_KEY) {
-          this.handleStartGroupKeyRun(action);
-        } else {
-          this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
-        }
+        this.handleAction(action);
 
         res.writeHead(200, 'OK');
         res.end();
@@ -492,17 +487,7 @@ export class Worker {
           `Worker ${this.name} received action ${action.actionId}:${action.actionType}`
         );
 
-        if (action.actionType === ActionType.START_STEP_RUN) {
-          this.handleStartStepRun(action);
-        } else if (action.actionType === ActionType.CANCEL_STEP_RUN) {
-          this.handleCancelStepRun(action);
-        } else if (action.actionType === ActionType.START_GET_GROUP_KEY) {
-          this.handleStartGroupKeyRun(action);
-        } else {
-          this.logger.error(
-            `Worker ${this.name} received unknown action type ${action.actionType}`
-          );
-        }
+        this.handleAction(action);
       }
     } catch (e: any) {
       // TODO TEMP this needs to be handled better
@@ -512,6 +497,19 @@ export class Worker {
       }
       this.logger.error(`Could not run worker: ${e.message}`);
       throw new HatchetError(`Could not run worker: ${e.message}`);
+    }
+  }
+
+  handleAction(action: Action) {
+    const type = action.actionType || ActionType.START_STEP_RUN;
+    if (type === ActionType.START_STEP_RUN) {
+      this.handleStartStepRun(action);
+    } else if (type === ActionType.CANCEL_STEP_RUN) {
+      this.handleCancelStepRun(action);
+    } else if (type === ActionType.START_GET_GROUP_KEY) {
+      this.handleStartGroupKeyRun(action);
+    } else {
+      this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
     }
   }
 }

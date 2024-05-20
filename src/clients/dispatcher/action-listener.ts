@@ -6,6 +6,7 @@ import sleep from '@util/sleep';
 import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
 
+import { z } from 'zod';
 import { DispatcherClient } from './dispatcher-client';
 import { Heartbeat } from './heartbeat/heartbeat-controller';
 
@@ -18,20 +19,22 @@ enum ListenStrategy {
   LISTEN_STRATEGY_V2 = 2,
 }
 
-export interface Action {
-  tenantId: string;
-  jobId: string;
-  jobName: string;
-  jobRunId: string;
-  stepId: string;
-  stepRunId: string;
-  actionId: string;
-  actionType: number;
-  actionPayload: string;
-  workflowRunId: string;
-  getGroupKeyRunId: string;
-  stepName: string;
-}
+export const ActionObject = z.object({
+  tenantId: z.string(),
+  jobId: z.string(),
+  jobName: z.string(),
+  jobRunId: z.string(),
+  stepId: z.string(),
+  stepRunId: z.string(),
+  actionId: z.string(),
+  actionType: z.number().optional(),
+  actionPayload: z.string(),
+  workflowRunId: z.string(),
+  getGroupKeyRunId: z.string().optional(),
+  stepName: z.string(),
+});
+
+export type Action = z.infer<typeof ActionObject>;
 
 export class ActionListener {
   config: ClientConfig;

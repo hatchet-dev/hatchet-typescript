@@ -34,6 +34,7 @@ export const CreateWorkflowSchema = z.object({
   description: z.string(),
   version: z.string().optional(),
   scheduleTimeout: z.string().optional(),
+  webhook: z.string().optional(),
   /**
    * @deprecated Workflow timeout is deprecated. Use step timeouts instead.
    */

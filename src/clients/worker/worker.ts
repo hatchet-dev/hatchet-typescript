@@ -1,6 +1,6 @@
 import { HatchetClient } from '@clients/hatchet-client';
 import HatchetError from '@util/errors/hatchet-error';
-import { Action, ActionListener } from '@clients/dispatcher/action-listener';
+import { Action, ActionListener, ActionObject } from '@clients/dispatcher/action-listener';
 import {
   StepActionEvent,
   StepActionEventType,
@@ -17,7 +17,8 @@ import {
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
-// import sleep from '@hatchet/util/sleep';
+import { IncomingMessage, ServerResponse } from 'http';
+import { createHmac } from 'crypto';
 import { Context, StepRunFunction } from '../../step';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
@@ -98,6 +99,7 @@ export class Worker {
       const registeredWorkflow = this.client.admin.put_workflow({
         name: workflow.id,
         description: workflow.description,
+        webhook: workflow.webhook,
         version: workflow.version || '',
         eventTriggers: workflow.on.event ? [this.client.config.namespace + workflow.on.event] : [],
         cronTriggers: workflow.on.cron ? [workflow.on.cron] : [],
@@ -124,6 +126,16 @@ export class Worker {
       });
       this.registeredWorkflowPromises.push(registeredWorkflow);
       await registeredWorkflow;
+
+      if (workflow.webhook) {
+        await this.client.dispatcher.client.register({
+          workerName: this.name,
+          services: ['default'],
+          webhook: true,
+          actions: workflow.steps.map((step) => `${workflow.id}:${step.name}`),
+          maxRuns: workflow.concurrency?.maxRuns,
+        });
+      }
     } catch (e: any) {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }
@@ -246,6 +258,11 @@ export class Worker {
 
       const key = action.getGroupKeyRunId;
 
+      if (!key) {
+        this.logger.error(`No group key run id provided for action ${actionId}`);
+        return;
+      }
+
       this.contexts[key] = context;
 
       this.logger.debug(`Starting group key run ${key}`);
@@ -303,7 +320,7 @@ export class Worker {
       };
 
       const future = new HatchetPromise(run().then(success).catch(failure));
-      this.futures[action.getGroupKeyRunId] = future;
+      this.futures[key] = future;
 
       // Send the action event to the dispatcher
       const event = this.getGroupKeyActionEvent(
@@ -341,6 +358,9 @@ export class Worker {
     eventType: GroupKeyActionEventType,
     payload: any = ''
   ): GroupKeyActionEvent {
+    if (!action.getGroupKeyRunId) {
+      throw new HatchetError('No group key run id provided');
+    }
     return {
       workerId: this.name,
       workflowRunId: action.workflowRunId,
@@ -405,6 +425,52 @@ export class Worker {
     }
   }
 
+  async handler(secret: string) {
+    // ensure all workflows are registered
+    await Promise.all(this.registeredWorkflowPromises);
+
+    return (req: IncomingMessage, res: ServerResponse) => {
+      const handle = async () => {
+        const signature = req.headers['x-hatchet-signature'];
+
+        const body = await getBody(req);
+
+        // verfy hmac
+        const actualSignature = createHmac('sha256', secret).update(body).digest('hex');
+        console.log('signature', signature);
+        console.log('actualSignature', actualSignature);
+        if (actualSignature !== signature) {
+          this.logger.error(`Invalid signature, expected ${actualSignature}, got ${signature}`);
+          res.writeHead(401, 'Invalid signature');
+          res.end();
+          return;
+        }
+
+        const action = ActionObject.parse(JSON.parse(body));
+        const type = action.actionType || ActionType.START_STEP_RUN;
+
+        if (type === ActionType.START_STEP_RUN) {
+          this.handleStartStepRun(action);
+        } else if (type === ActionType.CANCEL_STEP_RUN) {
+          this.handleCancelStepRun(action);
+        } else if (type === ActionType.START_GET_GROUP_KEY) {
+          this.handleStartGroupKeyRun(action);
+        } else {
+          this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
+        }
+
+        res.writeHead(200, 'OK');
+        res.end();
+      };
+
+      handle().catch((e) => {
+        this.logger.error(`Error handling request: ${e.message}`);
+        res.writeHead(500, 'Internal server error');
+        res.end();
+      });
+    };
+  }
+
   async start() {
     // ensure all workflows are registered
     await Promise.all(this.registeredWorkflowPromises);
@@ -449,3 +515,15 @@ export class Worker {
     }
   }
 }
+
+const getBody = (req: IncomingMessage): Promise<string> => {
+  return new Promise((resolve) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      resolve(body);
+    });
+  });
+};

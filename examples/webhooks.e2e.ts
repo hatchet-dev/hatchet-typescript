@@ -1,6 +1,9 @@
+import { createServer } from 'node:http';
 import { Workflow, Worker } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
+
+const port = 8369;
 
 describe('e2e', () => {
   let hatchet: Hatchet;
@@ -8,7 +11,7 @@ describe('e2e', () => {
 
   beforeEach(async () => {
     hatchet = Hatchet.init();
-    worker = await hatchet.worker('example-worker');
+    worker = await hatchet.worker('simple-webhook-workflow');
   });
 
   afterEach(async () => {
@@ -16,34 +19,35 @@ describe('e2e', () => {
     await sleep(2000);
   });
 
-  xit('should pass a simple workflow', async () => {
+  it('should pass a simple workflow', async () => {
     let invoked = 0;
-    const start = new Date();
 
     const workflow: Workflow = {
-      id: 'simple-e2e-workflow',
+      id: 'simple-webhook-workflow',
+      webhook: `http://localhost:${port}/webhook`,
       description: 'test',
       on: {
-        event: 'user:create',
+        event: 'user:create-webhook',
       },
       steps: [
         {
           name: 'step1',
           run: async (ctx) => {
-            console.log('starting step1 with the following input', ctx.workflowInput());
-            console.log(`took ${new Date().getTime() - start.getTime()}ms`);
+            console.log('invoked!! ✅✅✅✅✅✅✅');
+            console.log('invoked!! ✅✅✅✅✅✅✅');
+            console.log('invoked!! ✅✅✅✅✅✅✅');
+            console.log('invoked!! ✅✅✅✅✅✅✅');
+            console.log('invoked!! ✅✅✅✅✅✅✅');
             invoked += 1;
-            return { step1: 'step1 results!' };
+            return { message: `${ctx.workflowName()} results!` };
           },
         },
         {
           name: 'step2',
           parents: ['step1'],
           run: (ctx) => {
-            console.log(`step 1 -> 2 took ${new Date().getTime() - start.getTime()}ms`);
-            console.log('executed step2 after step1 returned ', ctx.stepOutput('step1'));
             invoked += 1;
-            return { step2: 'step2 results!' };
+            return { message: `${ctx.workflowName()} results!` };
           },
         },
       ],
@@ -52,7 +56,14 @@ describe('e2e', () => {
     console.log('registering workflow...');
     await worker.registerWorkflow(workflow);
 
-    void worker.start();
+    const secret = 'secret';
+    const server = createServer(await worker.handler(secret));
+
+    await new Promise((resolve) => {
+      server.listen(port, () => {
+        resolve('');
+      });
+    });
 
     console.log('worker started.');
 
@@ -60,7 +71,7 @@ describe('e2e', () => {
 
     console.log('pushing event...');
 
-    await hatchet.event.push('user:create', {
+    await hatchet.event.push('user:create-webhook', {
       test: 'test',
     });
 

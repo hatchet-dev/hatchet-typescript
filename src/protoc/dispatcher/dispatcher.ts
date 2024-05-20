@@ -272,6 +272,8 @@ export interface WorkerRegisterRequest {
   services: string[];
   /** (optional) the max number of runs this worker can handle */
   maxRuns?: number | undefined;
+  /** (optional) whether this worker should be a webhook worker */
+  webhook?: boolean | undefined;
 }
 
 export interface WorkerRegisterResponse {
@@ -455,7 +457,7 @@ export interface ReleaseSlotRequest {
 export interface ReleaseSlotResponse {}
 
 function createBaseWorkerRegisterRequest(): WorkerRegisterRequest {
-  return { workerName: '', actions: [], services: [], maxRuns: undefined };
+  return { workerName: '', actions: [], services: [], maxRuns: undefined, webhook: undefined };
 }
 
 export const WorkerRegisterRequest = {
@@ -471,6 +473,9 @@ export const WorkerRegisterRequest = {
     }
     if (message.maxRuns !== undefined) {
       writer.uint32(32).int32(message.maxRuns);
+    }
+    if (message.webhook !== undefined) {
+      writer.uint32(40).bool(message.webhook);
     }
     return writer;
   },
@@ -510,6 +515,13 @@ export const WorkerRegisterRequest = {
 
           message.maxRuns = reader.int32();
           continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.webhook = reader.bool();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -529,6 +541,7 @@ export const WorkerRegisterRequest = {
         ? object.services.map((e: any) => globalThis.String(e))
         : [],
       maxRuns: isSet(object.maxRuns) ? globalThis.Number(object.maxRuns) : undefined,
+      webhook: isSet(object.webhook) ? globalThis.Boolean(object.webhook) : undefined,
     };
   },
 
@@ -546,6 +559,9 @@ export const WorkerRegisterRequest = {
     if (message.maxRuns !== undefined) {
       obj.maxRuns = Math.round(message.maxRuns);
     }
+    if (message.webhook !== undefined) {
+      obj.webhook = message.webhook;
+    }
     return obj;
   },
 
@@ -558,6 +574,7 @@ export const WorkerRegisterRequest = {
     message.actions = object.actions?.map((e) => e) || [];
     message.services = object.services?.map((e) => e) || [];
     message.maxRuns = object.maxRuns ?? undefined;
+    message.webhook = object.webhook ?? undefined;
     return message;
   },
 };

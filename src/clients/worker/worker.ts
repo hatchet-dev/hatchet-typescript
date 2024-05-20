@@ -425,34 +425,57 @@ export class Worker {
     }
   }
 
+  private async handle(
+    body: string | undefined,
+    secret: string | undefined,
+    signature: string | string[] | undefined
+  ) {
+    if (!signature || typeof signature !== 'string') {
+      throw new HatchetError('No signature provided');
+    }
+    if (!secret) {
+      throw new HatchetError('No secret provided');
+    }
+    if (!body) {
+      throw new HatchetError('No body provided');
+    }
+
+    // verify hmac signature
+    const actualSignature = createHmac('sha256', secret).update(body).digest('hex');
+    if (actualSignature !== signature) {
+      throw new HatchetError(`Invalid signature, expected ${actualSignature}, got ${signature}`);
+    }
+
+    const action = ActionObject.parse(JSON.parse(body));
+
+    this.handleAction(action);
+  }
+
+  // Handler for expressjs
+  async expressHandler(secret: string) {
+    await Promise.all(this.registeredWorkflowPromises);
+
+    return (req: any, res: any) => {
+      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
+        .then(() => {
+          res.sendStatus(200);
+        })
+        .catch((e) => {
+          this.logger.error(`Error handling request: ${e.message}`);
+          res.sendStatus(500);
+        });
+    };
+  }
+
+  // Handler for Node.JS HTTP server
   async httpHandler(secret: string) {
-    // ensure all workflows are registered
     await Promise.all(this.registeredWorkflowPromises);
 
     return (req: IncomingMessage, res: ServerResponse) => {
       const handle = async () => {
-        const signature = req.headers['x-hatchet-signature'];
-        if (!signature) {
-          this.logger.error('No signature provided');
-          res.writeHead(401);
-          res.end();
-          return;
-        }
-
         const body = await getBody(req);
 
-        // verify hmac signature
-        const actualSignature = createHmac('sha256', secret).update(body).digest('hex');
-        if (actualSignature !== signature) {
-          this.logger.error(`Invalid signature, expected ${actualSignature}, got ${signature}`);
-          res.writeHead(401);
-          res.end();
-          return;
-        }
-
-        const action = ActionObject.parse(JSON.parse(body));
-
-        this.handleAction(action);
+        await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
 
         res.writeHead(200, 'OK');
         res.end();

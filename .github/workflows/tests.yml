@@ -112,6 +112,8 @@ jobs:
           SERVER_AUTH_SET_EMAIL_VERIFIED=true
           EOF
           
+          export SEED_DEVELOPMENT=true
+          
           go run ./cmd/hatchet-admin quickstart
 
           go run ./cmd/hatchet-engine --config ./generated/ &

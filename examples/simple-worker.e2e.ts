@@ -16,7 +16,7 @@ describe('e2e', () => {
     await sleep(2000);
   });
 
-  xit('should pass a simple workflow', async () => {
+  it('should pass a simple workflow', async () => {
     let invoked = 0;
     const start = new Date();
 

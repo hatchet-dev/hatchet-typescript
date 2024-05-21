@@ -90,7 +90,7 @@ devDependencies:
     version: 4.6.0(eslint@8.56.0)
   eslint-plugin-react-refresh:
     specifier: ^0.4.6
-    version: 0.4.6(eslint@8.56.0)
+    version: 0.4.7(eslint@8.56.0)
   eslint-plugin-unused-imports:
     specifier: ^3.0.0
     version: 3.0.0(@typescript-eslint/eslint-plugin@6.19.0)(eslint@8.56.0)
@@ -2478,8 +2478,8 @@ packages:
       eslint: 8.56.0
     dev: true
 
-  /eslint-plugin-react-refresh@0.4.6(eslint@8.56.0):
-    resolution: {integrity: sha512-NjGXdm7zgcKRkKMua34qVO9doI7VOxZ6ancSvBELJSSoX97jyndXcSoa8XBh69JoB31dNz3EEzlMcizZl7LaMA==}
+  /eslint-plugin-react-refresh@0.4.7(eslint@8.56.0):
+    resolution: {integrity: sha512-yrj+KInFmwuQS2UQcg1SF83ha1tuHC1jMQbRNyuWtlEzzKRDgAl7L4Yp4NlDUZTZNlWvHEzOtJhMi40R7JxcSw==}
     peerDependencies:
       eslint: '>=7'
     dependencies:

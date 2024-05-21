@@ -51,7 +51,7 @@ devDependencies:
     version: 10.4.17(postcss@8.4.33)
   dotenv-cli:
     specifier: ^7.3.0
-    version: 7.3.0
+    version: 7.4.2
   eslint:
     specifier: ^8.56.0
     version: 8.56.0
@@ -1962,8 +1962,8 @@ packages:
       esutils: 2.0.3
     dev: true
 
-  /dotenv-cli@7.3.0:
-    resolution: {integrity: sha512-314CA4TyK34YEJ6ntBf80eUY+t1XaFLyem1k9P0sX1gn30qThZ5qZr/ZwE318gEnzyYP9yj9HJk6SqwE0upkfw==}
+  /dotenv-cli@7.4.2:
+    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
     hasBin: true
     dependencies:
       cross-spawn: 7.0.3

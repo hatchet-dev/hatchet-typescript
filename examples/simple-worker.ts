@@ -17,7 +17,6 @@ const workflow: Workflow = {
   steps: [
     {
       name: 'step1',
-      timeout: '5s',
       run: async (ctx) => {
         console.log('starting step1 with the following input', ctx.workflowInput());
         console.log('waiting 5 seconds...');

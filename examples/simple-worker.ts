@@ -18,19 +18,11 @@ const workflow: Workflow = {
     {
       name: 'step1',
       timeout: '5s',
-      retries: 3,
       run: async (ctx) => {
         console.log('starting step1 with the following input', ctx.workflowInput());
         console.log('waiting 5 seconds...');
-        console.log(ctx.retryCount())
-        await sleep(6000);
+        await sleep(5000);
         ctx.putStream('step1 stream');
-
-        if (ctx.controller.signal.aborted) {
-          console.log('aborted');
-          throw new Error('aborted');
-        }
-
         console.log('executed step1!');
         return { step1: 'step1 results!' };
       },

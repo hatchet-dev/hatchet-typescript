@@ -308,6 +308,8 @@ export interface AssignedAction {
   actionPayload: string;
   /** the step name */
   stepName: string;
+  /** the count number of the retry attempt */
+  retryCount: number;
 }
 
 export interface WorkerListenRequest {
@@ -665,6 +667,7 @@ function createBaseAssignedAction(): AssignedAction {
     actionType: 0,
     actionPayload: '',
     stepName: '',
+    retryCount: 0,
   };
 }
 
@@ -705,6 +708,9 @@ export const AssignedAction = {
     }
     if (message.stepName !== '') {
       writer.uint32(98).string(message.stepName);
+    }
+    if (message.retryCount !== 0) {
+      writer.uint32(104).int32(message.retryCount);
     }
     return writer;
   },
@@ -800,6 +806,13 @@ export const AssignedAction = {
 
           message.stepName = reader.string();
           continue;
+        case 13:
+          if (tag !== 104) {
+            break;
+          }
+
+          message.retryCount = reader.int32();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -825,6 +838,7 @@ export const AssignedAction = {
       actionType: isSet(object.actionType) ? actionTypeFromJSON(object.actionType) : 0,
       actionPayload: isSet(object.actionPayload) ? globalThis.String(object.actionPayload) : '',
       stepName: isSet(object.stepName) ? globalThis.String(object.stepName) : '',
+      retryCount: isSet(object.retryCount) ? globalThis.Number(object.retryCount) : 0,
     };
   },
 
@@ -866,6 +880,9 @@ export const AssignedAction = {
     if (message.stepName !== '') {
       obj.stepName = message.stepName;
     }
+    if (message.retryCount !== 0) {
+      obj.retryCount = Math.round(message.retryCount);
+    }
     return obj;
   },
 
@@ -886,6 +903,7 @@ export const AssignedAction = {
     message.actionType = object.actionType ?? 0;
     message.actionPayload = object.actionPayload ?? '';
     message.stepName = object.stepName ?? '';
+    message.retryCount = object.retryCount ?? 0;
     return message;
   },
 };

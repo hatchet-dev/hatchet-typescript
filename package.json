@@ -3,13 +3,7 @@
   "version": "0.7.0",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
-  "files": [
-    "*",
-    "!**/*.test.js",
-    "!**/*.test.d.ts",
-    "!**/*.e2e.js",
-    "!**/*.e2e.d.ts"
-  ],
+  "files": ["*", "!**/*.test.js", "!**/*.test.d.ts", "!**/*.e2e.js", "!**/*.e2e.d.ts"],
   "repository": {
     "type": "git",
     "url": "https://github.com/hatchet-dev/hatchet-typescript.git"
@@ -99,6 +93,5 @@
     "qs": "^6.11.2",
     "yaml": "^2.3.4",
     "zod": "^3.22.4"
-  },
-  "packageManager": "pnpm@8.15.7+sha256.50783dd0fa303852de2dd1557cd4b9f07cb5b018154a6e76d0f40635d6cee019"
+  }
 }

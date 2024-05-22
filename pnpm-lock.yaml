@@ -114,7 +114,7 @@ devDependencies:
     version: 10.9.2(@types/node@20.12.12)(typescript@5.4.5)
   ts-proto:
     specifier: ^1.167.0
-    version: 1.167.0
+    version: 1.176.0
   typedoc:
     specifier: ^0.25.7
     version: 0.25.7(typescript@5.4.5)
@@ -5049,27 +5049,27 @@ packages:
       yn: 3.1.1
     dev: true
 
-  /ts-poet@6.6.0:
-    resolution: {integrity: sha512-4vEH/wkhcjRPFOdBwIh9ItO6jOoumVLRF4aABDX5JSNEubSqwOulihxQPqai+OkuygJm3WYMInxXQX4QwVNMuw==}
+  /ts-poet@6.9.0:
+    resolution: {integrity: sha512-roe6W6MeZmCjRmppyfOURklO5tQFQ6Sg7swURKkwYJvV7dbGCrK28um5+51iW3twdPRKtwarqFAVMU6G1mvnuQ==}
     dependencies:
       dprint-node: 1.0.8
     dev: true
 
-  /ts-proto-descriptors@1.15.0:
-    resolution: {integrity: sha512-TYyJ7+H+7Jsqawdv+mfsEpZPTIj9siDHS6EMCzG/z3b/PZiphsX+mWtqFfFVe5/N0Th6V3elK9lQqjnrgTOfrg==}
+  /ts-proto-descriptors@1.16.0:
+    resolution: {integrity: sha512-3yKuzMLpltdpcyQji1PJZRfoo4OJjNieKTYkQY8pF7xGKsYz/RHe3aEe4KiRxcinoBmnEhmuI+yJTxLb922ULA==}
     dependencies:
       long: 5.2.3
       protobufjs: 7.2.6
     dev: true
 
-  /ts-proto@1.167.0:
-    resolution: {integrity: sha512-ATJ9bN0JpPhtWVymKpkf7zUYOLBZVOA7rWRRH/U+ML8A2xjcBgcM3H4Mme8T8Yn6S4rW6ttNjRAtLZmusAjIIA==}
+  /ts-proto@1.176.0:
+    resolution: {integrity: sha512-OWVrVUpNfZVfvKJZlSjRmCPkcNcox6IPRw3RIeyK2Z4d0Uoy1/gkumMwCVOAMznZcv80D1r9GyYHgYVdp6Cj+g==}
     hasBin: true
     dependencies:
       case-anything: 2.1.13
       protobufjs: 7.2.6
-      ts-poet: 6.6.0
-      ts-proto-descriptors: 1.15.0
+      ts-poet: 6.9.0
+      ts-proto-descriptors: 1.16.0
     dev: true
 
   /tsconfig-paths@3.15.0:

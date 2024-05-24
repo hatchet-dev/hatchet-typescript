@@ -425,10 +425,21 @@ export class Worker {
     }
   }
 
-  private async handle(
+  /**
+   * Handles a request with a provided body, secret, and signature.
+   *
+   * @param {string | undefined} body - The body of the request.
+   * @param {string | undefined} secret - The secret used for signature verification.
+   * @param {string | string[] | undefined | null} signature - The signature of the request.
+   *
+   * @throws {HatchetError} - If no signature is provided or the signature is not a string.
+   * @throws {HatchetError} - If no secret is provided.
+   * @throws {HatchetError} - If no body is provided.
+   */
+  async handle(
     body: string | undefined,
     secret: string | undefined,
-    signature: string | string[] | undefined
+    signature: string | string[] | undefined | null
   ) {
     if (!signature || typeof signature !== 'string') {
       throw new HatchetError('No signature provided');
@@ -451,7 +462,17 @@ export class Worker {
     this.handleAction(action);
   }
 
-  // Handler for expressjs
+  /**
+   * Express Handler
+   *
+   * This method is an asynchronous function that returns an Express middleware handler.
+   * The handler function is responsible for handling incoming requests and invoking the
+   * corresponding logic based on the provided secret.
+   *
+   * @param {string} secret - The secret key used to authenticate and authorize the incoming requests.
+   *
+   * @return {Function} - An Express middleware handler function that receives the request and response objects.
+   */
   async expressHandler(secret: string) {
     await Promise.all(this.registeredWorkflowPromises);
 
@@ -467,7 +488,13 @@ export class Worker {
     };
   }
 
-  // Handler for Node.JS HTTP server
+  /**
+   * A method that returns an HTTP request handler.
+   *
+   * @param {string} secret - The secret key used for verification.
+   *
+   * @returns {function} - An HTTP request handler function.
+   */
   async httpHandler(secret: string) {
     await Promise.all(this.registeredWorkflowPromises);
 
@@ -487,6 +514,18 @@ export class Worker {
         res.end();
       });
     };
+  }
+
+  /**
+   * Handles a hatchet webhook request from a Vercel API route (including but not limited to Next.js routes).
+   *
+   * @param {any} req - The request object received from Vercel.
+   * @param {string} secret - The secret key used to verify the request.
+   * @return {Promise<Response>} - A Promise that resolves with a Response object.
+   */
+  async handleVercelRequest(req: Request, secret: string) {
+    await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
+    return new Response('ok', { status: 200 });
   }
 
   async start() {

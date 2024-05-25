@@ -3,13 +3,8 @@
   "version": "0.12.0",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
-  "files": [
-    "*",
-    "!**/*.test.js",
-    "!**/*.test.d.ts",
-    "!**/*.e2e.js",
-    "!**/*.e2e.d.ts"
-  ],
+  "main": "dist/index.js",
+  "files": ["dist/**/*"],
   "repository": {
     "type": "git",
     "url": "https://github.com/hatchet-dev/hatchet-typescript.git"
@@ -54,7 +49,7 @@
     "worker:logger": "npm run exec -- ./src/examples/logger.ts",
     "api": "npm run exec -- ./src/examples/api.ts",
     "prepublish": "cp package.json dist/package.json;",
-    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
+    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && npm publish --access public --no-git-checks",
     "generate-docs": "typedoc"
   },
   "keywords": [],

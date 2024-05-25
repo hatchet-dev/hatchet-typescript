@@ -162,4 +162,12 @@ export class HatchetClient {
 
     return worker;
   }
+
+  webhooks(workflow: Workflow) {
+    const worker = new Worker(this, {
+      name: workflow.id,
+    });
+
+    return worker.getHandler(workflow);
+  }
 }

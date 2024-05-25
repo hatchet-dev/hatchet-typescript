@@ -1,6 +1,6 @@
 import { HatchetClient } from '@clients/hatchet-client';
 import HatchetError from '@util/errors/hatchet-error';
-import { Action, ActionListener, ActionObject } from '@clients/dispatcher/action-listener';
+import { Action, ActionListener } from '@clients/dispatcher/action-listener';
 import {
   StepActionEvent,
   StepActionEventType,
@@ -17,8 +17,7 @@ import {
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
-import { IncomingMessage, ServerResponse } from 'http';
-import { createHmac } from 'crypto';
+import { WebhookHandler } from '@clients/worker/handler';
 import { Context, StepRunFunction } from '../../step';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
@@ -55,6 +54,45 @@ export class Worker {
     this.handle_kill = options.handleKill === undefined ? true : options.handleKill;
 
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
+  }
+
+  private registerActions(workflow: Workflow) {
+    const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
+      acc[`${workflow.id}:${step.name}`] = step.run;
+      return acc;
+    }, {});
+
+    const onFailureAction = workflow.onFailure
+      ? {
+          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
+        }
+      : {};
+
+    this.action_registry = {
+      ...this.action_registry,
+      ...newActions,
+      ...onFailureAction,
+    };
+
+    this.action_registry = workflow.concurrency?.name
+      ? {
+          ...this.action_registry,
+          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
+        }
+      : {
+          ...this.action_registry,
+        };
+  }
+
+  getHandler(workflow: Workflow) {
+    const wf: Workflow = {
+      ...workflow,
+      id: this.client.config.namespace + workflow.id,
+    };
+
+    this.registerActions(wf);
+
+    return new WebhookHandler(this);
   }
 
   // @deprecated
@@ -140,31 +178,7 @@ export class Worker {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }
 
-    const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
-      acc[`${workflow.id}:${step.name}`] = step.run;
-      return acc;
-    }, {});
-
-    const onFailureAction = workflow.onFailure
-      ? {
-          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
-        }
-      : {};
-
-    this.action_registry = {
-      ...this.action_registry,
-      ...newActions,
-      ...onFailureAction,
-    };
-
-    this.action_registry = workflow.concurrency?.name
-      ? {
-          ...this.action_registry,
-          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
-        }
-      : {
-          ...this.action_registry,
-        };
+    this.registerActions(workflow);
   }
 
   registerAction<T, K>(actionId: string, action: StepRunFunction<T, K>) {
@@ -425,109 +439,6 @@ export class Worker {
     }
   }
 
-  /**
-   * Handles a request with a provided body, secret, and signature.
-   *
-   * @param {string | undefined} body - The body of the request.
-   * @param {string | undefined} secret - The secret used for signature verification.
-   * @param {string | string[] | undefined | null} signature - The signature of the request.
-   *
-   * @throws {HatchetError} - If no signature is provided or the signature is not a string.
-   * @throws {HatchetError} - If no secret is provided.
-   * @throws {HatchetError} - If no body is provided.
-   */
-  async handle(
-    body: string | undefined,
-    secret: string | undefined,
-    signature: string | string[] | undefined | null
-  ) {
-    if (!signature || typeof signature !== 'string') {
-      throw new HatchetError('No signature provided');
-    }
-    if (!secret) {
-      throw new HatchetError('No secret provided');
-    }
-    if (!body) {
-      throw new HatchetError('No body provided');
-    }
-
-    // verify hmac signature
-    const actualSignature = createHmac('sha256', secret).update(body).digest('hex');
-    if (actualSignature !== signature) {
-      throw new HatchetError(`Invalid signature, expected ${actualSignature}, got ${signature}`);
-    }
-
-    const action = ActionObject.parse(JSON.parse(body));
-
-    this.handleAction(action);
-  }
-
-  /**
-   * Express Handler
-   *
-   * This method is an asynchronous function that returns an Express middleware handler.
-   * The handler function is responsible for handling incoming requests and invoking the
-   * corresponding logic based on the provided secret.
-   *
-   * @param {string} secret - The secret key used to authenticate and authorize the incoming requests.
-   *
-   * @return {Function} - An Express middleware handler function that receives the request and response objects.
-   */
-  async expressHandler(secret: string) {
-    await Promise.all(this.registeredWorkflowPromises);
-
-    return (req: any, res: any) => {
-      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
-        .then(() => {
-          res.sendStatus(200);
-        })
-        .catch((e) => {
-          this.logger.error(`Error handling request: ${e.message}`);
-          res.sendStatus(500);
-        });
-    };
-  }
-
-  /**
-   * A method that returns an HTTP request handler.
-   *
-   * @param {string} secret - The secret key used for verification.
-   *
-   * @returns {function} - An HTTP request handler function.
-   */
-  async httpHandler(secret: string) {
-    await Promise.all(this.registeredWorkflowPromises);
-
-    return (req: IncomingMessage, res: ServerResponse) => {
-      const handle = async () => {
-        const body = await getBody(req);
-
-        await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
-
-        res.writeHead(200, 'OK');
-        res.end();
-      };
-
-      handle().catch((e) => {
-        this.logger.error(`Error handling request: ${e.message}`);
-        res.writeHead(500, 'Internal server error');
-        res.end();
-      });
-    };
-  }
-
-  /**
-   * Handles a hatchet webhook request from a Vercel API route (including but not limited to Next.js routes).
-   *
-   * @param {any} req - The request object received from Vercel.
-   * @param {string} secret - The secret key used to verify the request.
-   * @return {Promise<Response>} - A Promise that resolves with a Response object.
-   */
-  async handleVercelRequest(req: Request, secret: string) {
-    await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
-    return new Response('ok', { status: 200 });
-  }
-
   async start() {
     // ensure all workflows are registered
     await Promise.all(this.registeredWorkflowPromises);
@@ -575,15 +486,3 @@ export class Worker {
     }
   }
 }
-
-const getBody = (req: IncomingMessage): Promise<string> => {
-  return new Promise((resolve) => {
-    let body = '';
-    req.on('data', (chunk) => {
-      body += chunk;
-    });
-    req.on('end', () => {
-      resolve(body);
-    });
-  });
-};

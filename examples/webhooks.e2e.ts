@@ -51,8 +51,10 @@ describe('e2e', () => {
     console.log('registering workflow...');
     await worker.registerWorkflow(workflow);
 
+    const handler = hatchet.webhooks(workflow);
+
     const secret = 'secret';
-    const server = createServer(await worker.httpHandler(secret));
+    const server = createServer(await handler.httpHandler(secret));
 
     await new Promise((resolve) => {
       server.listen(port, () => {

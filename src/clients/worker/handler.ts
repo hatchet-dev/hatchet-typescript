@@ -19,7 +19,7 @@ export class WebhookHandler {
    * @throws {HatchetError} - If no secret is provided.
    * @throws {HatchetError} - If no body is provided.
    */
-  async handle(
+  handle(
     body: string | undefined,
     secret: string | undefined,
     signature: string | string[] | undefined | null
@@ -56,16 +56,14 @@ export class WebhookHandler {
    *
    * @return {Function} - An Express middleware handler function that receives the request and response objects.
    */
-  async expressHandler(secret: string) {
+  expressHandler(secret: string) {
     return (req: any, res: any) => {
-      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
-        .then(() => {
-          res.sendStatus(200);
-        })
-        .catch((e) => {
-          this.worker.logger.error(`Error handling request: ${e.message}`);
-          res.sendStatus(500);
-        });
+      try {
+        this.handle(req.body, req.headers['x-hatchet-signature'], secret);
+      } catch (err) {
+        this.worker.logger.error(`Error handling request: ${err}`);
+        res.sendStatus(500);
+      }
     };
   }
 
@@ -76,7 +74,7 @@ export class WebhookHandler {
    *
    * @returns {function} - An HTTP request handler function.
    */
-  async httpHandler(secret: string) {
+  httpHandler(secret: string) {
     return (req: IncomingMessage, res: ServerResponse) => {
       const handle = async () => {
         const body = await this.getBody(req);
@@ -103,7 +101,7 @@ export class WebhookHandler {
    * @return {Promise<Response>} - A Promise that resolves with a Response object.
    */
   async handleVercelRequest(req: Request, secret: string) {
-    await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
+    this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
     return new Response('ok', { status: 200 });
   }
 

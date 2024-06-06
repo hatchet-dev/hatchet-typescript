@@ -114,7 +114,7 @@ export class AdminClient {
       const inputStr = JSON.stringify(input);
 
       const resp = await this.client.triggerWorkflow({
-        name: workflowName,
+        name,
         input: inputStr,
         ...options,
         additionalMetadata: options?.additionalMetadata

@@ -109,6 +109,8 @@ export class AdminClient {
     }
   ) {
     try {
+      const name = this.config.namespace + workflowName;
+
       const inputStr = JSON.stringify(input);
 
       const resp = await this.client.triggerWorkflow({

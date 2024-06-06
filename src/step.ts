@@ -208,7 +208,9 @@ export class Context<T, K> {
   ): ChildWorkflowRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
-    const childWorkflowRunIdPromise = this.client.admin.run_workflow(workflowName, input, {
+    const name = this.client.config.namespace + workflowName;
+
+    const childWorkflowRunIdPromise = this.client.admin.run_workflow(name, input, {
       parentId: workflowRunId,
       parentStepRunId: stepRunId,
       childKey: key,
@@ -221,7 +223,7 @@ export class Context<T, K> {
   }
 }
 
-export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep> | NextStep | void;
+export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep | void> | NextStep | void;
 
 export interface CreateStep<T, K> extends z.infer<typeof CreateStepSchema> {
   run: StepRunFunction<T, K>;

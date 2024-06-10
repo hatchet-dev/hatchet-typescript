@@ -5,7 +5,7 @@ import Hatchet from '../src/sdk';
 
 const port = 8369;
 
-describe('e2e', () => {
+describe('webhooks', () => {
   let hatchet: Hatchet;
   let worker: Worker;
 
@@ -19,7 +19,7 @@ describe('e2e', () => {
     await sleep(2000);
   });
 
-  it('should pass a simple workflow', async () => {
+  it('should pass a webhook workflow', async () => {
     let invoked = 0;
 
     const workflow: Workflow = {
@@ -57,6 +57,9 @@ describe('e2e', () => {
       url: `http://localhost:${port}/webhook`,
       workflows: ['simple-webhook-workflow'],
     });
+
+    // wait for engine to pick up the webhook worker
+    await sleep(30000 + 3000);
 
     const handler = hatchet.webhooks(workflow);
 

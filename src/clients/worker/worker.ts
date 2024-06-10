@@ -7,6 +7,7 @@ import {
   ActionType,
   GroupKeyActionEvent,
   GroupKeyActionEventType,
+  actionTypeFromJSON,
 } from '@hatchet/protoc/dispatcher';
 import HatchetPromise from '@util/hatchet-promise/hatchet-promise';
 import { Workflow } from '@hatchet/workflow';
@@ -468,7 +469,9 @@ export class Worker {
   }
 
   handleAction(action: Action) {
-    const type = action.actionType || ActionType.START_STEP_RUN;
+    const type = action.actionType
+      ? actionTypeFromJSON(action.actionType)
+      : ActionType.START_STEP_RUN;
     if (type === ActionType.START_STEP_RUN) {
       this.handleStartStepRun(action);
     } else if (type === ActionType.CANCEL_STEP_RUN) {

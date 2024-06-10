@@ -1,4 +1,8 @@
-import { DispatcherClient as PbDispatcherClient, AssignedAction } from '@hatchet/protoc/dispatcher';
+import {
+  DispatcherClient as PbDispatcherClient,
+  AssignedAction,
+  actionTypeToJSON,
+} from '@hatchet/protoc/dispatcher';
 
 import { Status } from 'nice-grpc';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
@@ -27,7 +31,7 @@ export const ActionObject = z.object({
   stepId: z.string(),
   stepRunId: z.string(),
   actionId: z.string(),
-  actionType: z.number().optional(),
+  actionType: z.string().optional(),
   actionPayload: z.string(),
   workflowRunId: z.string(),
   getGroupKeyRunId: z.string().optional(),
@@ -77,6 +81,7 @@ export class ActionListener {
           for await (const assignedAction of listenClient) {
             const action: Action = {
               ...assignedAction,
+              actionType: actionTypeToJSON(assignedAction.actionType),
             };
 
             yield action;

@@ -83,7 +83,7 @@ export class WebhookHandler {
       const handle = async () => {
         const body = await this.getBody(req);
 
-        await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
+        this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
 
         res.writeHead(200, 'OK');
         res.end();

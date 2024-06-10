@@ -109,14 +109,15 @@ export class AdminClient {
     }
   ) {
     try {
+      let wfName = workflowName;
       if (this.config.namespace && !workflowName.startsWith(this.config.namespace)) {
-        workflowName = this.config.namespace + workflowName;
+        wfName = this.config.namespace + workflowName;
       }
 
       const inputStr = JSON.stringify(input);
 
       const resp = await this.client.triggerWorkflow({
-        name: workflowName,
+        name: wfName,
         input: inputStr,
         ...options,
         additionalMetadata: options?.additionalMetadata

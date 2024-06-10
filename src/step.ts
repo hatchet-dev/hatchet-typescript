@@ -241,7 +241,9 @@ export class Context<T, K> {
   }
 }
 
-export type StepRunFunction<T, K> = (ctx: Context<T, K>) => Promise<NextStep | void> | NextStep | void;
+export type StepRunFunction<T, K> = (
+  ctx: Context<T, K>
+) => Promise<NextStep | void> | NextStep | void;
 
 export interface CreateStep<T, K> extends z.infer<typeof CreateStepSchema> {
   run: StepRunFunction<T, K>;

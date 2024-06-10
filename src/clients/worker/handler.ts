@@ -4,6 +4,10 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { ActionObject } from '@clients/dispatcher/action-listener';
 import { Worker } from './worker';
 
+export interface HandlerOpts {
+  secret: string;
+}
+
 export class WebhookHandler {
   // eslint-disable-next-line no-useless-constructor,no-empty-function
   constructor(private worker: Worker) {}
@@ -56,7 +60,7 @@ export class WebhookHandler {
    *
    * @return {Function} - An Express middleware handler function that receives the request and response objects.
    */
-  expressHandler(secret: string) {
+  expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
       try {
         this.handle(req.body, req.headers['x-hatchet-signature'], secret);
@@ -74,7 +78,7 @@ export class WebhookHandler {
    *
    * @returns {function} - An HTTP request handler function.
    */
-  httpHandler(secret: string) {
+  httpHandler({ secret }: HandlerOpts) {
     return (req: IncomingMessage, res: ServerResponse) => {
       const handle = async () => {
         const body = await this.getBody(req);
@@ -94,15 +98,22 @@ export class WebhookHandler {
   }
 
   /**
-   * Handles a hatchet webhook request from a Vercel API route (including but not limited to Next.js routes).
+   * A method that returns a Next.js request handler.
    *
-   * @param {any} req - The request object received from Vercel.
+   * @param {any} req - The request object received from Next.js.
    * @param {string} secret - The secret key used to verify the request.
    * @return {Promise<Response>} - A Promise that resolves with a Response object.
    */
-  async handleVercelRequest(req: Request, secret: string) {
-    this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
-    return new Response('ok', { status: 200 });
+  nextJSHandler({ secret }: HandlerOpts) {
+    const f = async (req: Request) => {
+      this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
+      return new Response('ok', { status: 200 });
+    };
+    return {
+      GET: f,
+      POST: f,
+      PUT: f,
+    };
   }
 
   private getBody(req: IncomingMessage): Promise<string> {

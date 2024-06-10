@@ -147,8 +147,6 @@ export interface CreateWorkflowVersionOpts {
   cronInput?: string | undefined;
   /** (optional) the job to run on failure */
   onFailureJob?: CreateWorkflowJobOpts | undefined;
-  /** (optional) the webhook for the workflow */
-  webhook?: string | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -357,7 +355,6 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     scheduleTimeout: undefined,
     cronInput: undefined,
     onFailureJob: undefined,
-    webhook: undefined,
   };
 }
 
@@ -395,9 +392,6 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.onFailureJob !== undefined) {
       CreateWorkflowJobOpts.encode(message.onFailureJob, writer.uint32(90).fork()).ldelim();
-    }
-    if (message.webhook !== undefined) {
-      writer.uint32(98).string(message.webhook);
     }
     return writer;
   },
@@ -486,13 +480,6 @@ export const CreateWorkflowVersionOpts = {
 
           message.onFailureJob = CreateWorkflowJobOpts.decode(reader, reader.uint32());
           continue;
-        case 12:
-          if (tag !== 98) {
-            break;
-          }
-
-          message.webhook = reader.string();
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -529,7 +516,6 @@ export const CreateWorkflowVersionOpts = {
       onFailureJob: isSet(object.onFailureJob)
         ? CreateWorkflowJobOpts.fromJSON(object.onFailureJob)
         : undefined,
-      webhook: isSet(object.webhook) ? globalThis.String(object.webhook) : undefined,
     };
   },
 
@@ -568,9 +554,6 @@ export const CreateWorkflowVersionOpts = {
     if (message.onFailureJob !== undefined) {
       obj.onFailureJob = CreateWorkflowJobOpts.toJSON(message.onFailureJob);
     }
-    if (message.webhook !== undefined) {
-      obj.webhook = message.webhook;
-    }
     return obj;
   },
 
@@ -596,7 +579,6 @@ export const CreateWorkflowVersionOpts = {
       object.onFailureJob !== undefined && object.onFailureJob !== null
         ? CreateWorkflowJobOpts.fromPartial(object.onFailureJob)
         : undefined;
-    message.webhook = object.webhook ?? undefined;
     return message;
   },
 };

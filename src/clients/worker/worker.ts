@@ -137,7 +137,6 @@ export class Worker {
       const registeredWorkflow = this.client.admin.put_workflow({
         name: workflow.id,
         description: workflow.description,
-        webhook: workflow.webhook,
         version: workflow.version || '',
         eventTriggers: workflow.on.event ? [this.client.config.namespace + workflow.on.event] : [],
         cronTriggers: workflow.on.cron ? [workflow.on.cron] : [],
@@ -164,16 +163,6 @@ export class Worker {
       });
       this.registeredWorkflowPromises.push(registeredWorkflow);
       await registeredWorkflow;
-
-      if (workflow.webhook) {
-        await this.client.dispatcher.client.register({
-          workerName: this.name,
-          services: ['default'],
-          webhook: true,
-          actions: workflow.steps.map((step) => `${workflow.id}:${step.name}`),
-          maxRuns: workflow.concurrency?.maxRuns,
-        });
-      }
     } catch (e: any) {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }

@@ -1014,3 +1014,32 @@ export interface WorkflowMetrics {
   /** The total number of concurrency group keys. */
   groupKeyCount?: number;
 }
+
+export interface WebhookWorker {
+  metadata: APIResourceMeta;
+  /** The webhook url. */
+  url: string;
+  /** The secret key for validation. */
+  secret: string;
+}
+
+export interface WebhookWorkerCreateRequest {
+  /** The webhook url. */
+  url: string;
+  /** The workflows to register for this webhook worker. */
+  workflows: string[];
+  /**
+   * The secret key for validation. If not provided, a random secret will be generated.
+   * @minLength 32
+   */
+  secret?: string;
+}
+
+export interface WebhookWorkerCreateResponse {
+  worker?: WebhookWorker;
+}
+
+export interface WebhookWorkerListResponse {
+  pagination?: PaginationResponse;
+  rows?: WebhookWorker[];
+}

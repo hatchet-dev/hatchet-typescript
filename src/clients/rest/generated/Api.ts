@@ -1642,9 +1642,8 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
   /**
    * @description Lists all webhooks
    *
-   * @tags User
    * @name WebhookList
-   * @summary Change user password
+   * @summary List webhooks
    * @request GET:/api/v1/webhook-workers/{tenant}
    * @secure
    */

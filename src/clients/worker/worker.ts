@@ -18,6 +18,7 @@ import {
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
+import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
 import { Context, StepRunFunction } from '../../step';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
@@ -93,6 +94,10 @@ export class Worker {
     this.registerActions(wf);
 
     return new WebhookHandler(this);
+  }
+
+  async registerWebhook(webhook: WebhookWorkerCreateRequest) {
+    return this.client.admin.webhook_create(webhook);
   }
 
   // @deprecated

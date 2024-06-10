@@ -24,7 +24,6 @@ describe('e2e', () => {
 
     const workflow: Workflow = {
       id: 'simple-webhook-workflow',
-      webhook: `http://localhost:${port}/webhook`,
       description: 'test',
       on: {
         event: 'user:create-webhook',
@@ -51,9 +50,16 @@ describe('e2e', () => {
     console.log('registering workflow...');
     await worker.registerWorkflow(workflow);
 
+    const secret = 'secret';
+
+    await worker.registerWebhook({
+      secret,
+      url: `http://localhost:${port}/webhook`,
+      workflows: ['simple-webhook-workflow'],
+    });
+
     const handler = hatchet.webhooks(workflow);
 
-    const secret = 'secret';
     const server = createServer(handler.httpHandler({ secret }));
 
     await new Promise((resolve) => {

@@ -52,11 +52,14 @@ describe('webhooks', () => {
 
     const secret = 'secret';
 
+    console.log('registering webhook...');
     await worker.registerWebhook({
       secret,
       url: `http://localhost:${port}/webhook`,
       workflows: ['simple-webhook-workflow'],
     });
+
+    console.log('starting worker...');
 
     const handler = hatchet.webhooks(workflow);
 

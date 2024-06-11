@@ -49,6 +49,12 @@ export class WebhookHandler {
     await this.worker.handleAction(action);
   }
 
+  private getHealthcheckResponse() {
+    return {
+      actions: Object.keys(this.worker.action_registry),
+    };
+  }
+
   /**
    * Express Handler
    *
@@ -83,6 +89,20 @@ export class WebhookHandler {
   httpHandler({ secret }: HandlerOpts) {
     return (req: IncomingMessage, res: ServerResponse) => {
       const handle = async () => {
+        if (req.method === 'GET') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify(this.getHealthcheckResponse()));
+          res.end();
+          return;
+        }
+
+        if (req.method !== 'POST') {
+          res.writeHead(405, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ error: 'Method not allowed' }));
+          res.end();
+          return;
+        }
+
         const body = await this.getBody(req);
 
         await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
@@ -107,12 +127,15 @@ export class WebhookHandler {
    * @return {Promise<Response>} - A Promise that resolves with a Response object.
    */
   nextJSHandler({ secret }: HandlerOpts) {
+    const healthcheck = async () => {
+      return new Response(JSON.stringify(this.getHealthcheckResponse()), { status: 200 });
+    };
     const f = async (req: Request) => {
       await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
       return new Response('ok', { status: 200 });
     };
     return {
-      GET: f,
+      GET: healthcheck,
       POST: f,
       PUT: f,
     };

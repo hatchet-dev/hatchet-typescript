@@ -23,7 +23,7 @@ export class WebhookHandler {
    * @throws {HatchetError} - If no secret is provided.
    * @throws {HatchetError} - If no body is provided.
    */
-  handle(
+  async handle(
     body: string | undefined,
     secret: string | undefined,
     signature: string | string[] | undefined | null
@@ -46,7 +46,7 @@ export class WebhookHandler {
 
     const action = ActionObject.parse(JSON.parse(body));
 
-    this.worker.handleAction(action);
+    await this.worker.handleAction(action);
   }
 
   /**
@@ -62,12 +62,14 @@ export class WebhookHandler {
    */
   expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
-      try {
-        this.handle(req.body, req.headers['x-hatchet-signature'], secret);
-      } catch (err) {
-        this.worker.logger.error(`Error handling request: ${err}`);
-        res.sendStatus(500);
-      }
+      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
+        .then(() => {
+          res.sendStatus(200);
+        })
+        .catch((e) => {
+          res.sendStatus(500);
+          this.worker.logger.error(`Error handling request: ${e.message}`);
+        });
     };
   }
 
@@ -83,7 +85,7 @@ export class WebhookHandler {
       const handle = async () => {
         const body = await this.getBody(req);
 
-        this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
+        await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
 
         res.writeHead(200, 'OK');
         res.end();
@@ -106,7 +108,7 @@ export class WebhookHandler {
    */
   nextJSHandler({ secret }: HandlerOpts) {
     const f = async (req: Request) => {
-      this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
+      await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
       return new Response('ok', { status: 200 });
     };
     return {

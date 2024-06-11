@@ -180,7 +180,7 @@ export class Worker {
     this.action_registry[actionId] = action;
   }
 
-  handleStartStepRun(action: Action) {
+  async handleStartStepRun(action: Action) {
     const { actionId } = action;
 
     try {
@@ -254,12 +254,14 @@ export class Worker {
       this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
         this.logger.error(`Could not send action event: ${e.message}`);
       });
+
+      await future.promise;
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }
   }
 
-  handleStartGroupKeyRun(action: Action) {
+  async handleStartGroupKeyRun(action: Action) {
     const { actionId } = action;
 
     try {
@@ -339,6 +341,8 @@ export class Worker {
       this.client.dispatcher.sendGroupKeyActionEvent(event).catch((e) => {
         this.logger.error(`Could not send action event: ${e.message}`);
       });
+
+      await future.promise;
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }
@@ -381,7 +385,7 @@ export class Worker {
     };
   }
 
-  handleCancelStepRun(action: Action) {
+  async handleCancelStepRun(action: Action) {
     try {
       this.logger.info(`Cancelling step run ${action.stepRunId}`);
 
@@ -399,6 +403,7 @@ export class Worker {
           this.logger.info(`Cancelled step run ${action.stepRunId}`);
         });
         future.cancel('Cancelled by worker');
+        await future.promise;
         delete this.futures[stepRunId];
       }
     } catch (e: any) {
@@ -455,7 +460,7 @@ export class Worker {
           `Worker ${this.name} received action ${action.actionId}:${action.actionType}`
         );
 
-        this.handleAction(action);
+        void this.handleAction(action);
       }
     } catch (e: any) {
       // TODO TEMP this needs to be handled better
@@ -468,16 +473,16 @@ export class Worker {
     }
   }
 
-  handleAction(action: Action) {
+  async handleAction(action: Action) {
     const type = action.actionType
       ? actionTypeFromJSON(action.actionType)
       : ActionType.START_STEP_RUN;
     if (type === ActionType.START_STEP_RUN) {
-      this.handleStartStepRun(action);
+      await this.handleStartStepRun(action);
     } else if (type === ActionType.CANCEL_STEP_RUN) {
-      this.handleCancelStepRun(action);
+      await this.handleCancelStepRun(action);
     } else if (type === ActionType.START_GET_GROUP_KEY) {
-      this.handleStartGroupKeyRun(action);
+      await this.handleStartGroupKeyRun(action);
     } else {
       this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
     }

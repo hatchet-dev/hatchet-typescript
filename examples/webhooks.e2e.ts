@@ -58,9 +58,6 @@ describe('webhooks', () => {
       workflows: ['simple-webhook-workflow'],
     });
 
-    // wait for engine to pick up the webhook worker
-    await sleep(30000 + 3000);
-
     const handler = hatchet.webhooks(workflow);
 
     const server = createServer(handler.httpHandler({ secret }));
@@ -71,9 +68,13 @@ describe('webhooks', () => {
       });
     });
 
-    console.log('worker started.');
+    console.log('server started.');
+    console.log('waiting for webhook to be registered...');
 
-    await sleep(5000);
+    // wait for engine to pick up the webhook worker
+    await sleep(30000 + 3000);
+
+    console.log('webhook wait time complete.');
 
     console.log('pushing event...');
 

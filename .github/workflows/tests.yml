@@ -119,7 +119,7 @@ jobs:
           go run ./cmd/hatchet-engine --config ./generated/ &
           go run ./cmd/hatchet-api --config ./generated/ &
           
-          sleep 20
+          sleep 30
       - name: E2E tests
         run: |
           cd hatchet/

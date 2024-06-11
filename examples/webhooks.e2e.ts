@@ -75,7 +75,7 @@ describe('webhooks', () => {
     console.log('waiting for webhook to be registered...');
 
     // wait for engine to pick up the webhook worker
-    await sleep(30000 + 3000);
+    await sleep(30_000 + 10_000);
 
     console.log('webhook wait time complete.');
 

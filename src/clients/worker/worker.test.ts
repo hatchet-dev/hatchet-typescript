@@ -207,8 +207,8 @@ describe('Worker', () => {
     xit('should get actions and start runs', async () => {
       const worker = new Worker(hatchet, { name: 'WORKER_NAME' });
 
-      const startSpy = jest.spyOn(worker, 'handleStartStepRun').mockReturnValue();
-      const cancelSpy = jest.spyOn(worker, 'handleCancelStepRun').mockReturnValue();
+      const startSpy = jest.spyOn(worker, 'handleStartStepRun').mockResolvedValue();
+      const cancelSpy = jest.spyOn(worker, 'handleCancelStepRun').mockResolvedValue();
 
       const mockActionListener = new ActionListener(hatchet.dispatcher, 'WORKER_ID');
 

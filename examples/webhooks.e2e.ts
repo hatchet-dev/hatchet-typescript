@@ -56,7 +56,6 @@ describe('webhooks', () => {
     await worker.registerWebhook({
       secret,
       url: `http://localhost:${port}/webhook`,
-      workflows: ['simple-webhook-workflow'],
     });
 
     console.log('starting worker...');

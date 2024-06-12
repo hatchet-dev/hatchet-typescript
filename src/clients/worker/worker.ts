@@ -39,6 +39,7 @@ export class Worker {
   logger: Logger;
 
   registeredWorkflowPromises: Array<Promise<any>> = [];
+  registeredWorkflowIds: string[] = [];
 
   constructor(
     client: HatchetClient,
@@ -98,7 +99,7 @@ export class Worker {
   }
 
   async registerWebhook(webhook: WebhookWorkerCreateRequest) {
-    return this.client.admin.webhook_create(webhook);
+    return this.client.admin.webhook_create({ ...webhook, workflows: this.registeredWorkflowIds });
   }
 
   // @deprecated
@@ -139,6 +140,8 @@ export class Worker {
             ],
           }
         : undefined;
+
+      this.registeredWorkflowIds.push(workflow.id);
 
       const registeredWorkflow = this.client.admin.put_workflow({
         name: workflow.id,

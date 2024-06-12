@@ -68,6 +68,18 @@ export class WebhookHandler {
    */
   expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
+      if (req.method === 'GET') {
+        res.sendStatus(200);
+        res.json(this.getHealthcheckResponse());
+        return;
+      }
+
+      if (req.method !== 'POST') {
+        res.sendStatus(405);
+        res.json({ error: 'Method not allowed' });
+        return;
+      }
+
       this.handle(req.body, req.headers['x-hatchet-signature'], secret)
         .then(() => {
           res.sendStatus(200);

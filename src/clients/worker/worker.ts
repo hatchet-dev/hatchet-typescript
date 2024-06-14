@@ -69,30 +69,30 @@ export class Worker {
     try {
       const concurrency: WorkflowConcurrencyOpts | undefined = workflow.concurrency?.name
         ? {
-            action: `${workflow.id}:${workflow.concurrency.name}`,
-            maxRuns: workflow.concurrency.maxRuns || 1,
-            limitStrategy:
-              workflow.concurrency.limitStrategy || ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS,
-          }
+          action: `${workflow.id}:${workflow.concurrency.name}`,
+          maxRuns: workflow.concurrency.maxRuns || 1,
+          limitStrategy:
+            workflow.concurrency.limitStrategy || ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS,
+        }
         : undefined;
 
       const onFailureJob: CreateWorkflowJobOpts | undefined = workflow.onFailure
         ? {
-            name: `${workflow.id}-on-failure`,
-            description: workflow.description,
-            steps: [
-              {
-                readableId: workflow.onFailure.name,
-                action: `${workflow.id}-on-failure:${workflow.onFailure.name}`,
-                timeout: workflow.onFailure.timeout || '60s',
-                inputs: '{}',
-                parents: [],
-                userData: '{}',
-                retries: workflow.onFailure.retries || 0,
-                rateLimits: workflow.onFailure.rate_limits ?? [],
-              },
-            ],
-          }
+          name: `${workflow.id}-on-failure`,
+          description: workflow.description,
+          steps: [
+            {
+              readableId: workflow.onFailure.name,
+              action: `${workflow.id}-on-failure:${workflow.onFailure.name}`,
+              timeout: workflow.onFailure.timeout || '60s',
+              inputs: '{}',
+              parents: [],
+              userData: '{}',
+              retries: workflow.onFailure.retries || 0,
+              rateLimits: workflow.onFailure.rate_limits ?? [],
+            },
+          ],
+        }
         : undefined;
 
       const registeredWorkflow = this.client.admin.put_workflow({
@@ -135,8 +135,8 @@ export class Worker {
 
     const onFailureAction = workflow.onFailure
       ? {
-          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
-        }
+        [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
+      }
       : {};
 
     this.action_registry = {
@@ -147,12 +147,12 @@ export class Worker {
 
     this.action_registry = workflow.concurrency?.name
       ? {
-          ...this.action_registry,
-          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
-        }
+        ...this.action_registry,
+        [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
+      }
       : {
-          ...this.action_registry,
-        };
+        ...this.action_registry,
+      };
   }
 
   registerAction<T, K>(actionId: string, action: StepRunFunction<T, K>) {
@@ -181,6 +181,11 @@ export class Worker {
         this.logger.info(`Step run ${action.stepRunId} succeeded`);
 
         try {
+          if (!result) {
+            // cast empty strings and other falsy values to null
+            result = null;
+          }
+
           // Send the action event to the dispatcher
           const event = this.getStepActionEvent(
             action,
@@ -188,7 +193,18 @@ export class Worker {
             result
           );
           this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send action event: ${e.message}`);
+            this.logger.error(`Could not send completed action event: ${e.message}`);
+
+            // send a failure event
+            const failureEvent = this.getStepActionEvent(
+              action,
+              StepActionEventType.STEP_EVENT_TYPE_FAILED,
+              e.message
+            );
+
+            this.client.dispatcher.sendStepActionEvent(failureEvent).catch((e) => {
+              this.logger.error(`Could not send failed action event: ${e.message}`);
+            });
           });
 
           // delete the run from the futures

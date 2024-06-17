@@ -24,6 +24,7 @@ const mockAssignedActions: AssignActionMock[] = [
     workflowRunId: 'workflowRun1',
     getGroupKeyRunId: 'groupKeyRun1',
     stepName: 'step1',
+    retryCount: 0,
   },
   // ... Add more mock AssignedAction objects as needed
 ];

@@ -185,10 +185,21 @@ export class Worker {
           const event = this.getStepActionEvent(
             action,
             StepActionEventType.STEP_EVENT_TYPE_COMPLETED,
-            result
+            result || null
           );
           this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send action event: ${e.message}`);
+            this.logger.error(`Could not send completed action event: ${e.message}`);
+
+            // send a failure event
+            const failureEvent = this.getStepActionEvent(
+              action,
+              StepActionEventType.STEP_EVENT_TYPE_FAILED,
+              e.message
+            );
+
+            this.client.dispatcher.sendStepActionEvent(failureEvent).catch((err2) => {
+              this.logger.error(`Could not send failed action event: ${err2.message}`);
+            });
           });
 
           // delete the run from the futures

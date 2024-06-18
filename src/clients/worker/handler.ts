@@ -70,13 +70,19 @@ export class WebhookHandler {
     return (req: any, res: any) => {
       if (req.method === 'GET') {
         res.sendStatus(200);
-        res.json(this.getHealthcheckResponse());
+        res.send('OK!');
         return;
       }
 
       if (req.method !== 'POST') {
         res.sendStatus(405);
         res.json({ error: 'Method not allowed' });
+        return;
+      }
+
+      if (req.headers['x-healthcheck']) {
+        res.sendStatus(200);
+        res.json(this.getHealthcheckResponse());
         return;
       }
 
@@ -103,7 +109,7 @@ export class WebhookHandler {
       const handle = async () => {
         if (req.method === 'GET') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify(this.getHealthcheckResponse()));
+          res.write('OK!');
           res.end();
           return;
         }
@@ -111,6 +117,13 @@ export class WebhookHandler {
         if (req.method !== 'POST') {
           res.writeHead(405, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify({ error: 'Method not allowed' }));
+          res.end();
+          return;
+        }
+
+        if (req.headers['x-healthcheck']) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify(this.getHealthcheckResponse()));
           res.end();
           return;
         }
@@ -139,15 +152,18 @@ export class WebhookHandler {
    * @return {Promise<Response>} - A Promise that resolves with a Response object.
    */
   nextJSHandler({ secret }: HandlerOpts) {
-    const healthcheck = async () => {
-      return new Response(JSON.stringify(this.getHealthcheckResponse()), { status: 200 });
+    const ok = async () => {
+      return new Response('OK!', { status: 200 });
     };
     const f = async (req: Request) => {
+      if (req.headers.get('x-healthcheck')) {
+        return new Response(JSON.stringify(this.getHealthcheckResponse()), { status: 200 });
+      }
       await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
       return new Response('ok', { status: 200 });
     };
     return {
-      GET: healthcheck,
+      GET: ok,
       POST: f,
       PUT: f,
     };

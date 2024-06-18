@@ -11,7 +11,7 @@ import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 
 import { Api } from '../rest';
-import { WebhookWorkerCreateRequest, WorkflowRunStatus } from '../rest/generated/data-contracts';
+import { WebhookWorkerCreateRequest, WorkflowRunStatus, WorkflowRunStatusList } from '../rest/generated/data-contracts';
 
 type WorkflowMetricsQuery = {
   workflowId?: string;
@@ -189,6 +189,10 @@ export class AdminClient {
     limit?: number | undefined;
     eventId?: string | undefined;
     workflowId?: string | undefined;
+    parentWorkflowRunId?: string | undefined;
+    parentStepRunId?: string | undefined;
+    statuses?: WorkflowRunStatusList | undefined;
+    additionalMetadata?: string[] | undefined;
   }) {
     const res = await this.api.workflowRunList(this.tenantId, query);
     return res.data;

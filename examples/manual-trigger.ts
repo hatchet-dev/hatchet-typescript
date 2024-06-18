@@ -3,7 +3,7 @@ import Hatchet from '../src/sdk';
 const hatchet = Hatchet.init();
 
 async function main() {
-  const workflowRunId = await hatchet.admin.run_workflow('simple-workflow', {});
+  const workflowRunId = await hatchet.admin.runWorkflow('simple-workflow', {});
   const stream = await hatchet.listener.stream(workflowRunId);
 
   for await (const event of stream) {

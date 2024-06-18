@@ -56,12 +56,14 @@ export class Worker {
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
-  // @deprecated
-  async registerWorkflow(initWorkflow: Workflow) {
-    return this.register_workflow(initWorkflow);
+  /**
+   * @deprecated use registerWorkflow instead
+   */
+  async register_workflow(initWorkflow: Workflow) {
+    return this.registerWorkflow(initWorkflow);
   }
 
-  async register_workflow(initWorkflow: Workflow) {
+  async registerWorkflow(initWorkflow: Workflow) {
     const workflow: Workflow = {
       ...initWorkflow,
       id: this.client.config.namespace + initWorkflow.id,
@@ -95,7 +97,7 @@ export class Worker {
           }
         : undefined;
 
-      const registeredWorkflow = this.client.admin.put_workflow({
+      const registeredWorkflow = this.client.admin.putWorkflow({
         name: workflow.id,
         description: workflow.description,
         version: workflow.version || '',

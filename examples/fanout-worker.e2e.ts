@@ -3,7 +3,6 @@ import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
 
 xdescribe('fanout-e2e', () => {
-
   it('should pass a fanout workflow', async () => {
     let invoked = 0;
     const start = new Date();
@@ -63,7 +62,7 @@ xdescribe('fanout-e2e', () => {
 
     console.log('pushing event...');
 
-    await hatchet.admin.run_workflow('parent-workflow', { input: 'parent-input' });
+    await hatchet.admin.runWorkflow('parent-workflow', { input: 'parent-input' });
 
     await sleep(10000);
 

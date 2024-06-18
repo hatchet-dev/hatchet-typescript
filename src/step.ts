@@ -232,7 +232,7 @@ export class Context<T, K> {
 
     const name = this.client.config.namespace + workflowName;
 
-    const childWorkflowRunIdPromise = this.client.admin.run_workflow(name, input, {
+    const childWorkflowRunIdPromise = this.client.admin.runWorkflow(name, input, {
       parentId: workflowRunId,
       parentStepRunId: stepRunId,
       childKey: key,

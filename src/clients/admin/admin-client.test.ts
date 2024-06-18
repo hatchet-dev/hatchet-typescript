@@ -51,7 +51,7 @@ describe('AdminClient', () => {
     );
   });
 
-  describe('put_workflow', () => {
+  describe('putWorkflow', () => {
     it('should throw an error if no version and not auto version', async () => {
       const workflow: CreateWorkflowVersionOpts = {
         name: 'workflow1',
@@ -64,7 +64,7 @@ describe('AdminClient', () => {
         concurrency: undefined,
       };
 
-      expect(() => client.put_workflow(workflow)).rejects.toThrow(
+      expect(() => client.putWorkflow(workflow)).rejects.toThrow(
         'PutWorkflow error: workflow version is required, or use autoVersion'
       );
     });
@@ -90,7 +90,7 @@ describe('AdminClient', () => {
         updatedAt: undefined,
       });
 
-      await client.put_workflow(workflow);
+      await client.putWorkflow(workflow);
 
       expect(putSpy).toHaveBeenCalled();
     });
@@ -111,7 +111,7 @@ describe('AdminClient', () => {
 
       const now = new Date();
 
-      client.schedule_workflow('workflowName', {
+      client.scheduleWorkflow('workflowName', {
         schedules: [now],
       });
 

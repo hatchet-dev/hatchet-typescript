@@ -263,13 +263,14 @@ export class Worker {
 
       const future = new HatchetPromise(
         (async () => {
+          let result: any;
           try {
-            await run();
+            result = await run();
           } catch (e: any) {
             await failure(e);
             return;
           }
-          await success(null);
+          await success(result);
         })()
       );
       this.futures[action.stepRunId] = future;

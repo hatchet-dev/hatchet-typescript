@@ -157,6 +157,10 @@ export class Context<T, K> {
     return this.action.workflowRunId;
   }
 
+  retryCount(): number {
+    return this.action.retryCount;
+  }
+
   playground(name: string, defaultValue: string = ''): string {
     if (name in this.overridesData) {
       return this.overridesData[name];

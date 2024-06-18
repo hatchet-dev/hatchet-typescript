@@ -18,20 +18,7 @@ enum ListenStrategy {
   LISTEN_STRATEGY_V2 = 2,
 }
 
-export interface Action {
-  tenantId: string;
-  jobId: string;
-  jobName: string;
-  jobRunId: string;
-  stepId: string;
-  stepRunId: string;
-  actionId: string;
-  actionType: number;
-  actionPayload: string;
-  workflowRunId: string;
-  getGroupKeyRunId: string;
-  stepName: string;
-}
+export interface Action extends AssignedAction {}
 
 export class ActionListener {
   config: ClientConfig;

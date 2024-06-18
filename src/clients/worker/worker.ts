@@ -201,7 +201,7 @@ export class Worker {
         return step(context);
       };
 
-      const success = (result: any) => {
+      const success = async (result: any) => {
         this.logger.info(`Step run ${action.stepRunId} succeeded`);
 
         try {
@@ -211,29 +211,31 @@ export class Worker {
             StepActionEventType.STEP_EVENT_TYPE_COMPLETED,
             result || null
           );
-          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send completed action event: ${e.message}`);
-
-            // send a failure event
-            const failureEvent = this.getStepActionEvent(
-              action,
-              StepActionEventType.STEP_EVENT_TYPE_FAILED,
-              e.message
-            );
-
-            this.client.dispatcher.sendStepActionEvent(failureEvent).catch((err2) => {
-              this.logger.error(`Could not send failed action event: ${err2.message}`);
-            });
-          });
+          await this.client.dispatcher.sendStepActionEvent(event);
 
           // delete the run from the futures
           delete this.futures[action.stepRunId];
-        } catch (e: any) {
-          this.logger.error(`Could not send action event: ${e.message}`);
+        } catch (actionEventError: any) {
+          this.logger.error(`Could not send completed action event: ${actionEventError.message}`);
+
+          // send a failure event
+          const failureEvent = this.getStepActionEvent(
+            action,
+            StepActionEventType.STEP_EVENT_TYPE_FAILED,
+            actionEventError.message
+          );
+
+          try {
+            await this.client.dispatcher.sendStepActionEvent(failureEvent);
+          } catch (failureEventError: any) {
+            this.logger.error(`Could not send failed action event: ${failureEventError.message}`);
+          }
+
+          this.logger.error(`Could not send action event: ${actionEventError.message}`);
         }
       };
 
-      const failure = (error: any) => {
+      const failure = async (error: any) => {
         this.logger.error(`Step run ${action.stepRunId} failed: ${error.message}`);
 
         if (error.stack) {
@@ -250,9 +252,8 @@ export class Worker {
               stack: error?.stack,
             }
           );
-          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send action event: ${e.message}`);
-          });
+          await this.client.dispatcher.sendStepActionEvent(event);
+
           // delete the run from the futures
           delete this.futures[action.stepRunId];
         } catch (e: any) {
@@ -260,7 +261,17 @@ export class Worker {
         }
       };
 
-      const future = new HatchetPromise(run().then(success).catch(failure));
+      const future = new HatchetPromise(
+        (async () => {
+          try {
+            await run();
+          } catch (e: any) {
+            await failure(e);
+            return;
+          }
+          await success(null);
+        })()
+      );
       this.futures[action.stepRunId] = future;
 
       // Send the action event to the dispatcher

@@ -1,4 +1,3 @@
-import https from 'https';
 import Hatchet, { Context, AdminClient } from '../src';
 import { CreateWorkflowVersionOpts } from '../src/protoc/workflows';
 
@@ -43,17 +42,9 @@ type StepOneInput = {
 async function main() {
   const hatchet = Hatchet.init();
 
-  const admin = hatchet.admin as AdminClient;
+  const admin = hatchet.admin;
 
-  admin.put_workflow(opts).then((res) => {
-    console.log(res);
-  });
-
-  admin.list_workflows().then((res) => {
-    res.rows?.forEach((row) => {
-      console.log(row);
-    });
-  });
+  await admin.put_workflow(opts);
 
   const worker = await hatchet.worker('example-worker');
 
@@ -63,7 +54,7 @@ async function main() {
     return { step1: 'step1' };
   });
 
-  hatchet.admin.run_workflow('api-workflow', {});
+  await hatchet.admin.run_workflow('api-workflow', {});
 
   worker.start();
 }

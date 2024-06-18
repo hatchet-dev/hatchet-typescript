@@ -36,6 +36,7 @@ export const ActionObject = z.object({
   workflowRunId: z.string(),
   getGroupKeyRunId: z.string().optional(),
   stepName: z.string(),
+  retryCount: z.number(),
 });
 
 export type Action = z.infer<typeof ActionObject>;

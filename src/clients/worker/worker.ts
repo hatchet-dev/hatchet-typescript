@@ -56,7 +56,9 @@ export class Worker {
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
-  // @deprecated
+  /**
+   * @deprecated use registerWorkflow instead
+   */
   async register_workflow(initWorkflow: Workflow) {
     return this.registerWorkflow(initWorkflow);
   }

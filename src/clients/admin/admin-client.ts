@@ -58,6 +58,13 @@ export class AdminClient {
   }
 
   /**
+   * @deprecated use putWorkflow instead
+   */
+  async put_workflow(opts: CreateWorkflowVersionOpts) {
+    return this.putWorkflow(opts);
+  }
+
+  /**
    * Creates a new workflow or updates an existing workflow. If the workflow already exists, Hatchet will automatically
    * determine if the workflow definition has changed and create a new version if necessary.
    * @param workflow a workflow definition to create
@@ -68,6 +75,13 @@ export class AdminClient {
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
+  }
+
+  /**
+   * @deprecated use putRateLimit instead
+   */
+  async put_rate_limit(key: string, limit: number, duration: RateLimitDuration) {
+    return this.putRateLimit(key, limit, duration);
   }
 
   async putRateLimit(
@@ -91,10 +105,28 @@ export class AdminClient {
   }
 
   /**
+   * @deprecated use runWorkflow instead
+   */
+  async run_workflow<T = object>(
+    workflowName: string,
+    input: T,
+    options?: {
+      parentId?: string | undefined;
+      parentStepRunId?: string | undefined;
+      childIndex?: number | undefined;
+      childKey?: string | undefined;
+      additionalMetadata?: Record<string, string> | undefined;
+    }
+  ) {
+    return this.runWorkflow(workflowName, input, options);
+  }
+
+  /**
    * Run a new instance of a workflow with the given input. This will create a new workflow run and return the ID of the
    * new run.
    * @param workflowName the name of the workflow to run
    * @param input an object containing the input to the workflow
+   * @param options an object containing the options to run the workflow
    * @returns the ID of the new workflow run
    */
   async runWorkflow<T = object>(
@@ -133,12 +165,26 @@ export class AdminClient {
   }
 
   /**
+   * @deprecated use listWorkflows instead
+   */
+  async list_workflows() {
+    return this.listWorkflows();
+  }
+
+  /**
    * List workflows in the tenant associated with the API token.
    * @returns a list of all workflows in the tenant
    */
   async listWorkflows() {
     const res = await this.api.workflowList(this.tenantId);
     return res.data;
+  }
+
+  /**
+   * @deprecated use getWorkflow instead
+   */
+  async get_workflow(workflowId: string) {
+    return this.getWorkflow(workflowId);
   }
 
   /**
@@ -149,6 +195,13 @@ export class AdminClient {
   async getWorkflow(workflowId: string) {
     const res = await this.api.workflowGet(workflowId);
     return res.data;
+  }
+
+  /**
+   * @deprecated use getWorkflowVersion instead
+   */
+  async get_workflow_version(workflowId: string, version?: string) {
+    return this.getWorkflowVersion(workflowId, version);
   }
 
   /**
@@ -166,6 +219,13 @@ export class AdminClient {
   }
 
   /**
+   * @deprecated use getWorkflowRun instead
+   */
+  async get_workflow_run(workflowRunId: string) {
+    return this.getWorkflowRun(workflowRunId);
+  }
+
+  /**
    * Get a workflow run.
    * @param workflowRunId the id of the workflow run to get
    * @returns the workflow run
@@ -173,6 +233,22 @@ export class AdminClient {
   async getWorkflowRun(workflowRunId: string) {
     const res = await this.api.workflowRunGet(this.tenantId, workflowRunId);
     return res.data;
+  }
+
+  /**
+   * @deprecated use listWorkflowRuns instead
+   */
+  async list_workflow_runs(query: {
+    offset?: number | undefined;
+    limit?: number | undefined;
+    eventId?: string | undefined;
+    workflowId?: string | undefined;
+    parentWorkflowRunId?: string | undefined;
+    parentStepRunId?: string | undefined;
+    statuses?: WorkflowRunStatusList | undefined;
+    additionalMetadata?: string[] | undefined;
+  }) {
+    return this.listWorkflowRuns(query);
   }
 
   /**
@@ -195,6 +271,18 @@ export class AdminClient {
   }
 
   /**
+   * @deprecated use scheduleWorkflow instead
+   */
+  async schedule_workflow(
+    name: string,
+    options?: {
+      schedules?: Date[];
+    }
+  ) {
+    return this.scheduleWorkflow(name, options);
+  }
+
+  /**
    * Schedule a workflow to run at a specific time or times.
    * @param name the name of the workflow to schedule
    * @param options an object containing the schedules to set
@@ -208,6 +296,13 @@ export class AdminClient {
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
+  }
+
+  /**
+   * @deprecated use getWorkflowMetrics instead
+   */
+  async get_workflow_metrics(data: WorkflowMetricsQuery) {
+    return this.getWorkflowMetrics(data);
   }
 
   /**

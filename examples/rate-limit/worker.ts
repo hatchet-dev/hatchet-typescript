@@ -23,7 +23,7 @@ const workflow: Workflow = {
 };
 
 async function main() {
-  await hatchet.admin.put_rate_limit('test-limit', 1, RateLimitDuration.MINUTE);
+  await hatchet.admin.putRateLimit('test-limit', 1, RateLimitDuration.MINUTE);
   const worker = await hatchet.worker('example-worker');
   await worker.registerWorkflow(workflow);
   worker.start();

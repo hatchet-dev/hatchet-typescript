@@ -62,7 +62,7 @@ export class AdminClient {
    * determine if the workflow definition has changed and create a new version if necessary.
    * @param workflow a workflow definition to create
    */
-  async put_workflow(workflow: CreateWorkflowVersionOpts) {
+  async putWorkflow(workflow: CreateWorkflowVersionOpts) {
     try {
       await retrier(async () => this.client.putWorkflow({ opts: workflow }), this.logger);
     } catch (e: any) {
@@ -70,7 +70,7 @@ export class AdminClient {
     }
   }
 
-  async put_rate_limit(
+  async putRateLimit(
     key: string,
     limit: number,
     duration: RateLimitDuration = RateLimitDuration.SECOND
@@ -97,7 +97,7 @@ export class AdminClient {
    * @param input an object containing the input to the workflow
    * @returns the ID of the new workflow run
    */
-  async run_workflow<T = object>(
+  async runWorkflow<T = object>(
     workflowName: string,
     input: T,
     options?: {
@@ -136,7 +136,7 @@ export class AdminClient {
    * List workflows in the tenant associated with the API token.
    * @returns a list of all workflows in the tenant
    */
-  async list_workflows() {
+  async listWorkflows() {
     const res = await this.api.workflowList(this.tenantId);
     return res.data;
   }
@@ -146,7 +146,7 @@ export class AdminClient {
    * @param workflowId the workflow ID (**note:** this is not the same as the workflow version id)
    * @returns
    */
-  async get_workflow(workflowId: string) {
+  async getWorkflow(workflowId: string) {
     const res = await this.api.workflowGet(workflowId);
     return res.data;
   }
@@ -157,7 +157,7 @@ export class AdminClient {
    * @param version the version of the workflow to get. If not provided, the latest version will be returned.
    * @returns the workflow version
    */
-  async get_workflow_version(workflowId: string, version?: string) {
+  async getWorkflowVersion(workflowId: string, version?: string) {
     const res = await this.api.workflowVersionGet(workflowId, {
       version,
     });
@@ -170,7 +170,7 @@ export class AdminClient {
    * @param workflowRunId the id of the workflow run to get
    * @returns the workflow run
    */
-  async get_workflow_run(workflowRunId: string) {
+  async getWorkflowRun(workflowRunId: string) {
     const res = await this.api.workflowRunGet(this.tenantId, workflowRunId);
     return res.data;
   }
@@ -180,7 +180,7 @@ export class AdminClient {
    * @param query the query to filter the list of workflow runs
    * @returns
    */
-  async list_workflow_runs(query: {
+  async listWorkflowRuns(query: {
     offset?: number | undefined;
     limit?: number | undefined;
     eventId?: string | undefined;
@@ -199,7 +199,7 @@ export class AdminClient {
    * @param name the name of the workflow to schedule
    * @param options an object containing the schedules to set
    */
-  schedule_workflow(name: string, options?: { schedules?: Date[] }) {
+  scheduleWorkflow(name: string, options?: { schedules?: Date[] }) {
     try {
       this.client.scheduleWorkflow({
         name,
@@ -217,14 +217,14 @@ export class AdminClient {
    * @param workflowName the name of the workflow to get metrics for
    * @param query an object containing query parameters to filter the metrics
    */
-  get_workflow_metrics({ workflowId, workflowName, status, groupKey }: WorkflowMetricsQuery) {
+  getWorkflowMetrics({ workflowId, workflowName, status, groupKey }: WorkflowMetricsQuery) {
     const params = {
       status,
       groupKey,
     };
 
     if (workflowName) {
-      this.list_workflows().then((res) => {
+      this.listWorkflows().then((res) => {
         const workflow = res.rows?.find((row) => row.name === workflowName);
 
         if (workflow) {

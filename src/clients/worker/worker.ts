@@ -102,12 +102,14 @@ export class Worker {
     return this.client.admin.webhook_create({ ...webhook, workflows: this.registeredWorkflowIds });
   }
 
-  // @deprecated
-  async registerWorkflow(initWorkflow: Workflow) {
-    return this.register_workflow(initWorkflow);
+  /**
+   * @deprecated use registerWorkflow instead
+   */
+  async register_workflow(initWorkflow: Workflow) {
+    return this.registerWorkflow(initWorkflow);
   }
 
-  async register_workflow(initWorkflow: Workflow) {
+  async registerWorkflow(initWorkflow: Workflow) {
     const workflow: Workflow = {
       ...initWorkflow,
       id: this.client.config.namespace + initWorkflow.id,
@@ -143,7 +145,7 @@ export class Worker {
 
       this.registeredWorkflowIds.push(workflow.id);
 
-      const registeredWorkflow = this.client.admin.put_workflow({
+      const registeredWorkflow = this.client.admin.putWorkflow({
         name: workflow.id,
         description: workflow.description,
         version: workflow.version || '',

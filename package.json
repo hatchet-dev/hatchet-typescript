@@ -51,7 +51,7 @@
     "worker:logger": "npm run exec -- ./examples/logger.ts",
     "api": "npm run exec -- ./examples/api.ts",
     "prepublish": "cp package.json dist/package.json;",
-    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
+    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks --tag=alpha",
     "generate-docs": "typedoc"
   },
   "keywords": [],

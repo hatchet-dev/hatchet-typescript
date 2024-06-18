@@ -194,6 +194,8 @@ export interface Tenant {
   slug: string;
   /** Whether the tenant has opted out of analytics. */
   analyticsOptOut?: boolean;
+  /** Whether to alert tenant members. */
+  alertMemberEmails?: boolean;
 }
 
 export interface TenantMember {
@@ -217,6 +219,38 @@ export enum TenantMemberRole {
   MEMBER = 'MEMBER',
 }
 
+export enum TenantResource {
+  WORKER = 'WORKER',
+  EVENT = 'EVENT',
+  WORKFLOW_RUN = 'WORKFLOW_RUN',
+  CRON = 'CRON',
+  SCHEDULE = 'SCHEDULE',
+}
+
+export interface TenantResourceLimit {
+  metadata: APIResourceMeta;
+  /** The resource associated with this limit. */
+  resource: TenantResource;
+  /** The limit associated with this limit. */
+  limitValue: number;
+  /** The alarm value associated with this limit to warn of approaching limit value. */
+  alarmValue?: number;
+  /** The current value associated with this limit. */
+  value: number;
+  /** The meter window for the limit. (i.e. 1 day, 1 week, 1 month) */
+  window?: string;
+  /**
+   * The last time the limit was refilled.
+   * @format date-time
+   */
+  lastRefill?: string;
+}
+
+export interface TenantResourcePolicy {
+  /** A list of resource limits for the tenant. */
+  limits: TenantResourceLimit[];
+}
+
 export interface CreateTenantInviteRequest {
   /** The email of the user to invite. */
   email: string;
@@ -231,6 +265,14 @@ export interface UpdateTenantInviteRequest {
 
 export interface TenantAlertingSettings {
   metadata: APIResourceMeta;
+  /** Whether to alert tenant members. */
+  alertMemberEmails?: boolean;
+  /** Whether to send alerts when workflow runs fail. */
+  enableWorkflowRunFailureAlerts?: boolean;
+  /** Whether to enable alerts when tokens are approaching expiration. */
+  enableExpiringTokenAlerts?: boolean;
+  /** Whether to enable alerts when tenant resources are approaching limits. */
+  enableTenantResourceLimitAlerts?: boolean;
   /** The max frequency at which to alert. */
   maxAlertingFrequency: string;
   /**
@@ -318,6 +360,14 @@ export interface UpdateTenantRequest {
   name?: string;
   /** Whether the tenant has opted out of analytics. */
   analyticsOptOut?: boolean;
+  /** Whether to alert tenant members. */
+  alertMemberEmails?: boolean;
+  /** Whether to send alerts when workflow runs fail. */
+  enableWorkflowRunFailureAlerts?: boolean;
+  /** Whether to enable alerts when tokens are approaching expiration. */
+  enableExpiringTokenAlerts?: boolean;
+  /** Whether to enable alerts when tenant resources are approaching limits. */
+  enableTenantResourceLimitAlerts?: boolean;
   /** The max frequency at which to alert. */
   maxAlertingFrequency?: string;
 }

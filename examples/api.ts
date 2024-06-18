@@ -2,21 +2,6 @@ import https from 'https';
 import Hatchet, { Context, AdminClient } from '../src';
 import { CreateWorkflowVersionOpts } from '../src/protoc/workflows';
 
-const hatchet = Hatchet.init(
-  {
-    log_level: 'OFF',
-  },
-  {},
-  {
-    // This is needed for the local certificate in the example, but should not be used in production
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
-  }
-);
-
-const admin = hatchet.admin as AdminClient;
-
 type CustomUserData = {
   example: string;
 };
@@ -32,13 +17,12 @@ const opts: CreateWorkflowVersionOpts = {
   jobs: [
     {
       name: 'my-job',
-      timeout: '60s',
       description: 'Job description',
       steps: [
         {
           retries: 0,
           readableId: 'custom-step',
-          action: `default:step-one`,
+          action: `slack:example`,
           timeout: '60s',
           inputs: '{}',
           parents: [],
@@ -52,22 +36,28 @@ const opts: CreateWorkflowVersionOpts = {
   ],
 };
 
-admin.put_workflow(opts);
-
-admin.list_workflows().then((res) => {
-  res.rows?.forEach((row) => {
-    console.log(row);
-  });
-});
-
 type StepOneInput = {
   key: string;
 };
 
 async function main() {
+  const hatchet = Hatchet.init();
+
+  const admin = hatchet.admin as AdminClient;
+
+  admin.put_workflow(opts).then((res) => {
+    console.log(res);
+  });
+
+  admin.list_workflows().then((res) => {
+    res.rows?.forEach((row) => {
+      console.log(row);
+    });
+  });
+
   const worker = await hatchet.worker('example-worker');
 
-  worker.registerAction('default:step-one', async (ctx: Context<StepOneInput, CustomUserData>) => {
+  worker.registerAction('slack:example', async (ctx: Context<StepOneInput, CustomUserData>) => {
     const setData = ctx.userData();
     console.log('executed step1!', setData);
     return { step1: 'step1' };

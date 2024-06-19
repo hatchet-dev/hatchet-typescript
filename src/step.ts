@@ -89,7 +89,7 @@ class ChildWorkflowRef<T> {
   }
 }
 
-export class Context<T, K> {
+export class Context<T, K = {}> {
   data: ContextData<T, K>;
   input: T;
   controller = new AbortController();

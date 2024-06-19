@@ -101,8 +101,11 @@ export class Worker {
         name: workflow.id,
         description: workflow.description,
         version: workflow.version || '',
-        eventTriggers: workflow.on.event ? [this.client.config.namespace + workflow.on.event] : [],
-        cronTriggers: workflow.on.cron ? [workflow.on.cron] : [],
+        eventTriggers:
+          workflow.on && workflow.on.event
+            ? [this.client.config.namespace + workflow.on.event]
+            : [],
+        cronTriggers: workflow.on && workflow.on.cron ? [workflow.on.cron] : [],
         scheduledTriggers: [],
         concurrency,
         scheduleTimeout: workflow.scheduleTimeout,

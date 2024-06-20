@@ -2,6 +2,7 @@ import HatchetError from '@util/errors/hatchet-error';
 import { createHmac } from 'crypto';
 import { IncomingMessage, ServerResponse } from 'http';
 import { ActionObject } from '@clients/dispatcher/action-listener';
+import { Workflow } from '@hatchet/workflow';
 import { Worker } from './worker';
 
 export interface HandlerOpts {
@@ -9,8 +10,12 @@ export interface HandlerOpts {
 }
 
 export class WebhookHandler {
-  // eslint-disable-next-line no-useless-constructor,no-empty-function
-  constructor(private worker: Worker) {}
+  // eslint-disable-next-line no-useless-constructor
+  constructor(
+    private worker: Worker,
+    private workflows: Workflow[]
+    // eslint-disable-next-line no-empty-function
+  ) {}
 
   /**
    * Handles a request with a provided body, secret, and signature.
@@ -49,7 +54,11 @@ export class WebhookHandler {
     await this.worker.handleAction(action);
   }
 
-  private getHealthcheckResponse() {
+  private async getHealthcheckResponse() {
+    for (const workflow of this.workflows) {
+      await this.worker.registerWorkflow(workflow);
+    }
+
     return {
       actions: Object.keys(this.worker.action_registry),
     };
@@ -81,8 +90,15 @@ export class WebhookHandler {
       }
 
       if (req.headers['x-healthcheck']) {
-        res.sendStatus(200);
-        res.json(this.getHealthcheckResponse());
+        this.getHealthcheckResponse()
+          .then((resp) => {
+            res.sendStatus(200);
+            res.json(resp);
+          })
+          .catch((err) => {
+            res.sendStatus(500);
+            this.worker.logger.error(`Error handling request: ${err.message}`);
+          });
         return;
       }
 
@@ -90,9 +106,9 @@ export class WebhookHandler {
         .then(() => {
           res.sendStatus(200);
         })
-        .catch((e) => {
+        .catch((err) => {
           res.sendStatus(500);
-          this.worker.logger.error(`Error handling request: ${e.message}`);
+          this.worker.logger.error(`Error handling request: ${err.message}`);
         });
     };
   }
@@ -122,8 +138,9 @@ export class WebhookHandler {
         }
 
         if (req.headers['x-healthcheck']) {
+          const resp = await this.getHealthcheckResponse();
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify(this.getHealthcheckResponse()));
+          res.write(JSON.stringify(resp));
           res.end();
           return;
         }
@@ -157,7 +174,8 @@ export class WebhookHandler {
     };
     const f = async (req: Request) => {
       if (req.headers.get('x-healthcheck')) {
-        return new Response(JSON.stringify(this.getHealthcheckResponse()), { status: 200 });
+        const resp = await this.getHealthcheckResponse();
+        return new Response(JSON.stringify(resp), { status: 200 });
       }
       await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
       return new Response('ok', { status: 200 });

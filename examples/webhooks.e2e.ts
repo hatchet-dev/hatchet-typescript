@@ -47,8 +47,7 @@ describe('webhooks', () => {
       ],
     };
 
-    console.log('registering workflow...');
-    await worker.registerWorkflow(workflow);
+    // registering workflows is not needed because it will be done automatically
 
     const secret = 'secret';
 
@@ -60,7 +59,7 @@ describe('webhooks', () => {
 
     console.log('starting worker...');
 
-    const handler = hatchet.webhooks(workflow);
+    const handler = hatchet.webhooks([workflow]);
 
     const server = createServer(handler.httpHandler({ secret }));
 
@@ -71,7 +70,7 @@ describe('webhooks', () => {
     });
 
     console.log('server started.');
-    console.log('waiting for webhook to be registered...');
+    console.log('waiting for worker to be registered...');
 
     // wait for engine to pick up the webhook worker
     await sleep(30_000 + 10_000);

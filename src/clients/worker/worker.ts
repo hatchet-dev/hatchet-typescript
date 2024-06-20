@@ -87,15 +87,17 @@ export class Worker {
         };
   }
 
-  getHandler(workflow: Workflow) {
-    const wf: Workflow = {
-      ...workflow,
-      id: this.client.config.namespace + workflow.id,
-    };
+  getHandler(workflows: Workflow[]) {
+    for (const workflow of workflows) {
+      const wf: Workflow = {
+        ...workflow,
+        id: this.client.config.namespace + workflow.id,
+      };
 
-    this.registerActions(wf);
+      this.registerActions(wf);
+    }
 
-    return new WebhookHandler(this);
+    return new WebhookHandler(this, workflows);
   }
 
   async registerWebhook(webhook: WebhookWorkerCreateRequest) {

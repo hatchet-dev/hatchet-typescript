@@ -11,7 +11,7 @@ describe('webhooks', () => {
 
   beforeEach(async () => {
     hatchet = Hatchet.init();
-    worker = await hatchet.worker('simple-webhook-workflow');
+    worker = await hatchet.worker('webhook-workflow');
   });
 
   afterEach(async () => {
@@ -23,7 +23,7 @@ describe('webhooks', () => {
     let invoked = 0;
 
     const workflow: Workflow = {
-      id: 'simple-webhook-workflow',
+      id: 'webhook-workflow',
       description: 'test',
       on: {
         event: 'user:create-webhook',

@@ -23,10 +23,10 @@ xdescribe('e2e', () => {
     const start = new Date();
 
     const workflow: Workflow = {
-      id: 'simple-e2e-workflow',
+      id: 'namespaced-e2e-workflow',
       description: 'test',
       on: {
-        event: 'user:create',
+        event: 'user:create-namespaced',
       },
       steps: [
         {
@@ -62,7 +62,7 @@ xdescribe('e2e', () => {
 
     console.log('pushing event...');
 
-    await hatchet.event.push('user:create', {
+    await hatchet.event.push('user:create-namespaced', {
       test: 'test',
     });
 

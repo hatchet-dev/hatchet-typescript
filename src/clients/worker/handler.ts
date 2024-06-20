@@ -137,8 +137,18 @@ export class WebhookHandler {
           return;
         }
 
+        console.log(
+          'got request',
+          req.method,
+          req.headers['x-hatchet-signature'],
+          `h: ${!!req.headers['x-healthcheck']}`
+        );
+
         if (req.headers['x-healthcheck']) {
+          console.log('doing healthcheck');
           const resp = await this.getHealthcheckResponse();
+          console.log('healthcheck response:', resp);
+
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify(resp));
           res.end();
@@ -173,8 +183,16 @@ export class WebhookHandler {
       return new Response('OK!', { status: 200 });
     };
     const f = async (req: Request) => {
+      console.log(
+        'got request',
+        req.method,
+        req.headers.get('x-hatchet-signature'),
+        `h: ${!!req.headers.get('x-healthcheck')}`
+      );
       if (req.headers.get('x-healthcheck')) {
+        console.log('doing healthcheck');
         const resp = await this.getHealthcheckResponse();
+        console.log('healthcheck response:', resp);
         return new Response(JSON.stringify(resp), { status: 200 });
       }
       await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));

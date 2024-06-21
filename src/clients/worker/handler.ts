@@ -1,8 +1,8 @@
 import HatchetError from '@util/errors/hatchet-error';
 import { createHmac } from 'crypto';
 import { IncomingMessage, ServerResponse } from 'http';
-import { ActionObject } from '@clients/dispatcher/action-listener';
 import { Workflow } from '@hatchet/workflow';
+import { ActionObject } from '@clients/dispatcher/action-listener';
 import { Worker } from './worker';
 
 export interface HandlerOpts {
@@ -30,8 +30,20 @@ export class WebhookHandler {
    */
   async handle(
     body: string | undefined,
-    secret: string | undefined,
-    signature: string | string[] | undefined | null
+    signature: string | string[] | undefined | null,
+    secret: string | undefined
+  ) {
+    this.checkSignature(body, signature, secret);
+
+    const action = ActionObject.parse(JSON.parse(body!));
+
+    await this.worker.handleAction(action);
+  }
+
+  private checkSignature(
+    body: string | undefined,
+    signature: string | string[] | undefined | null,
+    secret: string | undefined
   ) {
     if (!signature || typeof signature !== 'string') {
       throw new HatchetError('No signature provided');
@@ -48,13 +60,15 @@ export class WebhookHandler {
     if (actualSignature !== signature) {
       throw new HatchetError(`Invalid signature, expected ${actualSignature}, got ${signature}`);
     }
-
-    const action = ActionObject.parse(JSON.parse(body));
-
-    await this.worker.handleAction(action);
   }
 
-  private async getHealthcheckResponse() {
+  private async getHealthcheckResponse(
+    body: string | undefined,
+    signature: string | string[] | undefined | null,
+    secret: string | undefined
+  ) {
+    this.checkSignature(body, signature, secret);
+
     for (const workflow of this.workflows) {
       await this.worker.registerWorkflow(workflow);
     }
@@ -90,7 +104,7 @@ export class WebhookHandler {
       }
 
       if (req.headers['x-healthcheck']) {
-        this.getHealthcheckResponse()
+        this.getHealthcheckResponse(req.body, req.headers['x-hatchet-signature'], secret)
           .then((resp) => {
             res.sendStatus(200);
             res.json(resp);
@@ -137,17 +151,21 @@ export class WebhookHandler {
           return;
         }
 
+        const body = await this.getBody(req);
+
         if (req.headers['x-healthcheck']) {
-          const resp = await this.getHealthcheckResponse();
+          const resp = await this.getHealthcheckResponse(
+            body,
+            req.headers['x-hatchet-signature'],
+            secret
+          );
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify(resp));
           res.end();
           return;
         }
 
-        const body = await this.getBody(req);
-
-        await this.handle(body, secret, req.headers['x-hatchet-signature'] as any);
+        await this.handle(body, req.headers['x-hatchet-signature'], secret);
 
         res.writeHead(200, 'OK');
         res.end();
@@ -173,11 +191,16 @@ export class WebhookHandler {
       return new Response('OK!', { status: 200 });
     };
     const f = async (req: Request) => {
+      const body = await req.text();
       if (req.headers.get('x-healthcheck')) {
-        const resp = await this.getHealthcheckResponse();
+        const resp = await this.getHealthcheckResponse(
+          body,
+          req.headers.get('x-hatchet-signature'),
+          secret
+        );
         return new Response(JSON.stringify(resp), { status: 200 });
       }
-      await this.handle(await req.text(), secret, req.headers.get('x-hatchet-signature'));
+      await this.handle(body, req.headers.get('x-hatchet-signature'), secret);
       return new Response('ok', { status: 200 });
     };
     return {

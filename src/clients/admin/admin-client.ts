@@ -279,23 +279,26 @@ export class AdminClient {
    */
   async schedule_workflow(
     name: string,
+    input: object,
     options?: {
       schedules?: Date[];
     }
   ) {
-    return this.scheduleWorkflow(name, options);
+    return this.scheduleWorkflow(name, input, options);
   }
 
   /**
    * Schedule a workflow to run at a specific time or times.
    * @param name the name of the workflow to schedule
+   * @param input an object containing the input to the workflow
    * @param options an object containing the schedules to set
    */
-  scheduleWorkflow(name: string, options?: { schedules?: Date[] }) {
+  scheduleWorkflow(name: string, input: object, options?: { schedules?: Date[] }) {
     try {
       this.client.scheduleWorkflow({
         name,
         schedules: options?.schedules,
+        input: JSON.stringify(input),
       });
     } catch (e: any) {
       throw new HatchetError(e.message);

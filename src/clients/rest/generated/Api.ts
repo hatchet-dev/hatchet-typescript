@@ -10,17 +10,19 @@
  */
 
 import {
+  AcceptInviteRequest,
   APIError,
   APIErrors,
   APIMeta,
-  AcceptInviteRequest,
   CreateAPITokenRequest,
   CreateAPITokenResponse,
+  CreateEventRequest,
   CreatePullRequestFromStepRun,
   CreateSNSIntegrationRequest,
   CreateTenantAlertEmailGroupRequest,
   CreateTenantInviteRequest,
   CreateTenantRequest,
+  Event,
   EventData,
   EventKey,
   EventKeyList,
@@ -36,8 +38,8 @@ import {
   ListGithubBranchesResponse,
   ListGithubReposResponse,
   ListPullRequestsResponse,
-  ListSNSIntegrations,
   ListSlackWebhooks,
+  ListSNSIntegrations,
   LogLineLevelField,
   LogLineList,
   LogLineOrderByDirection,
@@ -58,6 +60,7 @@ import {
   TenantInviteList,
   TenantMember,
   TenantMemberList,
+  TenantQueueMetrics,
   TenantResourcePolicy,
   TriggerWorkflowRunRequest,
   UpdateTenantAlertEmailGroupRequest,
@@ -68,7 +71,7 @@ import {
   UserLoginRequest,
   UserRegisterRequest,
   UserTenantMembershipsList,
-  WebhookWorker,
+  WebhookWorkerCreated,
   WebhookWorkerCreateRequest,
   WebhookWorkerListResponse,
   Worker,
@@ -79,10 +82,10 @@ import {
   WorkflowMetrics,
   WorkflowRun,
   WorkflowRunList,
-  WorkflowRunStatus,
-  WorkflowRunStatusList,
   WorkflowRunsCancelRequest,
   WorkflowRunsMetrics,
+  WorkflowRunStatus,
+  WorkflowRunStatusList,
   WorkflowVersion,
   WorkflowVersionDefinition,
 } from './data-contracts';
@@ -836,6 +839,36 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
   /**
+   * @description Get the queue metrics for the tenant
+   *
+   * @tags Workflow
+   * @name TenantGetQueueMetrics
+   * @summary Get workflow metrics
+   * @request GET:/api/v1/tenants/{tenant}/queue-metrics
+   * @secure
+   */
+  tenantGetQueueMetrics = (
+    tenant: string,
+    query?: {
+      /** A list of workflow IDs to filter by */
+      workflows?: WorkflowID[];
+      /**
+       * A list of metadata key value pairs to filter by
+       * @example ["key1:value1","key2:value2"]
+       */
+      additionalMetadata?: string[];
+    },
+    params: RequestParams = {}
+  ) =>
+    this.request<TenantQueueMetrics, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/queue-metrics`,
+      method: 'GET',
+      query: query,
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
    * @description Lists all events for a tenant.
    *
    * @tags Event
@@ -882,6 +915,25 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       method: 'GET',
       query: query,
       secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Creates a new event.
+   *
+   * @tags Event
+   * @name EventCreate
+   * @summary Create event
+   * @request POST:/api/v1/tenants/{tenant}/events
+   * @secure
+   */
+  eventCreate = (tenant: string, data: CreateEventRequest, params: RequestParams = {}) =>
+    this.request<Event, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/events`,
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: ContentType.Json,
       format: 'json',
       ...params,
     });
@@ -1178,7 +1230,7 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
   workflowGetMetrics = (
     workflow: string,
     query?: {
-      /** A status of workflow runs to filter by */
+      /** A status of workflow run statuses to filter by */
       status?: WorkflowRunStatus;
       /** A group key to filter metrics by */
       groupKey?: string;
@@ -1644,12 +1696,12 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
    *
    * @name WebhookList
    * @summary List webhooks
-   * @request GET:/api/v1/webhook-workers/{tenant}
+   * @request GET:/api/v1/tenants/{tenant}/webhook-workers
    * @secure
    */
   webhookList = (tenant: string, params: RequestParams = {}) =>
     this.request<WebhookWorkerListResponse, APIErrors>({
-      path: `/api/v1/webhook-workers/${tenant}`,
+      path: `/api/v1/tenants/${tenant}/webhook-workers`,
       method: 'GET',
       secure: true,
       format: 'json',
@@ -1660,15 +1712,32 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
    *
    * @name WebhookCreate
    * @summary Create a webhook
-   * @request POST:/api/v1/webhook-workers/{tenant}/create
+   * @request POST:/api/v1/tenants/{tenant}/webhook-workers
+   * @secure
    */
   webhookCreate = (tenant: string, data: WebhookWorkerCreateRequest, params: RequestParams = {}) =>
-    this.request<WebhookWorker, APIErrors>({
-      path: `/api/v1/webhook-workers/${tenant}/create`,
+    this.request<WebhookWorkerCreated, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/webhook-workers`,
       method: 'POST',
       body: data,
+      secure: true,
       type: ContentType.Json,
       format: 'json',
+      ...params,
+    });
+  /**
+   * @description Deletes a webhook
+   *
+   * @name WebhookDelete
+   * @summary Delete a webhook
+   * @request DELETE:/api/v1/tenants/webhook-workers/{webhook}
+   * @secure
+   */
+  webhookDelete = (webhook: string, params: RequestParams = {}) =>
+    this.request<void, APIErrors>({
+      path: `/api/v1/tenants/webhook-workers/${webhook}`,
+      method: 'DELETE',
+      secure: true,
       ...params,
     });
 }

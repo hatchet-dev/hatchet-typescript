@@ -325,6 +325,21 @@ export interface TenantInviteList {
   rows?: TenantInvite[];
 }
 
+export interface QueueMetrics {
+  /** The number of items in the queue. */
+  numQueued: number;
+  /** The number of items running. */
+  numRunning: number;
+  /** The number of items pending. */
+  numPending: number;
+}
+
+export interface TenantQueueMetrics {
+  /** The total queue metrics. */
+  total?: QueueMetrics;
+  workflow?: Record<string, QueueMetrics>;
+}
+
 export interface AcceptInviteRequest {
   /**
    * @minLength 36
@@ -389,6 +404,15 @@ export interface Event {
 export interface EventData {
   /** The data for the event (JSON bytes). */
   data: string;
+}
+
+export interface CreateEventRequest {
+  /** The key for the event. */
+  key: string;
+  /** The data for the event. */
+  data: object;
+  /** Additional metadata for the event. */
+  additionalMetadata?: object;
 }
 
 export interface EventWorkflowRunSummary {
@@ -1017,6 +1041,16 @@ export interface WorkflowMetrics {
 
 export interface WebhookWorker {
   metadata: APIResourceMeta;
+  /** The name of the webhook worker. */
+  name: string;
+  /** The webhook url. */
+  url: string;
+}
+
+export interface WebhookWorkerCreated {
+  metadata: APIResourceMeta;
+  /** The name of the webhook worker. */
+  name: string;
   /** The webhook url. */
   url: string;
   /** The secret key for validation. */
@@ -1024,6 +1058,8 @@ export interface WebhookWorker {
 }
 
 export interface WebhookWorkerCreateRequest {
+  /** The name of the webhook worker. */
+  name: string;
   /** The webhook url. */
   url: string;
   /** The workflow IDs or names to register for this webhook worker. If not provided, workflows will be automatically detected. */
@@ -1036,7 +1072,7 @@ export interface WebhookWorkerCreateRequest {
 }
 
 export interface WebhookWorkerCreateResponse {
-  worker?: WebhookWorker;
+  worker?: WebhookWorkerCreated;
 }
 
 export interface WebhookWorkerListResponse {

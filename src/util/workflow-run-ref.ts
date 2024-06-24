@@ -45,6 +45,10 @@ export default class WorkflowRunRef<T> {
     this.client = client;
   }
 
+  async getWorkflowRunId(): Promise<string> {
+    return getWorkflowRunId(this.workflowRunId);
+  }
+
   async stream(): Promise<AsyncGenerator<StepRunEvent, void, unknown>> {
     const workflowRunId = await getWorkflowRunId(this.workflowRunId);
     return this.client.stream(workflowRunId);

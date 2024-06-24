@@ -27,9 +27,6 @@ xdescribe('fanout-e2e', () => {
     const childWorkflow: Workflow = {
       id: 'child-workflow',
       description: 'simple example for spawning child workflows',
-      on: {
-        event: 'fanout:create',
-      },
       steps: [
         {
           name: 'child-work',
@@ -57,7 +54,7 @@ xdescribe('fanout-e2e', () => {
 
     await sleep(5000);
 
-    console.log('pushing event...');
+    console.log('running workflow...');
 
     await hatchet.admin.runWorkflow('parent-workflow', { input: 'parent-input' });
 

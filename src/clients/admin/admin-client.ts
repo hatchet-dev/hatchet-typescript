@@ -9,9 +9,11 @@ import HatchetError from '@util/errors/hatchet-error';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
+import WorkflowRunRef from '@hatchet/util/workflow-run-ref';
 
 import { Api } from '../rest';
 import { WorkflowRunStatus, WorkflowRunStatusList } from '../rest/generated/data-contracts';
+import { ListenerClient } from '../listener/listener-client';
 
 type WorkflowMetricsQuery = {
   workflowId?: string;
@@ -42,19 +44,22 @@ export class AdminClient {
   api: Api;
   tenantId: string;
   logger: Logger;
+  listenerClient: ListenerClient;
 
   constructor(
     config: ClientConfig,
     channel: Channel,
     factory: ClientFactory,
     api: Api,
-    tenantId: string
+    tenantId: string,
+    listenerClient: ListenerClient
   ) {
     this.config = config;
     this.client = factory.create(WorkflowServiceDefinition, channel);
     this.api = api;
     this.tenantId = tenantId;
     this.logger = new Logger(`Admin`, config.log_level);
+    this.listenerClient = listenerClient;
   }
 
   /**
@@ -129,7 +134,7 @@ export class AdminClient {
    * @param options an object containing the options to run the workflow
    * @returns the ID of the new workflow run
    */
-  async runWorkflow<T = object>(
+  runWorkflow<P = object, T = object>(
     workflowName: string,
     input: T,
     options?: {
@@ -149,7 +154,7 @@ export class AdminClient {
 
       const inputStr = JSON.stringify(input);
 
-      const resp = await this.client.triggerWorkflow({
+      const resp = this.client.triggerWorkflow({
         name: computedName,
         input: inputStr,
         ...options,
@@ -158,7 +163,7 @@ export class AdminClient {
           : undefined,
       });
 
-      return resp.workflowRunId;
+      return new WorkflowRunRef<P>(resp, this.listenerClient, options?.parentId);
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
@@ -231,8 +236,7 @@ export class AdminClient {
    * @returns the workflow run
    */
   async getWorkflowRun(workflowRunId: string) {
-    const res = await this.api.workflowRunGet(this.tenantId, workflowRunId);
-    return res.data;
+    return new WorkflowRunRef(workflowRunId, this.listenerClient);
   }
 
   /**

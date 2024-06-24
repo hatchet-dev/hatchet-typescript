@@ -7,7 +7,7 @@ import { LogLevel } from './clients/event/event-client';
 import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
-import { WorkflowRunEvent, WorkflowRunEventType } from './protoc/dispatcher';
+import WorkflowRunRef from './util/workflow-run-ref';
 
 export const CreateRateLimitSchema = z.object({
   key: z.string(),
@@ -31,62 +31,6 @@ interface ContextData<T, K> {
   parents: Record<string, any>;
   triggered_by: string;
   user_data: K;
-}
-
-class ChildWorkflowRef<T> {
-  workflowRunId: Promise<string>;
-  parentWorkflowRunId: string;
-  client: HatchetClient;
-
-  constructor(workflowRunId: Promise<string>, parentWorkflowRunId: string, client: HatchetClient) {
-    this.workflowRunId = workflowRunId;
-    this.parentWorkflowRunId = parentWorkflowRunId;
-    this.client = client;
-  }
-
-  async stream(): Promise<AsyncGenerator<WorkflowRunEvent, void, unknown>> {
-    const workflowRunId = await this.workflowRunId;
-    const listener = await this.client.listener.getChildListener(
-      workflowRunId,
-      this.parentWorkflowRunId
-    );
-
-    return listener.stream();
-  }
-
-  async result(): Promise<T> {
-    const listener = await this.stream();
-
-    return new Promise<T>((resolve, reject) => {
-      (async () => {
-        for await (const event of await listener) {
-          if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
-            if (event.results.some((r) => !!r.error)) {
-              reject(event.results);
-              return;
-            }
-
-            const result = event.results.reduce(
-              (acc, r) => ({
-                ...acc,
-                [r.stepReadableId]: JSON.parse(r.output || '{}'),
-              }),
-              {} as T
-            );
-
-            resolve(result);
-            return;
-          }
-        }
-      })();
-    });
-  }
-
-  async toJSON(): Promise<string> {
-    return JSON.stringify({
-      workflowRunId: await this.workflowRunId,
-    });
-  }
 }
 
 export class Context<T, K = {}> {
@@ -227,21 +171,25 @@ export class Context<T, K = {}> {
     workflowName: string,
     input: Q,
     key?: string
-  ): ChildWorkflowRef<P> {
+  ): WorkflowRunRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
     const name = this.client.config.namespace + workflowName;
 
-    const childWorkflowRunIdPromise = this.client.admin.runWorkflow(name, input, {
-      parentId: workflowRunId,
-      parentStepRunId: stepRunId,
-      childKey: key,
-      childIndex: this.spawnIndex,
-    });
+    try {
+      const resp = this.client.admin.runWorkflow<P, Q>(name, input, {
+        parentId: workflowRunId,
+        parentStepRunId: stepRunId,
+        childKey: key,
+        childIndex: this.spawnIndex,
+      });
 
-    this.spawnIndex += 1;
+      this.spawnIndex += 1;
 
-    return new ChildWorkflowRef(childWorkflowRunIdPromise, workflowRunId, this.client);
+      return resp;
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
   }
 }
 

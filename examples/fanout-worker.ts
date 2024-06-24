@@ -19,14 +19,13 @@ const parentWorkflow: Workflow = {
       name: 'parent-spawn',
       timeout: '10s',
       run: async (ctx) => {
-
         const promises = Array.from({ length: 7 }, (_, i) =>
           ctx.spawnWorkflow<string>('child-workflow', { input: `child-input-${i}` }).result()
         );
 
         const results = await Promise.all(promises);
         console.log('spawned workflow results:', results);
-        console.log('number of spawned workflows:', results.length)
+        console.log('number of spawned workflows:', results.length);
         return { spawned: results };
       },
     },

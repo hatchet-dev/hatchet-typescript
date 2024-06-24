@@ -110,19 +110,19 @@ export class HatchetClient {
       channelFactory(this.config, this.credentials),
       clientFactory
     );
-    this.admin = new AdminClient(
-      this.config,
-      channelFactory(this.config, this.credentials),
-      clientFactory,
-      this.api,
-      this.tenantId
-    );
-
     this.listener = new ListenerClient(
       this.config,
       channelFactory(this.config, this.credentials),
       clientFactory,
       this.api
+    );
+    this.admin = new AdminClient(
+      this.config,
+      channelFactory(this.config, this.credentials),
+      clientFactory,
+      this.api,
+      this.tenantId,
+      this.listener
     );
 
     this.logger = new Logger('HatchetClient', this.config.log_level);

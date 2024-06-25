@@ -1,53 +1,60 @@
 import { CreateWorkflowVersionOpts, WorkflowVersion } from '@hatchet/protoc/workflows';
 import { AdminClient } from './admin-client';
 import { mockChannel, mockFactory } from '../hatchet-client/hatchet-client.test';
+import { ListenerClient } from '../listener/listener-client';
 
 describe('AdminClient', () => {
   let client: AdminClient;
 
   it('should create a client', () => {
-    const x = new AdminClient(
-      {
-        token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
-        host_port: 'HOST_PORT',
-        tls_config: {
-          cert_file: 'TLS_CERT_FILE',
-          key_file: 'TLS_KEY_FILE',
-          ca_file: 'TLS_ROOT_CA_FILE',
-          server_name: 'TLS_SERVER_NAME',
-        },
-        api_url: 'API_URL',
-        tenant_id: 'tenantId',
+    const config = {
+      token:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
+      host_port: 'HOST_PORT',
+      tls_config: {
+        cert_file: 'TLS_CERT_FILE',
+        key_file: 'TLS_KEY_FILE',
+        ca_file: 'TLS_ROOT_CA_FILE',
+        server_name: 'TLS_SERVER_NAME',
       },
+      api_url: 'API_URL',
+      tenant_id: 'tenantId',
+    };
+
+    const x = new AdminClient(
+      config,
       mockChannel,
       mockFactory,
       {} as any,
-      'tenantId'
+      'tenantId',
+      new ListenerClient(config, mockChannel, mockFactory, {} as any)
     );
 
     expect(x).toBeDefined();
   });
 
   beforeEach(() => {
-    client = new AdminClient(
-      {
-        token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
-        host_port: 'HOST_PORT',
-        tls_config: {
-          cert_file: 'TLS_CERT_FILE',
-          key_file: 'TLS_KEY_FILE',
-          ca_file: 'TLS_ROOT_CA_FILE',
-          server_name: 'TLS_SERVER_NAME',
-        },
-        api_url: 'API_URL',
-        tenant_id: 'tenantId',
+    const config = {
+      token:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
+      host_port: 'HOST_PORT',
+      tls_config: {
+        cert_file: 'TLS_CERT_FILE',
+        key_file: 'TLS_KEY_FILE',
+        ca_file: 'TLS_ROOT_CA_FILE',
+        server_name: 'TLS_SERVER_NAME',
       },
+      api_url: 'API_URL',
+      tenant_id: 'tenantId',
+    };
+
+    client = new AdminClient(
+      config,
       mockChannel,
       mockFactory,
       {} as any,
-      'tenantId'
+      'tenantId',
+      new ListenerClient(config, mockChannel, mockFactory, {} as any)
     );
   });
 

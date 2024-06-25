@@ -206,7 +206,6 @@ export class WebhookHandler {
     return {
       GET: ok,
       POST: f,
-      PUT: f,
     };
   }
 

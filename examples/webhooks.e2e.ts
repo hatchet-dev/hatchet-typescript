@@ -53,6 +53,7 @@ describe('webhooks', () => {
 
     console.log('registering webhook...');
     await worker.registerWebhook({
+      name: 'webhook-example',
       secret,
       url: `http://localhost:${port}/webhook`,
     });

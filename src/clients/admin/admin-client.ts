@@ -134,7 +134,7 @@ export class AdminClient {
    * @param options an object containing the options to run the workflow
    * @returns the ID of the new workflow run
    */
-  runWorkflow<P = object, T = object>(
+  runWorkflow<T = object, P = object>(
     workflowName: string,
     input: T,
     options?: {

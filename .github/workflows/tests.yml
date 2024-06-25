@@ -127,4 +127,5 @@ jobs:
           cd ..
           export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
           export NODE_TLS_REJECT_UNAUTHORIZED=0
+          export HATCHET_CLIENT_TLS_STRATEGY=none
           pnpm test:e2e

@@ -14,7 +14,7 @@ xdescribe('fanout-e2e', () => {
           name: 'parent-spawn',
           timeout: '10s',
           run: async (ctx) => {
-            const ref = ctx.spawnWorkflow<string>('child-workflow', { input: 'child-input' });
+            const ref = ctx.spawnWorkflow('child-workflow', { input: 'child-input' });
 
             const res = await ref.result();
             console.log('spawned workflow result:', res);

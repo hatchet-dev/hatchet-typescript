@@ -22,9 +22,17 @@ export const CreateStepSchema = z.object({
   rate_limits: z.array(CreateRateLimitSchema).optional(),
 });
 
-type JSONPrimitive = string | number | boolean | null | Array<JSONPrimitive>;
+export type JsonObject = { [Key in string]: JsonValue } & {
+  [Key in string]?: JsonValue | undefined;
+};
 
-export type NextStep = { [key: string]: NextStep | JSONPrimitive | Array<NextStep> };
+export type JsonArray = JsonValue[] | readonly JsonValue[];
+
+export type JsonPrimitive = string | number | boolean | null;
+
+export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
+
+export type NextStep = { [key: string]: JsonValue };
 
 interface ContextData<T, K> {
   input: T;
@@ -167,7 +175,7 @@ export class Context<T, K = {}> {
     await this.client.event.putStream(stepRunId, data);
   }
 
-  spawnWorkflow<Q = object, P = object>(
+  spawnWorkflow<Q = JsonValue, P = JsonValue>(
     workflowName: string,
     input: Q,
     key?: string

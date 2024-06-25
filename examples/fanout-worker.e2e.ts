@@ -9,17 +9,14 @@ xdescribe('fanout-e2e', () => {
     const parentWorkflow: Workflow = {
       id: 'parent-workflow',
       description: 'simple example for spawning child workflows',
-      on: {
-        event: 'fanout:create',
-      },
       steps: [
         {
           name: 'parent-spawn',
           timeout: '10s',
           run: async (ctx) => {
-            const res = await ctx
-              .spawnWorkflow<string>('child-workflow', { input: 'child-input' })
-              .result();
+            const ref = ctx.spawnWorkflow('child-workflow', { input: 'child-input' });
+
+            const res = await ref.result();
             console.log('spawned workflow result:', res);
             invoked += 1;
             return { spawned: [res] };
@@ -30,9 +27,6 @@ xdescribe('fanout-e2e', () => {
     const childWorkflow: Workflow = {
       id: 'child-workflow',
       description: 'simple example for spawning child workflows',
-      on: {
-        event: 'fanout:create',
-      },
       steps: [
         {
           name: 'child-work',
@@ -60,7 +54,7 @@ xdescribe('fanout-e2e', () => {
 
     await sleep(5000);
 
-    console.log('pushing event...');
+    console.log('running workflow...');
 
     await hatchet.admin.runWorkflow('parent-workflow', { input: 'parent-input' });
 

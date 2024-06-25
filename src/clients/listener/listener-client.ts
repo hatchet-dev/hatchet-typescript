@@ -6,6 +6,7 @@ import {
   DispatcherDefinition,
   ResourceEventType,
   ResourceType,
+  DispatcherClient,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -80,18 +81,17 @@ export interface StepRunEvent {
   payload: string;
 }
 
-export class PollingAsyncListener {
-  client: ListenerClient;
+export class RunEventListener {
+  client: DispatcherClient;
 
   q: Array<StepRunEvent> = [];
   eventEmitter = new EventEmitter();
 
   pollInterval: any;
 
-  constructor(workflowRunid: string, client: ListenerClient) {
+  constructor(workflowRunid: string, client: DispatcherClient) {
     this.client = client;
     this.listen(workflowRunid);
-    this.polling(workflowRunid);
   }
 
   emit(event: StepRunEvent) {
@@ -100,33 +100,18 @@ export class PollingAsyncListener {
   }
 
   async listen(workflowRunId: string) {
-    let listener = this.client.client.subscribeToWorkflowEvents({
+    let listener = this.client.subscribeToWorkflowEvents({
       workflowRunId,
     });
-
-    const res = await this.getWorkflowRun(workflowRunId);
-
-    if (res) {
-      this.emit(res);
-      this.close();
-    }
 
     try {
       for await (const workflowEvent of listener) {
         const eventType = resourceTypeMap[workflowEvent.resourceType]?.[workflowEvent.eventType];
         if (eventType) {
-          if (eventType === RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED) {
-            // OPTIMZATION - consider including the workflow run data in the event?
-            const data = await this.getWorkflowRun(workflowRunId);
-            if (data) {
-              this.emit(data);
-            }
-          } else {
-            this.emit({
-              type: eventType,
-              payload: workflowEvent.eventPayload,
-            });
-          }
+          this.emit({
+            type: eventType,
+            payload: workflowEvent.eventPayload,
+          });
         }
       }
     } catch (e: any) {
@@ -137,8 +122,6 @@ export class PollingAsyncListener {
         listener = await this.retrySubscribe(workflowRunId);
       }
     }
-
-    setTimeout(() => this.close(), DEFAULT_EVENT_LISTENER_POLL_INTERVAL * 5);
   }
 
   async retrySubscribe(workflowRunId: string) {
@@ -148,7 +131,7 @@ export class PollingAsyncListener {
       try {
         await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL);
 
-        const listener = this.client.client.subscribeToWorkflowEvents({
+        const listener = this.client.subscribeToWorkflowEvents({
           workflowRunId,
         });
 
@@ -161,51 +144,6 @@ export class PollingAsyncListener {
     throw new HatchetError(
       `Could not subscribe to the worker after ${DEFAULT_EVENT_LISTENER_RETRY_COUNT} retries`
     );
-  }
-
-  async getWorkflowRun(workflowRunId: string) {
-    try {
-      const res = await this.client.api.workflowRunGet(this.client.config.tenant_id, workflowRunId);
-
-      const stepRuns = res.data.jobRuns?.[0]?.stepRuns ?? [];
-      const stepRunOutput = stepRuns.reduce((acc: Record<string, any>, stepRun) => {
-        acc[stepRun.step?.readableId || ''] = JSON.parse(stepRun.output || '{}');
-        return acc;
-      }, {});
-
-      if (Object.keys(workflowStatusMap).includes(res.data.status)) {
-        const type = workflowStatusMap[res.data.status];
-        if (!type) return undefined;
-        return {
-          type,
-          payload: JSON.stringify(stepRunOutput),
-        };
-      }
-
-      return undefined;
-    } catch (e: any) {
-      throw new HatchetError(e.message);
-    }
-  }
-
-  async polling(workflowRunId: string) {
-    this.pollInterval = setInterval(async () => {
-      try {
-        const result = await this.getWorkflowRun(workflowRunId);
-        if (result) {
-          this.emit(result);
-          this.close();
-        }
-      } catch (e: any) {
-        // TODO error handling
-      }
-    }, DEFAULT_EVENT_LISTENER_POLL_INTERVAL);
-  }
-
-  close() {
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-    }
   }
 
   async *stream(): AsyncGenerator<StepRunEvent, void, unknown> {
@@ -226,7 +164,7 @@ export class ListenerClient {
   logger: Logger;
   api: Api;
 
-  childListeners: Record<string, GrpcPooledListener> = {};
+  pooledListener: GrpcPooledListener | undefined;
 
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory, api: Api) {
     this.config = config;
@@ -235,24 +173,21 @@ export class ListenerClient {
     this.api = api;
   }
 
-  getChildListener(workflowRunId: string, parentWorkflowRunId: string) {
-    if (!this.childListeners[parentWorkflowRunId]) {
-      this.childListeners[parentWorkflowRunId] = new GrpcPooledListener(this, () => {
-        // cleanup listener when all children are done
-        delete this.childListeners[parentWorkflowRunId];
+  get(workflowRunId: string) {
+    if (!this.pooledListener) {
+      this.pooledListener = new GrpcPooledListener(this, () => {
+        this.pooledListener = undefined;
       });
     }
-    return this.childListeners[parentWorkflowRunId].subscribe({
+
+    return this.pooledListener.subscribe({
       workflowRunId,
     });
   }
 
-  get(workflowRunId: string) {
-    const listener = new PollingAsyncListener(workflowRunId, this);
-    return listener;
-  }
-
   async stream(workflowRunId: string): Promise<AsyncGenerator<StepRunEvent, void, unknown>> {
-    return this.get(workflowRunId).stream();
+    const listener = new RunEventListener(workflowRunId, this.client);
+
+    return listener.stream();
   }
 }

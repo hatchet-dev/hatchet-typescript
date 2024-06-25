@@ -8,6 +8,16 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+type Input = {
+  input: string;
+};
+
+type Output = {
+  'child-work': {
+    'child-output': string;
+  };
+};
+
 const parentWorkflow: Workflow = {
   id: 'parent-workflow',
   description: 'simple example for spawning child workflows',
@@ -19,14 +29,13 @@ const parentWorkflow: Workflow = {
       name: 'parent-spawn',
       timeout: '10s',
       run: async (ctx) => {
-
         const promises = Array.from({ length: 7 }, (_, i) =>
-          ctx.spawnWorkflow<string>('child-workflow', { input: `child-input-${i}` }).result()
+          ctx.spawnWorkflow<Input, Output>('child-workflow', { input: `child-input-${i}` }).result()
         );
 
         const results = await Promise.all(promises);
         console.log('spawned workflow results:', results);
-        console.log('number of spawned workflows:', results.length)
+        console.log('number of spawned workflows:', results.length);
         return { spawned: results };
       },
     },

@@ -82,7 +82,7 @@ jobs:
         working-directory: hatchet
         run: |
           export DATABASE_URL="postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet"
-          task prisma-migrate
+          task prisma-migrate -- tmp
           task generate-go
 
       - name: Setup

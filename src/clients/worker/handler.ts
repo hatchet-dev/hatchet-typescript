@@ -2,7 +2,6 @@ import HatchetError from '@util/errors/hatchet-error';
 import { createHmac } from 'crypto';
 import { IncomingMessage, ServerResponse } from 'http';
 import { Workflow } from '@hatchet/workflow';
-import { ActionObject } from '@clients/dispatcher/action-listener';
 import { Worker } from './worker';
 
 export interface HandlerOpts {
@@ -37,7 +36,7 @@ export class WebhookHandler {
   ) {
     this.checkSignature(body, signature, secret);
 
-    const action = ActionObject.parse(JSON.parse(body!));
+    const action = JSON.parse(body!);
 
     await this.worker.handleAction(action);
   }

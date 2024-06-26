@@ -1,8 +1,4 @@
-import {
-  DispatcherClient as PbDispatcherClient,
-  AssignedAction,
-  actionTypeFromJSON,
-} from '@hatchet/protoc/dispatcher';
+import { DispatcherClient as PbDispatcherClient, AssignedAction } from '@hatchet/protoc/dispatcher';
 
 import { Status } from 'nice-grpc';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
@@ -10,7 +6,6 @@ import sleep from '@util/sleep';
 import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
 
-import { z } from 'zod';
 import { DispatcherClient } from './dispatcher-client';
 import { Heartbeat } from './heartbeat/heartbeat-controller';
 
@@ -23,23 +18,7 @@ enum ListenStrategy {
   LISTEN_STRATEGY_V2 = 2,
 }
 
-export const ActionObject = z.object({
-  tenantId: z.string(),
-  jobId: z.string(),
-  jobName: z.string(),
-  jobRunId: z.string(),
-  stepId: z.string(),
-  stepRunId: z.string(),
-  actionId: z.string(),
-  actionType: z.preprocess((s) => actionTypeFromJSON(s), z.number().optional()),
-  actionPayload: z.string(),
-  workflowRunId: z.string(),
-  getGroupKeyRunId: z.string().optional(),
-  stepName: z.string(),
-  retryCount: z.number(),
-});
-
-export type Action = z.infer<typeof ActionObject>;
+export interface Action extends AssignedAction {}
 
 export class ActionListener {
   config: ClientConfig;

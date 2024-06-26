@@ -100,7 +100,7 @@ export class Worker {
   }
 
   async registerWebhook(webhook: WebhookWorkerCreateRequest) {
-    return this.client.admin.webhook_create({ ...webhook });
+    return this.client.admin.registerWebhook({ ...webhook });
   }
 
   /**

@@ -113,7 +113,7 @@ export class AdminClient {
     }
   }
 
-  async webhook_create(data: WebhookWorkerCreateRequest) {
+  async registerWebhook(data: WebhookWorkerCreateRequest) {
     return this.api.webhookCreate(this.tenantId, data);
   }
 

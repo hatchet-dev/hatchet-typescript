@@ -1,10 +1,4 @@
 export function parseJSON(json: string): any {
-  // TODO why is this needed?
-  if (json.startsWith('ey')) {
-    const decoded = Buffer.from(json, 'base64').toString('utf8');
-    return JSON.parse(decoded);
-  }
-
   try {
     const firstParse = JSON.parse(json);
 

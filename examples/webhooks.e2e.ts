@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { Workflow, Worker } from '../src';
 import sleep from '../src/util/sleep';
 import Hatchet from '../src/sdk';
+import { AxiosError } from 'axios';
 
 const port = 8369;
 
@@ -52,11 +53,17 @@ describe('webhooks', () => {
     const secret = 'secret';
 
     console.log('registering webhook...');
-    await worker.registerWebhook({
-      name: 'webhook-example',
-      secret,
-      url: `http://localhost:${port}/webhook`,
-    });
+    try {
+      await worker.registerWebhook({
+        name: 'webhook-example',
+        secret,
+        url: `http://localhost:${port}/webhook`,
+      });
+    } catch (e) {
+      const axiosError = e as AxiosError;
+      console.error(axiosError.response?.data);
+      throw e;
+    }
 
     console.log('starting worker...');
 

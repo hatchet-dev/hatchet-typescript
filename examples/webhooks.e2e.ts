@@ -33,6 +33,7 @@ describe('webhooks', () => {
         {
           name: 'step1',
           run: async (ctx) => {
+            console.log('step1', ctx.workflowInput());
             invoked += 1;
             return { message: `${ctx.workflowName()} results!` };
           },
@@ -41,6 +42,7 @@ describe('webhooks', () => {
           name: 'step2',
           parents: ['step1'],
           run: (ctx) => {
+            console.log('step2', ctx.workflowInput());
             invoked += 1;
             return { message: `${ctx.workflowName()} results!` };
           },

@@ -9,6 +9,8 @@ export interface HandlerOpts {
   secret: string;
 }
 
+const okMessage = 'The Hatchet webhooks endpoint is up and running!';
+
 export class WebhookHandler {
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -93,17 +95,11 @@ export class WebhookHandler {
     return (req: any, res: any) => {
       if (req.method === 'GET') {
         res.sendStatus(200);
-        res.send('OK!');
+        res.send(okMessage);
         return;
       }
 
-      if (req.method !== 'POST') {
-        res.sendStatus(405);
-        res.json({ error: 'Method not allowed' });
-        return;
-      }
-
-      if (req.headers['x-healthcheck']) {
+      if (req.method === 'PUT') {
         this.getHealthcheckResponse(req.body, req.headers['x-hatchet-signature'], secret)
           .then((resp) => {
             res.sendStatus(200);
@@ -113,6 +109,12 @@ export class WebhookHandler {
             res.sendStatus(500);
             this.worker.logger.error(`Error handling request: ${err.message}`);
           });
+        return;
+      }
+
+      if (req.method !== 'POST') {
+        res.sendStatus(405);
+        res.json({ error: 'Method not allowed' });
         return;
       }
 
@@ -139,21 +141,14 @@ export class WebhookHandler {
       const handle = async () => {
         if (req.method === 'GET') {
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.write('OK!');
-          res.end();
-          return;
-        }
-
-        if (req.method !== 'POST') {
-          res.writeHead(405, { 'Content-Type': 'application/json' });
-          res.write(JSON.stringify({ error: 'Method not allowed' }));
+          res.write(okMessage);
           res.end();
           return;
         }
 
         const body = await this.getBody(req);
 
-        if (req.headers['x-healthcheck']) {
+        if (req.method === 'PUT') {
           const resp = await this.getHealthcheckResponse(
             body,
             req.headers['x-hatchet-signature'],
@@ -161,6 +156,13 @@ export class WebhookHandler {
           );
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.write(JSON.stringify(resp));
+          res.end();
+          return;
+        }
+
+        if (req.method !== 'POST') {
+          res.writeHead(405, { 'Content-Type': 'application/json' });
+          res.write(JSON.stringify({ error: 'Method not allowed' }));
           res.end();
           return;
         }
@@ -188,24 +190,25 @@ export class WebhookHandler {
    */
   nextJSHandler({ secret }: HandlerOpts) {
     const ok = async () => {
-      return new Response('OK!', { status: 200 });
+      return new Response(okMessage, { status: 200 });
     };
     const f = async (req: Request) => {
+      const sig = req.headers.get('x-hatchet-signature');
       const body = await req.text();
-      if (req.headers.get('x-healthcheck')) {
-        const resp = await this.getHealthcheckResponse(
-          body,
-          req.headers.get('x-hatchet-signature'),
-          secret
-        );
+      if (req.method === 'PUT') {
+        const resp = await this.getHealthcheckResponse(body, sig, secret);
         return new Response(JSON.stringify(resp), { status: 200 });
       }
-      await this.handle(body, req.headers.get('x-hatchet-signature'), secret);
+      if (req.method !== 'POST') {
+        return new Response('Method not allowed', { status: 405 });
+      }
+      await this.handle(body, sig, secret);
       return new Response('ok', { status: 200 });
     };
     return {
       GET: ok,
       POST: f,
+      PUT: f,
     };
   }
 

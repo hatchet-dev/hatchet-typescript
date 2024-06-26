@@ -61,7 +61,7 @@ describe('webhooks', () => {
       });
     } catch (e) {
       const axiosError = e as AxiosError;
-      console.error(axiosError.response?.data, JSON.stringify(axiosError.request));
+      console.error(axiosError.response?.data, axiosError.request.url, axiosError.request.method);
       throw e;
     }
 

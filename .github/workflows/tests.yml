@@ -45,7 +45,7 @@ jobs:
       - name: Install Protoc
         uses: arduino/setup-protoc@v3
         with:
-          version: "25.1"
+          version: '25.1'
 
       - name: Install Task
         uses: arduino/setup-task@v2
@@ -53,7 +53,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: '1.21'
 
       - name: Install pnpm
         run: npm install -g pnpm@8
@@ -89,7 +89,7 @@ jobs:
 
       - name: Setup
         working-directory: hatchet
-        run: | 
+        run: |
           cat > .env <<EOF
           HATCHET_CLIENT_TENANT_ID=707d0855-80ab-4e1f-a156-f1c4546cbf52
           DATABASE_URL="postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet"
@@ -104,21 +104,21 @@ jobs:
 
           DATABASE_URL='postgresql://hatchet:hatchet@127.0.0.1:5431/hatchet'
           SERVER_PORT=8080
-          SERVER_URL=https://app.dev.hatchet-tools.com
+          SERVER_URL=http://localhost:8080
 
           SERVER_AUTH_COOKIE_SECRETS="kPpegRDNpofgkUsr HoWe67haMOF5qnaB"
-          SERVER_AUTH_COOKIE_DOMAIN=app.dev.hatchet-tools.com
-          SERVER_AUTH_COOKIE_INSECURE=false
+          SERVER_AUTH_COOKIE_DOMAIN=localhost
+          SERVER_AUTH_COOKIE_INSECURE=true
           SERVER_AUTH_SET_EMAIL_VERIFIED=true
           EOF
-          
+
           export SEED_DEVELOPMENT=true
-          
+
           go run ./cmd/hatchet-admin quickstart
 
           go run ./cmd/hatchet-engine --config ./generated/ &
           go run ./cmd/hatchet-api --config ./generated/ &
-          
+
           sleep 30
       - name: E2E tests
         run: |
@@ -127,5 +127,4 @@ jobs:
           cd ..
           export HATCHET_CLIENT_TLS_ROOT_CA_FILE=./hatchet/hack/dev/certs/ca.cert
           export NODE_TLS_REJECT_UNAUTHORIZED=0
-          export HATCHET_CLIENT_TLS_STRATEGY=none
           pnpm test:e2e

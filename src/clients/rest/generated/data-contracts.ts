@@ -17,6 +17,26 @@ export interface APIMeta {
    */
   pylonAppId?: string;
   posthog?: APIMetaPosthog;
+  /**
+   * whether or not users can sign up for this instance
+   * @example true
+   */
+  allowSignup?: boolean;
+  /**
+   * whether or not users can invite other users to this instance
+   * @example true
+   */
+  allowInvites?: boolean;
+  /**
+   * whether or not users can create new tenants
+   * @example true
+   */
+  allowCreateTenant?: boolean;
+  /**
+   * whether or not users can change their password
+   * @example true
+   */
+  allowChangePassword?: boolean;
 }
 
 export interface APIMetaAuth {
@@ -325,6 +345,21 @@ export interface TenantInviteList {
   rows?: TenantInvite[];
 }
 
+export interface QueueMetrics {
+  /** The number of items in the queue. */
+  numQueued: number;
+  /** The number of items running. */
+  numRunning: number;
+  /** The number of items pending. */
+  numPending: number;
+}
+
+export interface TenantQueueMetrics {
+  /** The total queue metrics. */
+  total?: QueueMetrics;
+  workflow?: Record<string, QueueMetrics>;
+}
+
 export interface AcceptInviteRequest {
   /**
    * @minLength 36
@@ -389,6 +424,15 @@ export interface Event {
 export interface EventData {
   /** The data for the event (JSON bytes). */
   data: string;
+}
+
+export interface CreateEventRequest {
+  /** The key for the event. */
+  key: string;
+  /** The data for the event. */
+  data: object;
+  /** Additional metadata for the event. */
+  additionalMetadata?: object;
 }
 
 export interface EventWorkflowRunSummary {
@@ -462,7 +506,6 @@ export interface Workflow {
   lastRun?: WorkflowRun;
   /** The jobs of the workflow. */
   jobs?: Job[];
-  deployment?: WorkflowDeploymentConfig;
 }
 
 export interface WorkflowConcurrency {
@@ -475,23 +518,6 @@ export interface WorkflowConcurrency {
   limitStrategy: 'CANCEL_IN_PROGRESS' | 'DROP_NEWEST' | 'QUEUE_NEWEST' | 'GROUP_ROUND_ROBIN';
   /** An action which gets the concurrency group for the WorkflowRun. */
   getConcurrencyGroup: string;
-}
-
-export interface WorkflowDeploymentConfig {
-  metadata: APIResourceMeta;
-  /** The repository name. */
-  gitRepoName: string;
-  /** The repository owner. */
-  gitRepoOwner: string;
-  /** The repository branch. */
-  gitRepoBranch: string;
-  /** The Github App installation. */
-  githubAppInstallation?: GithubAppInstallation;
-  /**
-   * The id of the Github App installation.
-   * @format uuid
-   */
-  githubAppInstallationId: string;
 }
 
 export interface WorkflowVersionMeta {
@@ -769,6 +795,35 @@ export interface StepRunEventList {
   rows?: StepRunEvent[];
 }
 
+export interface StepRunArchive {
+  stepRunId: string;
+  order: number;
+  input?: string;
+  output?: string;
+  /** @format date-time */
+  startedAt?: string;
+  error?: string;
+  /** @format date-time */
+  createdAt: string;
+  startedAtEpoch?: number;
+  /** @format date-time */
+  finishedAt?: string;
+  finishedAtEpoch?: number;
+  /** @format date-time */
+  timeoutAt?: string;
+  timeoutAtEpoch?: number;
+  /** @format date-time */
+  cancelledAt?: string;
+  cancelledAtEpoch?: number;
+  cancelledReason?: string;
+  cancelledError?: string;
+}
+
+export interface StepRunArchiveList {
+  pagination?: PaginationResponse;
+  rows?: StepRunArchive[];
+}
+
 export interface WorkerList {
   pagination?: PaginationResponse;
   rows?: Worker[];
@@ -850,47 +905,6 @@ export interface TriggerWorkflowRunRequest {
   input: object;
   additionalMetadata?: object;
 }
-
-export interface LinkGithubRepositoryRequest {
-  /**
-   * The repository name.
-   * @minLength 36
-   * @maxLength 36
-   */
-  installationId: string;
-  /** The repository name. */
-  gitRepoName: string;
-  /** The repository owner. */
-  gitRepoOwner: string;
-  /** The repository branch. */
-  gitRepoBranch: string;
-}
-
-export interface GithubBranch {
-  branch_name: string;
-  is_default: boolean;
-}
-
-export interface GithubRepo {
-  repo_owner: string;
-  repo_name: string;
-}
-
-export interface GithubAppInstallation {
-  metadata: APIResourceMeta;
-  installation_settings_url: string;
-  account_name: string;
-  account_avatar_url: string;
-}
-
-export interface ListGithubAppInstallationsResponse {
-  pagination: PaginationResponse;
-  rows: GithubAppInstallation[];
-}
-
-export type ListGithubReposResponse = GithubRepo[];
-
-export type ListGithubBranchesResponse = GithubBranch[];
 
 export interface CreatePullRequestFromStepRun {
   branchName: string;
@@ -1013,4 +1027,43 @@ export interface WorkflowMetrics {
   groupKeyRunsCount?: number;
   /** The total number of concurrency group keys. */
   groupKeyCount?: number;
+}
+
+export interface WebhookWorker {
+  metadata: APIResourceMeta;
+  /** The name of the webhook worker. */
+  name: string;
+  /** The webhook url. */
+  url: string;
+}
+
+export interface WebhookWorkerCreated {
+  metadata: APIResourceMeta;
+  /** The name of the webhook worker. */
+  name: string;
+  /** The webhook url. */
+  url: string;
+  /** The secret key for validation. */
+  secret: string;
+}
+
+export interface WebhookWorkerCreateRequest {
+  /** The name of the webhook worker. */
+  name: string;
+  /** The webhook url. */
+  url: string;
+  /**
+   * The secret key for validation. If not provided, a random secret will be generated.
+   * @minLength 32
+   */
+  secret?: string;
+}
+
+export interface WebhookWorkerCreateResponse {
+  worker?: WebhookWorkerCreated;
+}
+
+export interface WebhookWorkerListResponse {
+  pagination?: PaginationResponse;
+  rows?: WebhookWorker[];
 }

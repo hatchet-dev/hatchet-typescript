@@ -24,7 +24,7 @@ describe('e2e', () => {
       id: 'simple-e2e-workflow',
       description: 'test',
       on: {
-        event: 'user:create',
+        event: 'user:create-simple',
       },
       steps: [
         {
@@ -60,7 +60,7 @@ describe('e2e', () => {
 
     console.log('pushing event...');
 
-    await hatchet.event.push('user:create', {
+    await hatchet.event.push('user:create-simple', {
       test: 'test',
     });
 

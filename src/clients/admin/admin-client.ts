@@ -12,7 +12,11 @@ import { retrier } from '@hatchet/util/retrier';
 import WorkflowRunRef from '@hatchet/util/workflow-run-ref';
 
 import { Api } from '../rest';
-import { WorkflowRunStatus, WorkflowRunStatusList } from '../rest/generated/data-contracts';
+import {
+  WebhookWorkerCreateRequest,
+  WorkflowRunStatus,
+  WorkflowRunStatusList,
+} from '../rest/generated/data-contracts';
 import { ListenerClient } from '../listener/listener-client';
 
 type WorkflowMetricsQuery = {
@@ -107,6 +111,10 @@ export class AdminClient {
     } catch (e: any) {
       throw new HatchetError(e.message);
     }
+  }
+
+  async registerWebhook(data: WebhookWorkerCreateRequest) {
+    return this.api.webhookCreate(this.tenantId, data);
   }
 
   /**

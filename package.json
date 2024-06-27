@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.8.0-alpha.4",
+  "version": "0.9.0",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -51,7 +51,7 @@
     "worker:logger": "npm run exec -- ./examples/logger.ts",
     "api": "npm run exec -- ./examples/api.ts",
     "prepublish": "cp package.json dist/package.json;",
-    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks --tag=alpha",
+    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
     "generate-docs": "typedoc"
   },
   "keywords": [],

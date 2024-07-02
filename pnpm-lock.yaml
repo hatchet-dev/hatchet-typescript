@@ -116,7 +116,7 @@ importers:
         version: 10.9.2(@types/node@20.14.9)(typescript@5.5.3)
       ts-proto:
         specifier: ^1.167.0
-        version: 1.180.0
+        version: 1.181.0
       typedoc:
         specifier: ^0.26.2
         version: 0.26.3(typescript@5.5.3)
@@ -2525,8 +2525,8 @@ packages:
   ts-proto-descriptors@1.16.0:
     resolution: {integrity: sha512-3yKuzMLpltdpcyQji1PJZRfoo4OJjNieKTYkQY8pF7xGKsYz/RHe3aEe4KiRxcinoBmnEhmuI+yJTxLb922ULA==}
 
-  ts-proto@1.180.0:
-    resolution: {integrity: sha512-Gx+y1ohKNitnBpoA4ELRPl2nHBa4zUkedj3kHKuwYn0THpLiLVLuzYidlqJVZBDooI+l/EROGGqlCt95FItI9g==}
+  ts-proto@1.181.0:
+    resolution: {integrity: sha512-5+ZnxOgPsSn/lU93x8ApEFQPHE9G8kZubCSF1/EUjyeKImbGRp27iPXHilelQLOdClYHLUgr3hJwqtVqfsjNYQ==}
     hasBin: true
 
   tsconfig-paths@3.15.0:
@@ -5600,7 +5600,7 @@ snapshots:
       long: 5.2.3
       protobufjs: 7.3.2
 
-  ts-proto@1.180.0:
+  ts-proto@1.181.0:
     dependencies:
       case-anything: 2.1.13
       protobufjs: 7.3.2

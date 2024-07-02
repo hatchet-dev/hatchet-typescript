@@ -65,7 +65,7 @@ importers:
         version: 9.1.0(eslint@8.56.0)
       eslint-config-standard-with-typescript:
         specifier: ^43.0.0
-        version: 43.0.0(@typescript-eslint/eslint-plugin@6.19.0(eslint@8.56.0)(typescript@5.5.3))(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.3.0(eslint@8.56.0))(eslint@8.56.0)(typescript@5.5.3)
+        version: 43.0.0(@typescript-eslint/eslint-plugin@6.19.0(eslint@8.56.0)(typescript@5.5.3))(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.4.0(eslint@8.56.0))(eslint@8.56.0)(typescript@5.5.3)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(eslint-plugin-import@2.29.1)(eslint@8.56.0)
@@ -83,7 +83,7 @@ importers:
         version: 5.1.3(eslint-config-prettier@9.1.0(eslint@8.56.0))(eslint@8.56.0)(prettier@3.3.2)
       eslint-plugin-promise:
         specifier: ^6.0.0
-        version: 6.3.0(eslint@8.56.0)
+        version: 6.4.0(eslint@8.56.0)
       eslint-plugin-react:
         specifier: ^7.34.1
         version: 7.34.3(eslint@8.56.0)
@@ -1231,8 +1231,8 @@ packages:
       eslint-config-prettier:
         optional: true
 
-  eslint-plugin-promise@6.3.0:
-    resolution: {integrity: sha512-XbhIavJwFnSGaxmXwKQCVF+cT4J1BC/j9rRNE8FIg1M4ufA1LpjUnawvDFiCn+gJAmOdra1Y4B5kybHN3pjpNA==}
+  eslint-plugin-promise@6.4.0:
+    resolution: {integrity: sha512-/KWWRaD3fGkVCZsdR0RU53PSthFmoHVhZl+y9+6DqeDLSikLdlUVpVEAmI6iCRR5QyOjBYBqHZV/bdv4DJ4Gtw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0
@@ -3947,25 +3947,25 @@ snapshots:
     dependencies:
       eslint: 8.56.0
 
-  eslint-config-standard-with-typescript@43.0.0(@typescript-eslint/eslint-plugin@6.19.0(eslint@8.56.0)(typescript@5.5.3))(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.3.0(eslint@8.56.0))(eslint@8.56.0)(typescript@5.5.3):
+  eslint-config-standard-with-typescript@43.0.0(@typescript-eslint/eslint-plugin@6.19.0(eslint@8.56.0)(typescript@5.5.3))(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.4.0(eslint@8.56.0))(eslint@8.56.0)(typescript@5.5.3):
     dependencies:
       '@typescript-eslint/eslint-plugin': 6.19.0(eslint@8.56.0)(typescript@5.5.3)
       '@typescript-eslint/parser': 6.19.0(eslint@8.56.0)(typescript@5.5.3)
       eslint: 8.56.0
-      eslint-config-standard: 17.1.0(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.3.0(eslint@8.56.0))(eslint@8.56.0)
+      eslint-config-standard: 17.1.0(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.4.0(eslint@8.56.0))(eslint@8.56.0)
       eslint-plugin-import: 2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-n: 16.6.2(eslint@8.56.0)
-      eslint-plugin-promise: 6.3.0(eslint@8.56.0)
+      eslint-plugin-promise: 6.4.0(eslint@8.56.0)
       typescript: 5.5.3
     transitivePeerDependencies:
       - supports-color
 
-  eslint-config-standard@17.1.0(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.3.0(eslint@8.56.0))(eslint@8.56.0):
+  eslint-config-standard@17.1.0(eslint-plugin-import@2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0))(eslint-plugin-n@16.6.2(eslint@8.56.0))(eslint-plugin-promise@6.4.0(eslint@8.56.0))(eslint@8.56.0):
     dependencies:
       eslint: 8.56.0
       eslint-plugin-import: 2.29.1(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-n: 16.6.2(eslint@8.56.0)
-      eslint-plugin-promise: 6.3.0(eslint@8.56.0)
+      eslint-plugin-promise: 6.4.0(eslint@8.56.0)
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
@@ -4069,7 +4069,7 @@ snapshots:
     optionalDependencies:
       eslint-config-prettier: 9.1.0(eslint@8.56.0)
 
-  eslint-plugin-promise@6.3.0(eslint@8.56.0):
+  eslint-plugin-promise@6.4.0(eslint@8.56.0):
     dependencies:
       eslint: 8.56.0
 

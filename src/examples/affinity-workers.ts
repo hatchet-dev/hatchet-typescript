@@ -13,6 +13,12 @@ const workflow: Workflow = {
     {
       name: 'step1',
       run: async (ctx) => {
+        ctx.worker.upsertAffinityConfig({
+          model: {
+            value: 'tuna',
+          },
+        });
+
         console.log('starting step1 with the following input', ctx.workflowInput());
         return { step1: 'step1 results!' };
       },
@@ -24,8 +30,8 @@ async function main() {
   const worker1 = await hatchet.worker('affinity-worker-1', {
     affinityConfig: {
       model: {
-        initialValue: '123',
-        required: true,
+        value: '123',
+        required: false,
       },
     },
   });
@@ -35,8 +41,8 @@ async function main() {
   const worker2 = await hatchet.worker('affinity-worker-2', {
     affinityConfig: {
       model: {
-        initialValue: 'abc',
-        required: true,
+        value: 'abc',
+        required: false,
       },
     },
   });

@@ -23,7 +23,7 @@ export interface WorkerAffinityConfig {
   /**
    * The initial value for the affinity setting. This can be a string or a number.
    */
-  initialValue: string | number;
+  value: string | number;
 
   /**
    * (Optional) Specifies whether the affinity setting is required.
@@ -69,21 +69,7 @@ export class DispatcherClient {
   }
 
   async getActionListener(options: GetActionListenerOptions) {
-    const affinities = Object.entries(options.affinities).reduce<
-      Record<string, PbWorkerAffinityConfig>
-    >(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: {
-          strValue: typeof value.initialValue === 'string' ? value.initialValue : undefined,
-          intValue: typeof value.initialValue === 'number' ? value.initialValue : undefined,
-          required: value.required,
-          weight: value.weight,
-          comparator: value.comparator,
-        } as PbWorkerAffinityConfig,
-      }),
-      {} as Record<string, PbWorkerAffinityConfig>
-    );
+    const affinities = mapAffinityConfig(options.affinities);
 
     this.logger.error(`Registering worker with affinities:${affinities}`);
 
@@ -128,4 +114,34 @@ export class DispatcherClient {
       throw new HatchetError(e.message);
     }
   }
+
+  async upsertAffinityConfig(workerId: string, config: Record<string, WorkerAffinityConfig>) {
+    const workerAffinities = mapAffinityConfig(config);
+    try {
+      return await this.client.upsertWorkerAffinities({
+        workerId,
+        workerAffinities,
+      });
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+}
+
+function mapAffinityConfig(
+  in_: Record<string, WorkerAffinityConfig>
+): Record<string, PbWorkerAffinityConfig> {
+  return Object.entries(in_).reduce<Record<string, PbWorkerAffinityConfig>>(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: {
+        strValue: typeof value.value === 'string' ? value.value : undefined,
+        intValue: typeof value.value === 'number' ? value.value : undefined,
+        required: value.required,
+        weight: value.weight,
+        comparator: value.comparator,
+      } as PbWorkerAffinityConfig,
+    }),
+    {} as Record<string, PbWorkerAffinityConfig>
+  );
 }

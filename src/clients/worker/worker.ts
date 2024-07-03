@@ -35,6 +35,7 @@ export interface WorkerOpts {
 export class Worker {
   client: HatchetClient;
   name: string;
+  workerId: string | undefined;
   killing: boolean;
   handle_kill: boolean;
 
@@ -208,7 +209,7 @@ export class Worker {
     const { actionId } = action;
 
     try {
-      const context = new Context(action, this.client);
+      const context = new Context(action, this.client, this);
       this.contexts[action.stepRunId] = context;
 
       const step = this.action_registry[actionId];
@@ -312,7 +313,7 @@ export class Worker {
     const { actionId } = action;
 
     try {
-      const context = new Context(action, this.client);
+      const context = new Context(action, this.client, this);
 
       const key = action.getGroupKeyRunId;
 
@@ -499,6 +500,8 @@ export class Worker {
         affinities: this.affinityConfig,
       });
 
+      this.workerId = this.listener.workerId;
+
       const generator = this.listener.actions();
 
       this.logger.info(`Worker ${this.name} listening for actions`);
@@ -534,5 +537,18 @@ export class Worker {
     } else {
       this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
     }
+  }
+
+  async upsertAffinityConfig(affinityConfig: Record<string, WorkerAffinityConfig>) {
+    this.affinityConfig = affinityConfig;
+
+    if (!this.workerId) {
+      this.logger.warn('Worker not registered.');
+      return this.affinityConfig;
+    }
+
+    this.client.dispatcher.upsertAffinityConfig(this.workerId, affinityConfig);
+
+    return this.affinityConfig;
   }
 }

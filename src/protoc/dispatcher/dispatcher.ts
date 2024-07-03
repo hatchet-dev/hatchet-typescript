@@ -370,6 +370,25 @@ export interface WorkerRegisterResponse {
   workerName: string;
 }
 
+export interface UpsertWorkerAffinitiesRequest {
+  /** the name of the worker */
+  workerId: string;
+  /** (optional) the worker affinity configurations */
+  workerAffinities: { [key: string]: WorkerAffinityConfig };
+}
+
+export interface UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+  key: string;
+  value: WorkerAffinityConfig | undefined;
+}
+
+export interface UpsertWorkerAffinitiesResponse {
+  /** the tenant id */
+  tenantId: string;
+  /** the id of the worker */
+  workerId: string;
+}
+
 export interface AssignedAction {
   /** the tenant id */
   tenantId: string;
@@ -995,6 +1014,277 @@ export const WorkerRegisterResponse = {
     message.tenantId = object.tenantId ?? '';
     message.workerId = object.workerId ?? '';
     message.workerName = object.workerName ?? '';
+    return message;
+  },
+};
+
+function createBaseUpsertWorkerAffinitiesRequest(): UpsertWorkerAffinitiesRequest {
+  return { workerId: '', workerAffinities: {} };
+}
+
+export const UpsertWorkerAffinitiesRequest = {
+  encode(
+    message: UpsertWorkerAffinitiesRequest,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.workerId !== '') {
+      writer.uint32(10).string(message.workerId);
+    }
+    Object.entries(message.workerAffinities).forEach(([key, value]) => {
+      UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.encode(
+        { key: key as any, value },
+        writer.uint32(18).fork()
+      ).ldelim();
+    });
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerAffinitiesRequest {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpsertWorkerAffinitiesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workerId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          const entry2 = UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.decode(
+            reader,
+            reader.uint32()
+          );
+          if (entry2.value !== undefined) {
+            message.workerAffinities[entry2.key] = entry2.value;
+          }
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpsertWorkerAffinitiesRequest {
+    return {
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+      workerAffinities: isObject(object.workerAffinities)
+        ? Object.entries(object.workerAffinities).reduce<{ [key: string]: WorkerAffinityConfig }>(
+            (acc, [key, value]) => {
+              acc[key] = WorkerAffinityConfig.fromJSON(value);
+              return acc;
+            },
+            {}
+          )
+        : {},
+    };
+  },
+
+  toJSON(message: UpsertWorkerAffinitiesRequest): unknown {
+    const obj: any = {};
+    if (message.workerId !== '') {
+      obj.workerId = message.workerId;
+    }
+    if (message.workerAffinities) {
+      const entries = Object.entries(message.workerAffinities);
+      if (entries.length > 0) {
+        obj.workerAffinities = {};
+        entries.forEach(([k, v]) => {
+          obj.workerAffinities[k] = WorkerAffinityConfig.toJSON(v);
+        });
+      }
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UpsertWorkerAffinitiesRequest>): UpsertWorkerAffinitiesRequest {
+    return UpsertWorkerAffinitiesRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<UpsertWorkerAffinitiesRequest>): UpsertWorkerAffinitiesRequest {
+    const message = createBaseUpsertWorkerAffinitiesRequest();
+    message.workerId = object.workerId ?? '';
+    message.workerAffinities = Object.entries(object.workerAffinities ?? {}).reduce<{
+      [key: string]: WorkerAffinityConfig;
+    }>((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = WorkerAffinityConfig.fromPartial(value);
+      }
+      return acc;
+    }, {});
+    return message;
+  },
+};
+
+function createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry(): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+  return { key: '', value: undefined };
+}
+
+export const UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry = {
+  encode(
+    message: UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      WorkerAffinityConfig.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = WorkerAffinityConfig.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      value: isSet(object.value) ? WorkerAffinityConfig.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry): unknown {
+    const obj: any = {};
+    if (message.key !== '') {
+      obj.key = message.key;
+    }
+    if (message.value !== undefined) {
+      obj.value = WorkerAffinityConfig.toJSON(message.value);
+    }
+    return obj;
+  },
+
+  create(
+    base?: DeepPartial<UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry>
+  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+    return UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.fromPartial(base ?? {});
+  },
+  fromPartial(
+    object: DeepPartial<UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry>
+  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+    const message = createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry();
+    message.key = object.key ?? '';
+    message.value =
+      object.value !== undefined && object.value !== null
+        ? WorkerAffinityConfig.fromPartial(object.value)
+        : undefined;
+    return message;
+  },
+};
+
+function createBaseUpsertWorkerAffinitiesResponse(): UpsertWorkerAffinitiesResponse {
+  return { tenantId: '', workerId: '' };
+}
+
+export const UpsertWorkerAffinitiesResponse = {
+  encode(
+    message: UpsertWorkerAffinitiesResponse,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.tenantId !== '') {
+      writer.uint32(10).string(message.tenantId);
+    }
+    if (message.workerId !== '') {
+      writer.uint32(18).string(message.workerId);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerAffinitiesResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpsertWorkerAffinitiesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.tenantId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.workerId = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpsertWorkerAffinitiesResponse {
+    return {
+      tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
+      workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
+    };
+  },
+
+  toJSON(message: UpsertWorkerAffinitiesResponse): unknown {
+    const obj: any = {};
+    if (message.tenantId !== '') {
+      obj.tenantId = message.tenantId;
+    }
+    if (message.workerId !== '') {
+      obj.workerId = message.workerId;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<UpsertWorkerAffinitiesResponse>): UpsertWorkerAffinitiesResponse {
+    return UpsertWorkerAffinitiesResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<UpsertWorkerAffinitiesResponse>): UpsertWorkerAffinitiesResponse {
+    const message = createBaseUpsertWorkerAffinitiesResponse();
+    message.tenantId = object.tenantId ?? '';
+    message.workerId = object.workerId ?? '';
     return message;
   },
 };
@@ -3015,6 +3305,14 @@ export const DispatcherDefinition = {
       responseStream: false,
       options: {},
     },
+    upsertWorkerAffinities: {
+      name: 'UpsertWorkerAffinities',
+      requestType: UpsertWorkerAffinitiesRequest,
+      requestStream: false,
+      responseType: UpsertWorkerAffinitiesResponse,
+      responseStream: false,
+      options: {},
+    },
   },
 } as const;
 
@@ -3072,6 +3370,10 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: ReleaseSlotRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<ReleaseSlotResponse>>;
+  upsertWorkerAffinities(
+    request: UpsertWorkerAffinitiesRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<UpsertWorkerAffinitiesResponse>>;
 }
 
 export interface DispatcherClient<CallOptionsExt = {}> {
@@ -3128,6 +3430,10 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<ReleaseSlotRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<ReleaseSlotResponse>;
+  upsertWorkerAffinities(
+    request: DeepPartial<UpsertWorkerAffinitiesRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<UpsertWorkerAffinitiesResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

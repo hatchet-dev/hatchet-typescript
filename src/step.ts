@@ -8,6 +8,8 @@ import { Logger } from './util/logger';
 import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
 import WorkflowRunRef from './util/workflow-run-ref';
+import { Worker } from './clients/worker';
+import { WorkerAffinityConfig } from './clients/dispatcher/dispatcher-client';
 
 export const CreateRateLimitSchema = z.object({
   key: z.string(),
@@ -41,6 +43,21 @@ interface ContextData<T, K> {
   user_data: K;
 }
 
+export class ContextWorker {
+  private worker: Worker;
+  constructor(worker: Worker) {
+    this.worker = worker;
+  }
+
+  affinityConfig() {
+    return this.worker.affinityConfig;
+  }
+
+  upsertAffinityConfig(affinityConfig: Record<string, WorkerAffinityConfig>) {
+    return this.worker.upsertAffinityConfig(affinityConfig);
+  }
+}
+
 export class Context<T, K = {}> {
   data: ContextData<T, K>;
   input: T;
@@ -48,18 +65,20 @@ export class Context<T, K = {}> {
   action: Action;
   client: HatchetClient;
 
+  worker: ContextWorker;
+
   overridesData: Record<string, any> = {};
   logger: Logger;
 
   spawnIndex: number = 0;
 
-  constructor(action: Action, client: HatchetClient) {
+  constructor(action: Action, client: HatchetClient, worker: Worker) {
     try {
       const data = parseJSON(action.actionPayload);
       this.data = data;
       this.action = action;
       this.client = client;
-
+      this.worker = new ContextWorker(worker);
       this.logger = new Logger(`Context Logger`, client.config.log_level);
 
       // if this is a getGroupKeyRunId, the data is the workflow input

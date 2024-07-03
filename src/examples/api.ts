@@ -1,5 +1,5 @@
-import Hatchet, { Context } from '../src';
-import { CreateWorkflowVersionOpts } from '../src/protoc/workflows';
+import Hatchet, { Context } from '..';
+import { CreateWorkflowVersionOpts } from '../protoc/workflows';
 
 type CustomUserData = {
   example: string;

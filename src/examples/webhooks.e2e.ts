@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
-import { Workflow, Worker } from '../src';
-import sleep from '../src/util/sleep';
-import Hatchet from '../src/sdk';
+import { Workflow, Worker } from '..';
+import sleep from '../util/sleep';
+import Hatchet from '../sdk';
 import { AxiosError } from 'axios';
 
 const port = 8369;

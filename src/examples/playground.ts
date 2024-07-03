@@ -1,5 +1,5 @@
-import Hatchet from '../src/sdk';
-import { Context } from '../src/step';
+import Hatchet from '../sdk';
+import { Context } from '../step';
 
 const hatchet: Hatchet = Hatchet.init();
 

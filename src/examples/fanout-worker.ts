@@ -1,5 +1,5 @@
-import Hatchet from '../src/sdk';
-import { Workflow } from '../src/workflow';
+import Hatchet from '../sdk';
+import { Workflow } from '../workflow';
 
 const hatchet = Hatchet.init();
 

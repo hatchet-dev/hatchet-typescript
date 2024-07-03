@@ -1,6 +1,6 @@
-import { RateLimitDuration } from '../../src/protoc/workflows';
-import Hatchet from '../../src/sdk';
-import { Workflow } from '../../src/workflow';
+import { RateLimitDuration } from '../../protoc/workflows';
+import Hatchet from '../../sdk';
+import { Workflow } from '../../workflow';
 
 const hatchet = Hatchet.init();
 

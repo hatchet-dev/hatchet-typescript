@@ -1,5 +1,5 @@
-import Hatchet from '../../../src/sdk';
-import { ConcurrencyLimitStrategy, Workflow } from '../../../src/workflow';
+import Hatchet from '../../../sdk';
+import { ConcurrencyLimitStrategy, Workflow } from '../../../workflow';
 
 const hatchet = Hatchet.init();
 

@@ -21,8 +21,16 @@ import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
 import { Context, StepRunFunction } from '../../step';
+import { WorkerAffinityConfig } from '../dispatcher/dispatcher-client';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
+
+export interface WorkerOpts {
+  name: string;
+  handleKill?: boolean;
+  maxRuns?: number;
+  affinityConfig?: Record<string, WorkerAffinityConfig>;
+}
 
 export class Worker {
   client: HatchetClient;
@@ -40,14 +48,23 @@ export class Worker {
 
   registeredWorkflowPromises: Array<Promise<any>> = [];
 
+  affinityConfig: Record<string, WorkerAffinityConfig> = {};
+
   constructor(
     client: HatchetClient,
-    options: { name: string; handleKill?: boolean; maxRuns?: number }
+    options: {
+      name: string;
+      handleKill?: boolean;
+      maxRuns?: number;
+      affinityConfig?: Record<string, WorkerAffinityConfig>;
+    }
   ) {
     this.client = client;
     this.name = this.client.config.namespace + options.name;
     this.action_registry = {};
     this.maxRuns = options.maxRuns;
+
+    this.affinityConfig = options.affinityConfig || {};
 
     process.on('SIGTERM', () => this.exitGracefully(true));
     process.on('SIGINT', () => this.exitGracefully(true));
@@ -479,6 +496,7 @@ export class Worker {
         services: ['default'],
         actions: Object.keys(this.action_registry),
         maxRuns: this.maxRuns,
+        affinities: this.affinityConfig,
       });
 
       const generator = this.listener.actions();

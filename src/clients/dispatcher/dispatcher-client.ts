@@ -6,6 +6,8 @@ import {
   GroupKeyActionEvent,
   OverridesData,
   DeepPartial,
+  WorkerAffinityConfig as PbWorkerAffinityConfig,
+  WorkerAffinityComparator,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -14,11 +16,45 @@ import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 import { ActionListener } from './action-listener';
 
+/**
+ * Configuration for worker affinity settings.
+ */
+export interface WorkerAffinityConfig {
+  /**
+   * The initial value for the affinity setting. This can be a string or a number.
+   */
+  initialValue: string | number;
+
+  /**
+   * (Optional) Specifies whether the affinity setting is required.
+   * If required, the worker will not accept actions that do not have a truthy affinity setting.
+   *
+   * Defaults to false.
+   */
+  required?: boolean;
+
+  /**
+   * (Optional) The weight assigned to the affinity setting. Higher weights indicate higher priority.
+   *
+   * Defaults to 100 if not specified.
+   */
+  weight?: number;
+
+  /**
+   * (Optional) The comparator used for evaluating the affinity setting.
+   * Supported values are 'EQUALS' and 'NOT_EQUALS'.
+   *
+   * Defaults to 'EQUALS' if not specified.
+   */
+  comparator?: WorkerAffinityComparator;
+}
+
 interface GetActionListenerOptions {
   workerName: string;
   services: string[];
   actions: string[];
   maxRuns?: number;
+  affinities: Record<string, WorkerAffinityConfig>;
 }
 
 export class DispatcherClient {
@@ -33,9 +69,28 @@ export class DispatcherClient {
   }
 
   async getActionListener(options: GetActionListenerOptions) {
+    const affinities = Object.entries(options.affinities).reduce<
+      Record<string, PbWorkerAffinityConfig>
+    >(
+      (acc, [key, value]) => ({
+        ...acc,
+        [key]: {
+          strValue: typeof value.initialValue === 'string' ? value.initialValue : undefined,
+          intValue: typeof value.initialValue === 'number' ? value.initialValue : undefined,
+          required: value.required,
+          weight: value.weight,
+          comparator: value.comparator,
+        } as PbWorkerAffinityConfig,
+      }),
+      {} as Record<string, PbWorkerAffinityConfig>
+    );
+
+    this.logger.error(`Registering worker with affinities:${affinities}`);
+
     // Register the worker
     const registration = await this.client.register({
       ...options,
+      workerAffinities: affinities,
     });
 
     return new ActionListener(this, registration.workerId);

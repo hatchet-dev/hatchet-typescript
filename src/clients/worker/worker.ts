@@ -15,13 +15,14 @@ import {
   ConcurrencyLimitStrategy,
   CreateWorkflowJobOpts,
   CreateWorkflowStepOpts,
+  DesiredWorkerLabels,
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
-import { Context, StepRunFunction } from '../../step';
-import { WorkerAffinityConfig } from '../dispatcher/dispatcher-client';
+import { Context, CreateStep, StepRunFunction } from '../../step';
+import { WorkerLabels } from '../dispatcher/dispatcher-client';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
 
@@ -29,7 +30,7 @@ export interface WorkerOpts {
   name: string;
   handleKill?: boolean;
   maxRuns?: number;
-  affinityConfig?: Record<string, WorkerAffinityConfig>;
+  labels?: WorkerLabels;
 }
 
 export class Worker {
@@ -49,7 +50,7 @@ export class Worker {
 
   registeredWorkflowPromises: Array<Promise<any>> = [];
 
-  affinityConfig: Record<string, WorkerAffinityConfig> = {};
+  labels: WorkerLabels = {};
 
   constructor(
     client: HatchetClient,
@@ -57,7 +58,7 @@ export class Worker {
       name: string;
       handleKill?: boolean;
       maxRuns?: number;
-      affinityConfig?: Record<string, WorkerAffinityConfig>;
+      labels?: WorkerLabels;
     }
   ) {
     this.client = client;
@@ -65,7 +66,7 @@ export class Worker {
     this.action_registry = {};
     this.maxRuns = options.maxRuns;
 
-    this.affinityConfig = options.affinityConfig || {};
+    this.labels = options.labels || {};
 
     process.on('SIGTERM', () => this.exitGracefully(true));
     process.on('SIGINT', () => this.exitGracefully(true));
@@ -157,6 +158,7 @@ export class Worker {
                 userData: '{}',
                 retries: workflow.onFailure.retries || 0,
                 rateLimits: workflow.onFailure.rate_limits ?? [],
+                workerLabels: {}, // TODO add worker labels
               },
             ],
           }
@@ -188,6 +190,7 @@ export class Worker {
               userData: '{}',
               retries: step.retries || 0,
               rateLimits: step.rate_limits ?? [], // Add the missing rateLimits property
+              workerLabels: toPbWorkerLabel(step.worker_labels), // TODO add worker labels
             })),
           },
         ],
@@ -497,7 +500,7 @@ export class Worker {
         services: ['default'],
         actions: Object.keys(this.action_registry),
         maxRuns: this.maxRuns,
-        affinities: this.affinityConfig,
+        labels: this.labels,
       });
 
       this.workerId = this.listener.workerId;
@@ -539,16 +542,70 @@ export class Worker {
     }
   }
 
-  async upsertAffinityConfig(affinityConfig: Record<string, WorkerAffinityConfig>) {
-    this.affinityConfig = affinityConfig;
+  async upsertLabels(labels: WorkerLabels) {
+    this.labels = labels;
 
     if (!this.workerId) {
       this.logger.warn('Worker not registered.');
-      return this.affinityConfig;
+      return this.labels;
     }
 
-    this.client.dispatcher.upsertAffinityConfig(this.workerId, affinityConfig);
+    this.client.dispatcher.upsertWorkerLabels(this.workerId, labels);
 
-    return this.affinityConfig;
+    return this.labels;
   }
+}
+
+function toPbWorkerLabel(
+  in_: CreateStep<unknown, unknown>['worker_labels']
+): Record<string, DesiredWorkerLabels> {
+  if (!in_) {
+    return {};
+  }
+
+  return Object.entries(in_).reduce<Record<string, DesiredWorkerLabels>>(
+    (acc, [key, value]) => {
+      if (!value) {
+        return {
+          ...acc,
+          [key]: {
+            strValue: undefined,
+            intValue: undefined,
+          },
+        };
+      }
+
+      if (typeof value === 'string') {
+        return {
+          ...acc,
+          [key]: {
+            strValue: value,
+            intValue: undefined,
+          },
+        };
+      }
+
+      if (typeof value === 'number') {
+        return {
+          ...acc,
+          [key]: {
+            strValue: undefined,
+            intValue: value,
+          },
+        };
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          strValue: typeof value.value === 'string' ? value.value : undefined,
+          intValue: typeof value.value === 'number' ? value.value : undefined,
+          required: value.required,
+          weight: value.weight,
+          comparator: value.comparator,
+        },
+      };
+    },
+    {} as Record<string, DesiredWorkerLabels>
+  );
 }

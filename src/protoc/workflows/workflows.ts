@@ -50,6 +50,63 @@ export function concurrencyLimitStrategyToJSON(object: ConcurrencyLimitStrategy)
   }
 }
 
+export enum WorkerLabelComparator {
+  EQUAL = 0,
+  NOT_EQUAL = 1,
+  GREATER_THAN = 2,
+  GREATER_THAN_OR_EQUAL = 3,
+  LESS_THAN = 4,
+  LESS_THAN_OR_EQUAL = 5,
+  UNRECOGNIZED = -1,
+}
+
+export function workerLabelComparatorFromJSON(object: any): WorkerLabelComparator {
+  switch (object) {
+    case 0:
+    case 'EQUAL':
+      return WorkerLabelComparator.EQUAL;
+    case 1:
+    case 'NOT_EQUAL':
+      return WorkerLabelComparator.NOT_EQUAL;
+    case 2:
+    case 'GREATER_THAN':
+      return WorkerLabelComparator.GREATER_THAN;
+    case 3:
+    case 'GREATER_THAN_OR_EQUAL':
+      return WorkerLabelComparator.GREATER_THAN_OR_EQUAL;
+    case 4:
+    case 'LESS_THAN':
+      return WorkerLabelComparator.LESS_THAN;
+    case 5:
+    case 'LESS_THAN_OR_EQUAL':
+      return WorkerLabelComparator.LESS_THAN_OR_EQUAL;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return WorkerLabelComparator.UNRECOGNIZED;
+  }
+}
+
+export function workerLabelComparatorToJSON(object: WorkerLabelComparator): string {
+  switch (object) {
+    case WorkerLabelComparator.EQUAL:
+      return 'EQUAL';
+    case WorkerLabelComparator.NOT_EQUAL:
+      return 'NOT_EQUAL';
+    case WorkerLabelComparator.GREATER_THAN:
+      return 'GREATER_THAN';
+    case WorkerLabelComparator.GREATER_THAN_OR_EQUAL:
+      return 'GREATER_THAN_OR_EQUAL';
+    case WorkerLabelComparator.LESS_THAN:
+      return 'LESS_THAN';
+    case WorkerLabelComparator.LESS_THAN_OR_EQUAL:
+      return 'LESS_THAN_OR_EQUAL';
+    case WorkerLabelComparator.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
 export enum RateLimitDuration {
   SECOND = 0,
   MINUTE = 1,
@@ -162,6 +219,29 @@ export interface CreateWorkflowJobOpts {
   steps: CreateWorkflowStepOpts[];
 }
 
+export interface DesiredWorkerLabels {
+  /** value of the affinity */
+  strValue?: string | undefined;
+  intValue?: number | undefined;
+  /**
+   * (optional) Specifies whether the affinity setting is required.
+   * If required, the worker will not accept actions that do not have a truthy affinity setting.
+   *
+   * Defaults to false.
+   */
+  required?: boolean | undefined;
+  /**
+   * (optional) Specifies the comparator for the affinity setting.
+   * If not set, the default is EQUAL.
+   */
+  comparator?: WorkerLabelComparator | undefined;
+  /**
+   * (optional) Specifies the weight of the affinity setting.
+   * If not set, the default is 100.
+   */
+  weight?: number | undefined;
+}
+
 /** CreateWorkflowStepOpts represents options to create a workflow step. */
 export interface CreateWorkflowStepOpts {
   /** (required) the step name */
@@ -180,6 +260,13 @@ export interface CreateWorkflowStepOpts {
   retries: number;
   /** (optional) the rate limits for the step */
   rateLimits: CreateStepRateLimit[];
+  /** (optional) the desired worker affinity state for the step */
+  workerLabels: { [key: string]: DesiredWorkerLabels };
+}
+
+export interface CreateWorkflowStepOpts_WorkerLabelsEntry {
+  key: string;
+  value: DesiredWorkerLabels | undefined;
 }
 
 export interface CreateStepRateLimit {
@@ -759,6 +846,133 @@ export const CreateWorkflowJobOpts = {
   },
 };
 
+function createBaseDesiredWorkerLabels(): DesiredWorkerLabels {
+  return {
+    strValue: undefined,
+    intValue: undefined,
+    required: undefined,
+    comparator: undefined,
+    weight: undefined,
+  };
+}
+
+export const DesiredWorkerLabels = {
+  encode(message: DesiredWorkerLabels, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.strValue !== undefined) {
+      writer.uint32(10).string(message.strValue);
+    }
+    if (message.intValue !== undefined) {
+      writer.uint32(16).int32(message.intValue);
+    }
+    if (message.required !== undefined) {
+      writer.uint32(24).bool(message.required);
+    }
+    if (message.comparator !== undefined) {
+      writer.uint32(32).int32(message.comparator);
+    }
+    if (message.weight !== undefined) {
+      writer.uint32(40).int32(message.weight);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): DesiredWorkerLabels {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDesiredWorkerLabels();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.strValue = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.intValue = reader.int32();
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.required = reader.bool();
+          continue;
+        case 4:
+          if (tag !== 32) {
+            break;
+          }
+
+          message.comparator = reader.int32() as any;
+          continue;
+        case 5:
+          if (tag !== 40) {
+            break;
+          }
+
+          message.weight = reader.int32();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DesiredWorkerLabels {
+    return {
+      strValue: isSet(object.strValue) ? globalThis.String(object.strValue) : undefined,
+      intValue: isSet(object.intValue) ? globalThis.Number(object.intValue) : undefined,
+      required: isSet(object.required) ? globalThis.Boolean(object.required) : undefined,
+      comparator: isSet(object.comparator)
+        ? workerLabelComparatorFromJSON(object.comparator)
+        : undefined,
+      weight: isSet(object.weight) ? globalThis.Number(object.weight) : undefined,
+    };
+  },
+
+  toJSON(message: DesiredWorkerLabels): unknown {
+    const obj: any = {};
+    if (message.strValue !== undefined) {
+      obj.strValue = message.strValue;
+    }
+    if (message.intValue !== undefined) {
+      obj.intValue = Math.round(message.intValue);
+    }
+    if (message.required !== undefined) {
+      obj.required = message.required;
+    }
+    if (message.comparator !== undefined) {
+      obj.comparator = workerLabelComparatorToJSON(message.comparator);
+    }
+    if (message.weight !== undefined) {
+      obj.weight = Math.round(message.weight);
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<DesiredWorkerLabels>): DesiredWorkerLabels {
+    return DesiredWorkerLabels.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<DesiredWorkerLabels>): DesiredWorkerLabels {
+    const message = createBaseDesiredWorkerLabels();
+    message.strValue = object.strValue ?? undefined;
+    message.intValue = object.intValue ?? undefined;
+    message.required = object.required ?? undefined;
+    message.comparator = object.comparator ?? undefined;
+    message.weight = object.weight ?? undefined;
+    return message;
+  },
+};
+
 function createBaseCreateWorkflowStepOpts(): CreateWorkflowStepOpts {
   return {
     readableId: '',
@@ -769,6 +983,7 @@ function createBaseCreateWorkflowStepOpts(): CreateWorkflowStepOpts {
     userData: '',
     retries: 0,
     rateLimits: [],
+    workerLabels: {},
   };
 }
 
@@ -798,6 +1013,12 @@ export const CreateWorkflowStepOpts = {
     for (const v of message.rateLimits) {
       CreateStepRateLimit.encode(v!, writer.uint32(66).fork()).ldelim();
     }
+    Object.entries(message.workerLabels).forEach(([key, value]) => {
+      CreateWorkflowStepOpts_WorkerLabelsEntry.encode(
+        { key: key as any, value },
+        writer.uint32(74).fork()
+      ).ldelim();
+    });
     return writer;
   },
 
@@ -864,6 +1085,16 @@ export const CreateWorkflowStepOpts = {
 
           message.rateLimits.push(CreateStepRateLimit.decode(reader, reader.uint32()));
           continue;
+        case 9:
+          if (tag !== 74) {
+            break;
+          }
+
+          const entry9 = CreateWorkflowStepOpts_WorkerLabelsEntry.decode(reader, reader.uint32());
+          if (entry9.value !== undefined) {
+            message.workerLabels[entry9.key] = entry9.value;
+          }
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -887,6 +1118,15 @@ export const CreateWorkflowStepOpts = {
       rateLimits: globalThis.Array.isArray(object?.rateLimits)
         ? object.rateLimits.map((e: any) => CreateStepRateLimit.fromJSON(e))
         : [],
+      workerLabels: isObject(object.workerLabels)
+        ? Object.entries(object.workerLabels).reduce<{ [key: string]: DesiredWorkerLabels }>(
+            (acc, [key, value]) => {
+              acc[key] = DesiredWorkerLabels.fromJSON(value);
+              return acc;
+            },
+            {}
+          )
+        : {},
     };
   },
 
@@ -916,6 +1156,15 @@ export const CreateWorkflowStepOpts = {
     if (message.rateLimits?.length) {
       obj.rateLimits = message.rateLimits.map((e) => CreateStepRateLimit.toJSON(e));
     }
+    if (message.workerLabels) {
+      const entries = Object.entries(message.workerLabels);
+      if (entries.length > 0) {
+        obj.workerLabels = {};
+        entries.forEach(([k, v]) => {
+          obj.workerLabels[k] = DesiredWorkerLabels.toJSON(v);
+        });
+      }
+    }
     return obj;
   },
 
@@ -932,6 +1181,101 @@ export const CreateWorkflowStepOpts = {
     message.userData = object.userData ?? '';
     message.retries = object.retries ?? 0;
     message.rateLimits = object.rateLimits?.map((e) => CreateStepRateLimit.fromPartial(e)) || [];
+    message.workerLabels = Object.entries(object.workerLabels ?? {}).reduce<{
+      [key: string]: DesiredWorkerLabels;
+    }>((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = DesiredWorkerLabels.fromPartial(value);
+      }
+      return acc;
+    }, {});
+    return message;
+  },
+};
+
+function createBaseCreateWorkflowStepOpts_WorkerLabelsEntry(): CreateWorkflowStepOpts_WorkerLabelsEntry {
+  return { key: '', value: undefined };
+}
+
+export const CreateWorkflowStepOpts_WorkerLabelsEntry = {
+  encode(
+    message: CreateWorkflowStepOpts_WorkerLabelsEntry,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key);
+    }
+    if (message.value !== undefined) {
+      DesiredWorkerLabels.encode(message.value, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): CreateWorkflowStepOpts_WorkerLabelsEntry {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateWorkflowStepOpts_WorkerLabelsEntry();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.key = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.value = DesiredWorkerLabels.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CreateWorkflowStepOpts_WorkerLabelsEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      value: isSet(object.value) ? DesiredWorkerLabels.fromJSON(object.value) : undefined,
+    };
+  },
+
+  toJSON(message: CreateWorkflowStepOpts_WorkerLabelsEntry): unknown {
+    const obj: any = {};
+    if (message.key !== '') {
+      obj.key = message.key;
+    }
+    if (message.value !== undefined) {
+      obj.value = DesiredWorkerLabels.toJSON(message.value);
+    }
+    return obj;
+  },
+
+  create(
+    base?: DeepPartial<CreateWorkflowStepOpts_WorkerLabelsEntry>
+  ): CreateWorkflowStepOpts_WorkerLabelsEntry {
+    return CreateWorkflowStepOpts_WorkerLabelsEntry.fromPartial(base ?? {});
+  },
+  fromPartial(
+    object: DeepPartial<CreateWorkflowStepOpts_WorkerLabelsEntry>
+  ): CreateWorkflowStepOpts_WorkerLabelsEntry {
+    const message = createBaseCreateWorkflowStepOpts_WorkerLabelsEntry();
+    message.key = object.key ?? '';
+    message.value =
+      object.value !== undefined && object.value !== null
+        ? DesiredWorkerLabels.fromPartial(object.value)
+        : undefined;
     return message;
   },
 };
@@ -1966,6 +2310,10 @@ function fromJsonTimestamp(o: any): Date {
   } else {
     return fromTimestamp(Timestamp.fromJSON(o));
   }
+}
+
+function isObject(value: any): boolean {
+  return typeof value === 'object' && value !== null;
 }
 
 function isSet(value: any): boolean {

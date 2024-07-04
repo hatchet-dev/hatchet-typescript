@@ -6,8 +6,7 @@ import {
   GroupKeyActionEvent,
   OverridesData,
   DeepPartial,
-  WorkerAffinityConfig as PbWorkerAffinityConfig,
-  WorkerAffinityComparator,
+  WorkerLabels as PbWorkerAffinityConfig,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -16,45 +15,14 @@ import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 import { ActionListener } from './action-listener';
 
-/**
- * Configuration for worker affinity settings.
- */
-export interface WorkerAffinityConfig {
-  /**
-   * The initial value for the affinity setting. This can be a string or a number.
-   */
-  value: string | number;
-
-  /**
-   * (Optional) Specifies whether the affinity setting is required.
-   * If required, the worker will not accept actions that do not have a truthy affinity setting.
-   *
-   * Defaults to false.
-   */
-  required?: boolean;
-
-  /**
-   * (Optional) The weight assigned to the affinity setting. Higher weights indicate higher priority.
-   *
-   * Defaults to 100 if not specified.
-   */
-  weight?: number;
-
-  /**
-   * (Optional) The comparator used for evaluating the affinity setting.
-   * Supported values are 'EQUALS' and 'NOT_EQUALS'.
-   *
-   * Defaults to 'EQUALS' if not specified.
-   */
-  comparator?: WorkerAffinityComparator;
-}
+export type WorkerLabels = Record<string, string | number | undefined>;
 
 interface GetActionListenerOptions {
   workerName: string;
   services: string[];
   actions: string[];
   maxRuns?: number;
-  affinities: Record<string, WorkerAffinityConfig>;
+  labels: Record<string, string | number | undefined>;
 }
 
 export class DispatcherClient {
@@ -69,14 +37,10 @@ export class DispatcherClient {
   }
 
   async getActionListener(options: GetActionListenerOptions) {
-    const affinities = mapAffinityConfig(options.affinities);
-
-    this.logger.error(`Registering worker with affinities:${affinities}`);
-
     // Register the worker
     const registration = await this.client.register({
       ...options,
-      workerAffinities: affinities,
+      labels: options.labels ? mapLabels(options.labels) : undefined,
     });
 
     return new ActionListener(this, registration.workerId);
@@ -115,12 +79,11 @@ export class DispatcherClient {
     }
   }
 
-  async upsertAffinityConfig(workerId: string, config: Record<string, WorkerAffinityConfig>) {
-    const workerAffinities = mapAffinityConfig(config);
+  async upsertWorkerLabels(workerId: string, labels: WorkerLabels) {
     try {
-      return await this.client.upsertWorkerAffinities({
+      return await this.client.upsertWorkerLabels({
         workerId,
-        workerAffinities,
+        labels: mapLabels(labels),
       });
     } catch (e: any) {
       throw new HatchetError(e.message);
@@ -128,18 +91,13 @@ export class DispatcherClient {
   }
 }
 
-function mapAffinityConfig(
-  in_: Record<string, WorkerAffinityConfig>
-): Record<string, PbWorkerAffinityConfig> {
+function mapLabels(in_: WorkerLabels): Record<string, PbWorkerAffinityConfig> {
   return Object.entries(in_).reduce<Record<string, PbWorkerAffinityConfig>>(
     (acc, [key, value]) => ({
       ...acc,
       [key]: {
-        strValue: typeof value.value === 'string' ? value.value : undefined,
-        intValue: typeof value.value === 'number' ? value.value : undefined,
-        required: value.required,
-        weight: value.weight,
-        comparator: value.comparator,
+        strValue: typeof value === 'string' ? value : undefined,
+        intValue: typeof value === 'number' ? value : undefined,
       } as PbWorkerAffinityConfig,
     }),
     {} as Record<string, PbWorkerAffinityConfig>

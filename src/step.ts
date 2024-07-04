@@ -9,12 +9,26 @@ import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
 import WorkflowRunRef from './util/workflow-run-ref';
 import { Worker } from './clients/worker';
-import { WorkerAffinityConfig } from './clients/dispatcher/dispatcher-client';
+import { WorkerLabels } from './clients/dispatcher/dispatcher-client';
+import { WorkerLabelComparator } from './protoc/workflows';
 
 export const CreateRateLimitSchema = z.object({
   key: z.string(),
   units: z.number().min(1),
 });
+
+export const DesiredWorkerLabelSchema = z
+  .union([
+    z.string(),
+    z.number().int(),
+    z.object({
+      value: z.union([z.string(), z.number()]),
+      required: z.boolean().optional(),
+      weight: z.number().int().optional(),
+      comparator: z.nativeEnum(WorkerLabelComparator).optional(),
+    }),
+  ])
+  .optional();
 
 export const CreateStepSchema = z.object({
   name: z.string(),
@@ -22,6 +36,7 @@ export const CreateStepSchema = z.object({
   timeout: HatchetTimeoutSchema.optional(),
   retries: z.number().optional(),
   rate_limits: z.array(CreateRateLimitSchema).optional(),
+  worker_labels: z.record(z.lazy(() => DesiredWorkerLabelSchema)).optional(),
 });
 
 export type JsonObject = { [Key in string]: JsonValue } & {
@@ -49,12 +64,12 @@ export class ContextWorker {
     this.worker = worker;
   }
 
-  affinityConfig() {
-    return this.worker.affinityConfig;
+  labels() {
+    return this.worker.labels;
   }
 
-  upsertAffinityConfig(affinityConfig: Record<string, WorkerAffinityConfig>) {
-    return this.worker.upsertAffinityConfig(affinityConfig);
+  upsertLabels(labels: WorkerLabels) {
+    return this.worker.upsertLabels(labels);
   }
 }
 

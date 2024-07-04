@@ -5,63 +5,6 @@ import { Timestamp } from '../google/protobuf/timestamp';
 
 export const protobufPackage = '';
 
-export enum WorkerAffinityComparator {
-  EQUAL = 0,
-  NOT_EQUAL = 1,
-  GREATER_THAN = 2,
-  GREATER_THAN_OR_EQUAL = 3,
-  LESS_THAN = 4,
-  LESS_THAN_OR_EQUAL = 5,
-  UNRECOGNIZED = -1,
-}
-
-export function workerAffinityComparatorFromJSON(object: any): WorkerAffinityComparator {
-  switch (object) {
-    case 0:
-    case 'EQUAL':
-      return WorkerAffinityComparator.EQUAL;
-    case 1:
-    case 'NOT_EQUAL':
-      return WorkerAffinityComparator.NOT_EQUAL;
-    case 2:
-    case 'GREATER_THAN':
-      return WorkerAffinityComparator.GREATER_THAN;
-    case 3:
-    case 'GREATER_THAN_OR_EQUAL':
-      return WorkerAffinityComparator.GREATER_THAN_OR_EQUAL;
-    case 4:
-    case 'LESS_THAN':
-      return WorkerAffinityComparator.LESS_THAN;
-    case 5:
-    case 'LESS_THAN_OR_EQUAL':
-      return WorkerAffinityComparator.LESS_THAN_OR_EQUAL;
-    case -1:
-    case 'UNRECOGNIZED':
-    default:
-      return WorkerAffinityComparator.UNRECOGNIZED;
-  }
-}
-
-export function workerAffinityComparatorToJSON(object: WorkerAffinityComparator): string {
-  switch (object) {
-    case WorkerAffinityComparator.EQUAL:
-      return 'EQUAL';
-    case WorkerAffinityComparator.NOT_EQUAL:
-      return 'NOT_EQUAL';
-    case WorkerAffinityComparator.GREATER_THAN:
-      return 'GREATER_THAN';
-    case WorkerAffinityComparator.GREATER_THAN_OR_EQUAL:
-      return 'GREATER_THAN_OR_EQUAL';
-    case WorkerAffinityComparator.LESS_THAN:
-      return 'LESS_THAN';
-    case WorkerAffinityComparator.LESS_THAN_OR_EQUAL:
-      return 'LESS_THAN_OR_EQUAL';
-    case WorkerAffinityComparator.UNRECOGNIZED:
-    default:
-      return 'UNRECOGNIZED';
-  }
-}
-
 export enum ActionType {
   START_STEP_RUN = 0,
   CANCEL_STEP_RUN = 1,
@@ -320,27 +263,10 @@ export function workflowRunEventTypeToJSON(object: WorkflowRunEventType): string
   }
 }
 
-export interface WorkerAffinityConfig {
-  /** value of the affinity */
+export interface WorkerLabels {
+  /** value of the label */
   strValue?: string | undefined;
   intValue?: number | undefined;
-  /**
-   * (optional) Specifies whether the affinity setting is required.
-   * If required, the worker will not accept actions that do not have a truthy affinity setting.
-   *
-   * Defaults to false.
-   */
-  required?: boolean | undefined;
-  /**
-   * (optional) Specifies the comparator for the affinity setting.
-   * If not set, the default is EQUAL.
-   */
-  comparator?: WorkerAffinityComparator | undefined;
-  /**
-   * (optional) Specifies the weight of the affinity setting.
-   * If not set, the default is 100.
-   */
-  weight?: number | undefined;
 }
 
 export interface WorkerRegisterRequest {
@@ -352,13 +278,13 @@ export interface WorkerRegisterRequest {
   services: string[];
   /** (optional) the max number of runs this worker can handle */
   maxRuns?: number | undefined;
-  /** (optional) the worker affinity configurations */
-  workerAffinities: { [key: string]: WorkerAffinityConfig };
+  /** (optional) worker labels (i.e. state or other metadata) */
+  labels: { [key: string]: WorkerLabels };
 }
 
-export interface WorkerRegisterRequest_WorkerAffinitiesEntry {
+export interface WorkerRegisterRequest_LabelsEntry {
   key: string;
-  value: WorkerAffinityConfig | undefined;
+  value: WorkerLabels | undefined;
 }
 
 export interface WorkerRegisterResponse {
@@ -370,19 +296,19 @@ export interface WorkerRegisterResponse {
   workerName: string;
 }
 
-export interface UpsertWorkerAffinitiesRequest {
+export interface UpsertWorkerLabelsRequest {
   /** the name of the worker */
   workerId: string;
-  /** (optional) the worker affinity configurations */
-  workerAffinities: { [key: string]: WorkerAffinityConfig };
+  /** (optional) the worker labels */
+  labels: { [key: string]: WorkerLabels };
 }
 
-export interface UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+export interface UpsertWorkerLabelsRequest_LabelsEntry {
   key: string;
-  value: WorkerAffinityConfig | undefined;
+  value: WorkerLabels | undefined;
 }
 
-export interface UpsertWorkerAffinitiesResponse {
+export interface UpsertWorkerLabelsResponse {
   /** the tenant id */
   tenantId: string;
   /** the id of the worker */
@@ -562,40 +488,25 @@ export interface ReleaseSlotRequest {
 
 export interface ReleaseSlotResponse {}
 
-function createBaseWorkerAffinityConfig(): WorkerAffinityConfig {
-  return {
-    strValue: undefined,
-    intValue: undefined,
-    required: undefined,
-    comparator: undefined,
-    weight: undefined,
-  };
+function createBaseWorkerLabels(): WorkerLabels {
+  return { strValue: undefined, intValue: undefined };
 }
 
-export const WorkerAffinityConfig = {
-  encode(message: WorkerAffinityConfig, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+export const WorkerLabels = {
+  encode(message: WorkerLabels, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.strValue !== undefined) {
       writer.uint32(10).string(message.strValue);
     }
     if (message.intValue !== undefined) {
       writer.uint32(16).int32(message.intValue);
     }
-    if (message.required !== undefined) {
-      writer.uint32(24).bool(message.required);
-    }
-    if (message.comparator !== undefined) {
-      writer.uint32(32).int32(message.comparator);
-    }
-    if (message.weight !== undefined) {
-      writer.uint32(40).int32(message.weight);
-    }
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): WorkerAffinityConfig {
+  decode(input: _m0.Reader | Uint8Array, length?: number): WorkerLabels {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseWorkerAffinityConfig();
+    const message = createBaseWorkerLabels();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -613,27 +524,6 @@ export const WorkerAffinityConfig = {
 
           message.intValue = reader.int32();
           continue;
-        case 3:
-          if (tag !== 24) {
-            break;
-          }
-
-          message.required = reader.bool();
-          continue;
-        case 4:
-          if (tag !== 32) {
-            break;
-          }
-
-          message.comparator = reader.int32() as any;
-          continue;
-        case 5:
-          if (tag !== 40) {
-            break;
-          }
-
-          message.weight = reader.int32();
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -643,19 +533,14 @@ export const WorkerAffinityConfig = {
     return message;
   },
 
-  fromJSON(object: any): WorkerAffinityConfig {
+  fromJSON(object: any): WorkerLabels {
     return {
       strValue: isSet(object.strValue) ? globalThis.String(object.strValue) : undefined,
       intValue: isSet(object.intValue) ? globalThis.Number(object.intValue) : undefined,
-      required: isSet(object.required) ? globalThis.Boolean(object.required) : undefined,
-      comparator: isSet(object.comparator)
-        ? workerAffinityComparatorFromJSON(object.comparator)
-        : undefined,
-      weight: isSet(object.weight) ? globalThis.Number(object.weight) : undefined,
     };
   },
 
-  toJSON(message: WorkerAffinityConfig): unknown {
+  toJSON(message: WorkerLabels): unknown {
     const obj: any = {};
     if (message.strValue !== undefined) {
       obj.strValue = message.strValue;
@@ -663,34 +548,22 @@ export const WorkerAffinityConfig = {
     if (message.intValue !== undefined) {
       obj.intValue = Math.round(message.intValue);
     }
-    if (message.required !== undefined) {
-      obj.required = message.required;
-    }
-    if (message.comparator !== undefined) {
-      obj.comparator = workerAffinityComparatorToJSON(message.comparator);
-    }
-    if (message.weight !== undefined) {
-      obj.weight = Math.round(message.weight);
-    }
     return obj;
   },
 
-  create(base?: DeepPartial<WorkerAffinityConfig>): WorkerAffinityConfig {
-    return WorkerAffinityConfig.fromPartial(base ?? {});
+  create(base?: DeepPartial<WorkerLabels>): WorkerLabels {
+    return WorkerLabels.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<WorkerAffinityConfig>): WorkerAffinityConfig {
-    const message = createBaseWorkerAffinityConfig();
+  fromPartial(object: DeepPartial<WorkerLabels>): WorkerLabels {
+    const message = createBaseWorkerLabels();
     message.strValue = object.strValue ?? undefined;
     message.intValue = object.intValue ?? undefined;
-    message.required = object.required ?? undefined;
-    message.comparator = object.comparator ?? undefined;
-    message.weight = object.weight ?? undefined;
     return message;
   },
 };
 
 function createBaseWorkerRegisterRequest(): WorkerRegisterRequest {
-  return { workerName: '', actions: [], services: [], maxRuns: undefined, workerAffinities: {} };
+  return { workerName: '', actions: [], services: [], maxRuns: undefined, labels: {} };
 }
 
 export const WorkerRegisterRequest = {
@@ -707,8 +580,8 @@ export const WorkerRegisterRequest = {
     if (message.maxRuns !== undefined) {
       writer.uint32(32).int32(message.maxRuns);
     }
-    Object.entries(message.workerAffinities).forEach(([key, value]) => {
-      WorkerRegisterRequest_WorkerAffinitiesEntry.encode(
+    Object.entries(message.labels).forEach(([key, value]) => {
+      WorkerRegisterRequest_LabelsEntry.encode(
         { key: key as any, value },
         writer.uint32(42).fork()
       ).ldelim();
@@ -756,12 +629,9 @@ export const WorkerRegisterRequest = {
             break;
           }
 
-          const entry5 = WorkerRegisterRequest_WorkerAffinitiesEntry.decode(
-            reader,
-            reader.uint32()
-          );
+          const entry5 = WorkerRegisterRequest_LabelsEntry.decode(reader, reader.uint32());
           if (entry5.value !== undefined) {
-            message.workerAffinities[entry5.key] = entry5.value;
+            message.labels[entry5.key] = entry5.value;
           }
           continue;
       }
@@ -783,10 +653,10 @@ export const WorkerRegisterRequest = {
         ? object.services.map((e: any) => globalThis.String(e))
         : [],
       maxRuns: isSet(object.maxRuns) ? globalThis.Number(object.maxRuns) : undefined,
-      workerAffinities: isObject(object.workerAffinities)
-        ? Object.entries(object.workerAffinities).reduce<{ [key: string]: WorkerAffinityConfig }>(
+      labels: isObject(object.labels)
+        ? Object.entries(object.labels).reduce<{ [key: string]: WorkerLabels }>(
             (acc, [key, value]) => {
-              acc[key] = WorkerAffinityConfig.fromJSON(value);
+              acc[key] = WorkerLabels.fromJSON(value);
               return acc;
             },
             {}
@@ -809,12 +679,12 @@ export const WorkerRegisterRequest = {
     if (message.maxRuns !== undefined) {
       obj.maxRuns = Math.round(message.maxRuns);
     }
-    if (message.workerAffinities) {
-      const entries = Object.entries(message.workerAffinities);
+    if (message.labels) {
+      const entries = Object.entries(message.labels);
       if (entries.length > 0) {
-        obj.workerAffinities = {};
+        obj.labels = {};
         entries.forEach(([k, v]) => {
-          obj.workerAffinities[k] = WorkerAffinityConfig.toJSON(v);
+          obj.labels[k] = WorkerLabels.toJSON(v);
         });
       }
     }
@@ -830,43 +700,41 @@ export const WorkerRegisterRequest = {
     message.actions = object.actions?.map((e) => e) || [];
     message.services = object.services?.map((e) => e) || [];
     message.maxRuns = object.maxRuns ?? undefined;
-    message.workerAffinities = Object.entries(object.workerAffinities ?? {}).reduce<{
-      [key: string]: WorkerAffinityConfig;
-    }>((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = WorkerAffinityConfig.fromPartial(value);
-      }
-      return acc;
-    }, {});
+    message.labels = Object.entries(object.labels ?? {}).reduce<{ [key: string]: WorkerLabels }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = WorkerLabels.fromPartial(value);
+        }
+        return acc;
+      },
+      {}
+    );
     return message;
   },
 };
 
-function createBaseWorkerRegisterRequest_WorkerAffinitiesEntry(): WorkerRegisterRequest_WorkerAffinitiesEntry {
+function createBaseWorkerRegisterRequest_LabelsEntry(): WorkerRegisterRequest_LabelsEntry {
   return { key: '', value: undefined };
 }
 
-export const WorkerRegisterRequest_WorkerAffinitiesEntry = {
+export const WorkerRegisterRequest_LabelsEntry = {
   encode(
-    message: WorkerRegisterRequest_WorkerAffinitiesEntry,
+    message: WorkerRegisterRequest_LabelsEntry,
     writer: _m0.Writer = _m0.Writer.create()
   ): _m0.Writer {
     if (message.key !== '') {
       writer.uint32(10).string(message.key);
     }
     if (message.value !== undefined) {
-      WorkerAffinityConfig.encode(message.value, writer.uint32(18).fork()).ldelim();
+      WorkerLabels.encode(message.value, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): WorkerRegisterRequest_WorkerAffinitiesEntry {
+  decode(input: _m0.Reader | Uint8Array, length?: number): WorkerRegisterRequest_LabelsEntry {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseWorkerRegisterRequest_WorkerAffinitiesEntry();
+    const message = createBaseWorkerRegisterRequest_LabelsEntry();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -882,7 +750,7 @@ export const WorkerRegisterRequest_WorkerAffinitiesEntry = {
             break;
           }
 
-          message.value = WorkerAffinityConfig.decode(reader, reader.uint32());
+          message.value = WorkerLabels.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -893,37 +761,35 @@ export const WorkerRegisterRequest_WorkerAffinitiesEntry = {
     return message;
   },
 
-  fromJSON(object: any): WorkerRegisterRequest_WorkerAffinitiesEntry {
+  fromJSON(object: any): WorkerRegisterRequest_LabelsEntry {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : '',
-      value: isSet(object.value) ? WorkerAffinityConfig.fromJSON(object.value) : undefined,
+      value: isSet(object.value) ? WorkerLabels.fromJSON(object.value) : undefined,
     };
   },
 
-  toJSON(message: WorkerRegisterRequest_WorkerAffinitiesEntry): unknown {
+  toJSON(message: WorkerRegisterRequest_LabelsEntry): unknown {
     const obj: any = {};
     if (message.key !== '') {
       obj.key = message.key;
     }
     if (message.value !== undefined) {
-      obj.value = WorkerAffinityConfig.toJSON(message.value);
+      obj.value = WorkerLabels.toJSON(message.value);
     }
     return obj;
   },
 
-  create(
-    base?: DeepPartial<WorkerRegisterRequest_WorkerAffinitiesEntry>
-  ): WorkerRegisterRequest_WorkerAffinitiesEntry {
-    return WorkerRegisterRequest_WorkerAffinitiesEntry.fromPartial(base ?? {});
+  create(base?: DeepPartial<WorkerRegisterRequest_LabelsEntry>): WorkerRegisterRequest_LabelsEntry {
+    return WorkerRegisterRequest_LabelsEntry.fromPartial(base ?? {});
   },
   fromPartial(
-    object: DeepPartial<WorkerRegisterRequest_WorkerAffinitiesEntry>
-  ): WorkerRegisterRequest_WorkerAffinitiesEntry {
-    const message = createBaseWorkerRegisterRequest_WorkerAffinitiesEntry();
+    object: DeepPartial<WorkerRegisterRequest_LabelsEntry>
+  ): WorkerRegisterRequest_LabelsEntry {
+    const message = createBaseWorkerRegisterRequest_LabelsEntry();
     message.key = object.key ?? '';
     message.value =
       object.value !== undefined && object.value !== null
-        ? WorkerAffinityConfig.fromPartial(object.value)
+        ? WorkerLabels.fromPartial(object.value)
         : undefined;
     return message;
   },
@@ -1018,20 +884,17 @@ export const WorkerRegisterResponse = {
   },
 };
 
-function createBaseUpsertWorkerAffinitiesRequest(): UpsertWorkerAffinitiesRequest {
-  return { workerId: '', workerAffinities: {} };
+function createBaseUpsertWorkerLabelsRequest(): UpsertWorkerLabelsRequest {
+  return { workerId: '', labels: {} };
 }
 
-export const UpsertWorkerAffinitiesRequest = {
-  encode(
-    message: UpsertWorkerAffinitiesRequest,
-    writer: _m0.Writer = _m0.Writer.create()
-  ): _m0.Writer {
+export const UpsertWorkerLabelsRequest = {
+  encode(message: UpsertWorkerLabelsRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.workerId !== '') {
       writer.uint32(10).string(message.workerId);
     }
-    Object.entries(message.workerAffinities).forEach(([key, value]) => {
-      UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.encode(
+    Object.entries(message.labels).forEach(([key, value]) => {
+      UpsertWorkerLabelsRequest_LabelsEntry.encode(
         { key: key as any, value },
         writer.uint32(18).fork()
       ).ldelim();
@@ -1039,10 +902,10 @@ export const UpsertWorkerAffinitiesRequest = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerAffinitiesRequest {
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerLabelsRequest {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpsertWorkerAffinitiesRequest();
+    const message = createBaseUpsertWorkerLabelsRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1058,12 +921,9 @@ export const UpsertWorkerAffinitiesRequest = {
             break;
           }
 
-          const entry2 = UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.decode(
-            reader,
-            reader.uint32()
-          );
+          const entry2 = UpsertWorkerLabelsRequest_LabelsEntry.decode(reader, reader.uint32());
           if (entry2.value !== undefined) {
-            message.workerAffinities[entry2.key] = entry2.value;
+            message.labels[entry2.key] = entry2.value;
           }
           continue;
       }
@@ -1075,13 +935,13 @@ export const UpsertWorkerAffinitiesRequest = {
     return message;
   },
 
-  fromJSON(object: any): UpsertWorkerAffinitiesRequest {
+  fromJSON(object: any): UpsertWorkerLabelsRequest {
     return {
       workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
-      workerAffinities: isObject(object.workerAffinities)
-        ? Object.entries(object.workerAffinities).reduce<{ [key: string]: WorkerAffinityConfig }>(
+      labels: isObject(object.labels)
+        ? Object.entries(object.labels).reduce<{ [key: string]: WorkerLabels }>(
             (acc, [key, value]) => {
-              acc[key] = WorkerAffinityConfig.fromJSON(value);
+              acc[key] = WorkerLabels.fromJSON(value);
               return acc;
             },
             {}
@@ -1090,66 +950,64 @@ export const UpsertWorkerAffinitiesRequest = {
     };
   },
 
-  toJSON(message: UpsertWorkerAffinitiesRequest): unknown {
+  toJSON(message: UpsertWorkerLabelsRequest): unknown {
     const obj: any = {};
     if (message.workerId !== '') {
       obj.workerId = message.workerId;
     }
-    if (message.workerAffinities) {
-      const entries = Object.entries(message.workerAffinities);
+    if (message.labels) {
+      const entries = Object.entries(message.labels);
       if (entries.length > 0) {
-        obj.workerAffinities = {};
+        obj.labels = {};
         entries.forEach(([k, v]) => {
-          obj.workerAffinities[k] = WorkerAffinityConfig.toJSON(v);
+          obj.labels[k] = WorkerLabels.toJSON(v);
         });
       }
     }
     return obj;
   },
 
-  create(base?: DeepPartial<UpsertWorkerAffinitiesRequest>): UpsertWorkerAffinitiesRequest {
-    return UpsertWorkerAffinitiesRequest.fromPartial(base ?? {});
+  create(base?: DeepPartial<UpsertWorkerLabelsRequest>): UpsertWorkerLabelsRequest {
+    return UpsertWorkerLabelsRequest.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<UpsertWorkerAffinitiesRequest>): UpsertWorkerAffinitiesRequest {
-    const message = createBaseUpsertWorkerAffinitiesRequest();
+  fromPartial(object: DeepPartial<UpsertWorkerLabelsRequest>): UpsertWorkerLabelsRequest {
+    const message = createBaseUpsertWorkerLabelsRequest();
     message.workerId = object.workerId ?? '';
-    message.workerAffinities = Object.entries(object.workerAffinities ?? {}).reduce<{
-      [key: string]: WorkerAffinityConfig;
-    }>((acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = WorkerAffinityConfig.fromPartial(value);
-      }
-      return acc;
-    }, {});
+    message.labels = Object.entries(object.labels ?? {}).reduce<{ [key: string]: WorkerLabels }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = WorkerLabels.fromPartial(value);
+        }
+        return acc;
+      },
+      {}
+    );
     return message;
   },
 };
 
-function createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry(): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+function createBaseUpsertWorkerLabelsRequest_LabelsEntry(): UpsertWorkerLabelsRequest_LabelsEntry {
   return { key: '', value: undefined };
 }
 
-export const UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry = {
+export const UpsertWorkerLabelsRequest_LabelsEntry = {
   encode(
-    message: UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry,
+    message: UpsertWorkerLabelsRequest_LabelsEntry,
     writer: _m0.Writer = _m0.Writer.create()
   ): _m0.Writer {
     if (message.key !== '') {
       writer.uint32(10).string(message.key);
     }
     if (message.value !== undefined) {
-      WorkerAffinityConfig.encode(message.value, writer.uint32(18).fork()).ldelim();
+      WorkerLabels.encode(message.value, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(
-    input: _m0.Reader | Uint8Array,
-    length?: number
-  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerLabelsRequest_LabelsEntry {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry();
+    const message = createBaseUpsertWorkerLabelsRequest_LabelsEntry();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1165,7 +1023,7 @@ export const UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry = {
             break;
           }
 
-          message.value = WorkerAffinityConfig.decode(reader, reader.uint32());
+          message.value = WorkerLabels.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -1176,49 +1034,49 @@ export const UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry = {
     return message;
   },
 
-  fromJSON(object: any): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
+  fromJSON(object: any): UpsertWorkerLabelsRequest_LabelsEntry {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : '',
-      value: isSet(object.value) ? WorkerAffinityConfig.fromJSON(object.value) : undefined,
+      value: isSet(object.value) ? WorkerLabels.fromJSON(object.value) : undefined,
     };
   },
 
-  toJSON(message: UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry): unknown {
+  toJSON(message: UpsertWorkerLabelsRequest_LabelsEntry): unknown {
     const obj: any = {};
     if (message.key !== '') {
       obj.key = message.key;
     }
     if (message.value !== undefined) {
-      obj.value = WorkerAffinityConfig.toJSON(message.value);
+      obj.value = WorkerLabels.toJSON(message.value);
     }
     return obj;
   },
 
   create(
-    base?: DeepPartial<UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry>
-  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
-    return UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry.fromPartial(base ?? {});
+    base?: DeepPartial<UpsertWorkerLabelsRequest_LabelsEntry>
+  ): UpsertWorkerLabelsRequest_LabelsEntry {
+    return UpsertWorkerLabelsRequest_LabelsEntry.fromPartial(base ?? {});
   },
   fromPartial(
-    object: DeepPartial<UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry>
-  ): UpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry {
-    const message = createBaseUpsertWorkerAffinitiesRequest_WorkerAffinitiesEntry();
+    object: DeepPartial<UpsertWorkerLabelsRequest_LabelsEntry>
+  ): UpsertWorkerLabelsRequest_LabelsEntry {
+    const message = createBaseUpsertWorkerLabelsRequest_LabelsEntry();
     message.key = object.key ?? '';
     message.value =
       object.value !== undefined && object.value !== null
-        ? WorkerAffinityConfig.fromPartial(object.value)
+        ? WorkerLabels.fromPartial(object.value)
         : undefined;
     return message;
   },
 };
 
-function createBaseUpsertWorkerAffinitiesResponse(): UpsertWorkerAffinitiesResponse {
+function createBaseUpsertWorkerLabelsResponse(): UpsertWorkerLabelsResponse {
   return { tenantId: '', workerId: '' };
 }
 
-export const UpsertWorkerAffinitiesResponse = {
+export const UpsertWorkerLabelsResponse = {
   encode(
-    message: UpsertWorkerAffinitiesResponse,
+    message: UpsertWorkerLabelsResponse,
     writer: _m0.Writer = _m0.Writer.create()
   ): _m0.Writer {
     if (message.tenantId !== '') {
@@ -1230,10 +1088,10 @@ export const UpsertWorkerAffinitiesResponse = {
     return writer;
   },
 
-  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerAffinitiesResponse {
+  decode(input: _m0.Reader | Uint8Array, length?: number): UpsertWorkerLabelsResponse {
     const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpsertWorkerAffinitiesResponse();
+    const message = createBaseUpsertWorkerLabelsResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -1260,14 +1118,14 @@ export const UpsertWorkerAffinitiesResponse = {
     return message;
   },
 
-  fromJSON(object: any): UpsertWorkerAffinitiesResponse {
+  fromJSON(object: any): UpsertWorkerLabelsResponse {
     return {
       tenantId: isSet(object.tenantId) ? globalThis.String(object.tenantId) : '',
       workerId: isSet(object.workerId) ? globalThis.String(object.workerId) : '',
     };
   },
 
-  toJSON(message: UpsertWorkerAffinitiesResponse): unknown {
+  toJSON(message: UpsertWorkerLabelsResponse): unknown {
     const obj: any = {};
     if (message.tenantId !== '') {
       obj.tenantId = message.tenantId;
@@ -1278,11 +1136,11 @@ export const UpsertWorkerAffinitiesResponse = {
     return obj;
   },
 
-  create(base?: DeepPartial<UpsertWorkerAffinitiesResponse>): UpsertWorkerAffinitiesResponse {
-    return UpsertWorkerAffinitiesResponse.fromPartial(base ?? {});
+  create(base?: DeepPartial<UpsertWorkerLabelsResponse>): UpsertWorkerLabelsResponse {
+    return UpsertWorkerLabelsResponse.fromPartial(base ?? {});
   },
-  fromPartial(object: DeepPartial<UpsertWorkerAffinitiesResponse>): UpsertWorkerAffinitiesResponse {
-    const message = createBaseUpsertWorkerAffinitiesResponse();
+  fromPartial(object: DeepPartial<UpsertWorkerLabelsResponse>): UpsertWorkerLabelsResponse {
+    const message = createBaseUpsertWorkerLabelsResponse();
     message.tenantId = object.tenantId ?? '';
     message.workerId = object.workerId ?? '';
     return message;
@@ -3305,11 +3163,11 @@ export const DispatcherDefinition = {
       responseStream: false,
       options: {},
     },
-    upsertWorkerAffinities: {
-      name: 'UpsertWorkerAffinities',
-      requestType: UpsertWorkerAffinitiesRequest,
+    upsertWorkerLabels: {
+      name: 'UpsertWorkerLabels',
+      requestType: UpsertWorkerLabelsRequest,
       requestStream: false,
-      responseType: UpsertWorkerAffinitiesResponse,
+      responseType: UpsertWorkerLabelsResponse,
       responseStream: false,
       options: {},
     },
@@ -3370,10 +3228,10 @@ export interface DispatcherServiceImplementation<CallContextExt = {}> {
     request: ReleaseSlotRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<ReleaseSlotResponse>>;
-  upsertWorkerAffinities(
-    request: UpsertWorkerAffinitiesRequest,
+  upsertWorkerLabels(
+    request: UpsertWorkerLabelsRequest,
     context: CallContext & CallContextExt
-  ): Promise<DeepPartial<UpsertWorkerAffinitiesResponse>>;
+  ): Promise<DeepPartial<UpsertWorkerLabelsResponse>>;
 }
 
 export interface DispatcherClient<CallOptionsExt = {}> {
@@ -3430,10 +3288,10 @@ export interface DispatcherClient<CallOptionsExt = {}> {
     request: DeepPartial<ReleaseSlotRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<ReleaseSlotResponse>;
-  upsertWorkerAffinities(
-    request: DeepPartial<UpsertWorkerAffinitiesRequest>,
+  upsertWorkerLabels(
+    request: DeepPartial<UpsertWorkerLabelsRequest>,
     options?: CallOptions & CallOptionsExt
-  ): Promise<UpsertWorkerAffinitiesResponse>;
+  ): Promise<UpsertWorkerLabelsResponse>;
 }
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;

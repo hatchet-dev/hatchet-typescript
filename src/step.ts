@@ -25,6 +25,10 @@ export const DesiredWorkerLabelSchema = z
       value: z.union([z.string(), z.number()]),
       required: z.boolean().optional(),
       weight: z.number().int().optional(),
+
+      // (optional) comparator for the label
+      // if not provided, the default is EQUAL
+      // desired COMPARATOR actual (i.e. desired > actual for GREATER_THAN)
       comparator: z.nativeEnum(WorkerLabelComparator).optional(),
     }),
   ])

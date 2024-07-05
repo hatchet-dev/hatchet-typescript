@@ -1,3 +1,4 @@
+import { WorkerLabelComparator } from '@hatchet/protoc/workflows';
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
 
@@ -6,9 +7,6 @@ const hatchet = Hatchet.init();
 const workflow: Workflow = {
   id: 'affinity-workflow',
   description: 'test',
-  on: {
-    event: 'user:create',
-  },
   steps: [
     {
       name: 'step1',
@@ -48,9 +46,10 @@ const childWorkflow: Workflow = {
     {
       name: 'child-step2',
       worker_labels: {
-        model: {
-          value: 'abc',
+        memory: {
+          value: 512,
           required: true,
+          comparator: WorkerLabelComparator.LESS_THAN,
         },
       },
       run: async (ctx) => {
@@ -65,6 +64,7 @@ async function main() {
   const worker1 = await hatchet.worker('affinity-worker-1', {
     labels: {
       model: 'abc',
+      memory: 1024,
     },
   });
   await worker1.registerWorkflow(workflow);
@@ -74,6 +74,7 @@ async function main() {
   const worker2 = await hatchet.worker('affinity-worker-2', {
     labels: {
       model: 'xyz',
+      memory: 512,
     },
   });
   await worker2.registerWorkflow(workflow);

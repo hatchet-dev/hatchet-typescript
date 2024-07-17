@@ -5,6 +5,39 @@ import { Timestamp } from '../google/protobuf/timestamp';
 
 export const protobufPackage = '';
 
+export enum StickyStrategy {
+  SOFT = 0,
+  HARD = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function stickyStrategyFromJSON(object: any): StickyStrategy {
+  switch (object) {
+    case 0:
+    case 'SOFT':
+      return StickyStrategy.SOFT;
+    case 1:
+    case 'HARD':
+      return StickyStrategy.HARD;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return StickyStrategy.UNRECOGNIZED;
+  }
+}
+
+export function stickyStrategyToJSON(object: StickyStrategy): string {
+  switch (object) {
+    case StickyStrategy.SOFT:
+      return 'SOFT';
+    case StickyStrategy.HARD:
+      return 'HARD';
+    case StickyStrategy.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
 export enum ConcurrencyLimitStrategy {
   CANCEL_IN_PROGRESS = 0,
   DROP_NEWEST = 1,
@@ -198,6 +231,8 @@ export interface CreateWorkflowVersionOpts {
   cronInput?: string | undefined;
   /** (optional) the job to run on failure */
   onFailureJob?: CreateWorkflowJobOpts | undefined;
+  /** (optional) the sticky strategy for assigning steps to workers */
+  sticky?: StickyStrategy | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -344,6 +379,11 @@ export interface TriggerWorkflowRequest {
   childKey?: string | undefined;
   /** (optional) additional metadata for the workflow */
   additionalMetadata?: string | undefined;
+  /**
+   * (optional) desired worker id for the workflow run,
+   * requires the workflow definition to have a sticky strategy
+   */
+  desiredWorkerId?: string | undefined;
 }
 
 export interface TriggerWorkflowResponse {
@@ -436,6 +476,7 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     scheduleTimeout: undefined,
     cronInput: undefined,
     onFailureJob: undefined,
+    sticky: undefined,
   };
 }
 
@@ -473,6 +514,9 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.onFailureJob !== undefined) {
       CreateWorkflowJobOpts.encode(message.onFailureJob, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.sticky !== undefined) {
+      writer.uint32(96).int32(message.sticky);
     }
     return writer;
   },
@@ -561,6 +605,13 @@ export const CreateWorkflowVersionOpts = {
 
           message.onFailureJob = CreateWorkflowJobOpts.decode(reader, reader.uint32());
           continue;
+        case 12:
+          if (tag !== 96) {
+            break;
+          }
+
+          message.sticky = reader.int32() as any;
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -597,6 +648,7 @@ export const CreateWorkflowVersionOpts = {
       onFailureJob: isSet(object.onFailureJob)
         ? CreateWorkflowJobOpts.fromJSON(object.onFailureJob)
         : undefined,
+      sticky: isSet(object.sticky) ? stickyStrategyFromJSON(object.sticky) : undefined,
     };
   },
 
@@ -635,6 +687,9 @@ export const CreateWorkflowVersionOpts = {
     if (message.onFailureJob !== undefined) {
       obj.onFailureJob = CreateWorkflowJobOpts.toJSON(message.onFailureJob);
     }
+    if (message.sticky !== undefined) {
+      obj.sticky = stickyStrategyToJSON(message.sticky);
+    }
     return obj;
   },
 
@@ -660,6 +715,7 @@ export const CreateWorkflowVersionOpts = {
       object.onFailureJob !== undefined && object.onFailureJob !== null
         ? CreateWorkflowJobOpts.fromPartial(object.onFailureJob)
         : undefined;
+    message.sticky = object.sticky ?? undefined;
     return message;
   },
 };
@@ -1856,6 +1912,7 @@ function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
     childIndex: undefined,
     childKey: undefined,
     additionalMetadata: undefined,
+    desiredWorkerId: undefined,
   };
 }
 
@@ -1881,6 +1938,9 @@ export const TriggerWorkflowRequest = {
     }
     if (message.additionalMetadata !== undefined) {
       writer.uint32(58).string(message.additionalMetadata);
+    }
+    if (message.desiredWorkerId !== undefined) {
+      writer.uint32(66).string(message.desiredWorkerId);
     }
     return writer;
   },
@@ -1941,6 +2001,13 @@ export const TriggerWorkflowRequest = {
 
           message.additionalMetadata = reader.string();
           continue;
+        case 8:
+          if (tag !== 66) {
+            break;
+          }
+
+          message.desiredWorkerId = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1962,6 +2029,9 @@ export const TriggerWorkflowRequest = {
       childKey: isSet(object.childKey) ? globalThis.String(object.childKey) : undefined,
       additionalMetadata: isSet(object.additionalMetadata)
         ? globalThis.String(object.additionalMetadata)
+        : undefined,
+      desiredWorkerId: isSet(object.desiredWorkerId)
+        ? globalThis.String(object.desiredWorkerId)
         : undefined,
     };
   },
@@ -1989,6 +2059,9 @@ export const TriggerWorkflowRequest = {
     if (message.additionalMetadata !== undefined) {
       obj.additionalMetadata = message.additionalMetadata;
     }
+    if (message.desiredWorkerId !== undefined) {
+      obj.desiredWorkerId = message.desiredWorkerId;
+    }
     return obj;
   },
 
@@ -2004,6 +2077,7 @@ export const TriggerWorkflowRequest = {
     message.childIndex = object.childIndex ?? undefined;
     message.childKey = object.childKey ?? undefined;
     message.additionalMetadata = object.additionalMetadata ?? undefined;
+    message.desiredWorkerId = object.desiredWorkerId ?? undefined;
     return message;
   },
 };

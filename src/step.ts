@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import HatchetError from '@util/errors/hatchet-error';
 import * as z from 'zod';
-import { HatchetTimeoutSchema } from './workflow';
+import { HatchetTimeoutSchema, Workflow } from './workflow';
 import { Action } from './clients/dispatcher/action-listener';
 import { LogLevel } from './clients/event/event-client';
 import { Logger } from './util/logger';
@@ -66,6 +66,14 @@ export class ContextWorker {
   private worker: Worker;
   constructor(worker: Worker) {
     this.worker = worker;
+  }
+
+  id() {
+    return this.worker.workerId;
+  }
+
+  hasWorkflow(workflowName: string) {
+    return !!this.worker.workflow_registry.find((workflow) => workflow.id === workflowName);
   }
 
   labels() {
@@ -213,14 +221,54 @@ export class Context<T, K = {}> {
     await this.client.event.putStream(stepRunId, data);
   }
 
+  /**
+   * Spawns a new workflow.
+   *
+   * @param workflowName the name of the workflow to spawn
+   * @param input the input data for the workflow
+   * @param options additional options for spawning the workflow. If a string is provided, it is used as the key.
+   *                If an object is provided, it can include:
+   *                - key: a unique identifier for the workflow (deprecated, use options.key instead)
+   *                - sticky: a boolean indicating whether to use sticky execution
+   * @param <Q> the type of the input data
+   * @param <P> the type of the output data
+   * @return a reference to the spawned workflow run
+   */
   spawnWorkflow<Q = JsonValue, P = JsonValue>(
-    workflowName: string,
+    workflow: string | Workflow,
     input: Q,
-    key?: string
+    options?: string | { key?: string; sticky?: boolean }
   ): WorkflowRunRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
+    let workflowName: string = '';
+
+    if (typeof workflow === 'string') {
+      workflowName = workflow;
+    } else {
+      workflowName = workflow.id;
+    }
+
     const name = this.client.config.namespace + workflowName;
+
+    let key: string | undefined = '';
+    let sticky: boolean | undefined = false;
+
+    if (typeof options === 'string') {
+      this.logger.warn(
+        'Using key param is deprecated and will be removed in a future release. Use options.key instead.'
+      );
+      key = options;
+    } else {
+      key = options?.key;
+      sticky = options?.sticky;
+    }
+
+    if (sticky && !this.worker.hasWorkflow(name)) {
+      throw new HatchetError(
+        `cannot run with sticky: workflow ${name} is not registered on the worker`
+      );
+    }
 
     try {
       const resp = this.client.admin.runWorkflow<Q, P>(name, input, {
@@ -228,6 +276,7 @@ export class Context<T, K = {}> {
         parentStepRunId: stepRunId,
         childKey: key,
         childIndex: this.spawnIndex,
+        desiredWorkerId: sticky ? this.worker.id() : undefined,
       });
 
       this.spawnIndex += 1;

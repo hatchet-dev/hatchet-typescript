@@ -41,6 +41,7 @@ export class Worker {
   handle_kill: boolean;
 
   action_registry: ActionRegistry;
+  workflow_registry: Workflow[] = [];
   listener: ActionListener | undefined;
   futures: Record<Action['stepRunId'], HatchetPromise<any>> = {};
   contexts: Record<Action['stepRunId'], Context<any, any>> = {};
@@ -177,6 +178,7 @@ export class Worker {
         concurrency,
         scheduleTimeout: workflow.scheduleTimeout,
         onFailureJob,
+        sticky: workflow.sticky,
         jobs: [
           {
             name: workflow.id,
@@ -197,6 +199,7 @@ export class Worker {
       });
       this.registeredWorkflowPromises.push(registeredWorkflow);
       await registeredWorkflow;
+      this.workflow_registry.push(workflow);
     } catch (e: any) {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }

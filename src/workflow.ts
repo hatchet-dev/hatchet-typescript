@@ -1,7 +1,10 @@
 import * as z from 'zod';
 
 import { CreateStep, CreateStepSchema } from './step';
-import { ConcurrencyLimitStrategy as PbConcurrencyLimitStrategy } from './protoc/workflows';
+import {
+  ConcurrencyLimitStrategy as PbConcurrencyLimitStrategy,
+  StickyStrategy as PbStickyStrategy,
+} from './protoc/workflows';
 
 const CronConfigSchema = z.object({
   cron: z.string(),
@@ -29,10 +32,16 @@ export const WorkflowConcurrency = z.object({
 
 export const HatchetTimeoutSchema = z.string();
 
+export const StickyStrategy = PbStickyStrategy;
+
 export const CreateWorkflowSchema = z.object({
   id: z.string(),
   description: z.string(),
   version: z.string().optional(),
+  /**
+   * sticky will attempt to run all steps for workflow on the same worker
+   */
+  sticky: z.nativeEnum(StickyStrategy).optional(),
   scheduleTimeout: z.string().optional(),
   /**
    * @deprecated Workflow timeout is deprecated. Use step timeouts instead.

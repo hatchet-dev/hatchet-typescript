@@ -64,7 +64,10 @@ export class ConfigLoader {
       const addresses = getAddressesFromJWT(token!);
 
       grpcBroadcastAddress =
-        yaml?.host_port ?? this.env('HATCHET_CLIENT_HOST_PORT') ?? addresses.grpcBroadcastAddress;
+        override?.host_port ??
+        yaml?.host_port ??
+        this.env('HATCHET_CLIENT_HOST_PORT') ??
+        addresses.grpcBroadcastAddress;
 
       apiUrl =
         override?.api_url ??
@@ -72,7 +75,8 @@ export class ConfigLoader {
         this.env('HATCHET_CLIENT_API_URL') ??
         addresses.serverUrl;
     } catch (e) {
-      grpcBroadcastAddress = yaml?.host_port ?? this.env('HATCHET_CLIENT_HOST_PORT');
+      grpcBroadcastAddress =
+        override?.host_port ?? yaml?.host_port ?? this.env('HATCHET_CLIENT_HOST_PORT');
       apiUrl = override?.api_url ?? yaml?.api_url ?? this.env('HATCHET_CLIENT_API_URL');
     }
 

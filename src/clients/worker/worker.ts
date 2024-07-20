@@ -7,6 +7,7 @@ import {
   ActionType,
   GroupKeyActionEvent,
   GroupKeyActionEventType,
+  actionTypeFromJSON,
 } from '@hatchet/protoc/dispatcher';
 import HatchetPromise from '@util/hatchet-promise/hatchet-promise';
 import { Workflow } from '@hatchet/workflow';
@@ -17,7 +18,8 @@ import {
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
-// import sleep from '@hatchet/util/sleep';
+import { WebhookHandler } from '@clients/worker/handler';
+import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
 import { Context, StepRunFunction } from '../../step';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
@@ -54,6 +56,51 @@ export class Worker {
     this.handle_kill = options.handleKill === undefined ? true : options.handleKill;
 
     this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
+  }
+
+  private registerActions(workflow: Workflow) {
+    const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
+      acc[`${workflow.id}:${step.name}`] = step.run;
+      return acc;
+    }, {});
+
+    const onFailureAction = workflow.onFailure
+      ? {
+          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
+        }
+      : {};
+
+    this.action_registry = {
+      ...this.action_registry,
+      ...newActions,
+      ...onFailureAction,
+    };
+
+    this.action_registry = workflow.concurrency?.name
+      ? {
+          ...this.action_registry,
+          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
+        }
+      : {
+          ...this.action_registry,
+        };
+  }
+
+  getHandler(workflows: Workflow[]) {
+    for (const workflow of workflows) {
+      const wf: Workflow = {
+        ...workflow,
+        id: this.client.config.namespace + workflow.id,
+      };
+
+      this.registerActions(wf);
+    }
+
+    return new WebhookHandler(this, workflows);
+  }
+
+  async registerWebhook(webhook: WebhookWorkerCreateRequest) {
+    return this.client.admin.registerWebhook({ ...webhook });
   }
 
   /**
@@ -133,38 +180,14 @@ export class Worker {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }
 
-    const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
-      acc[`${workflow.id}:${step.name}`] = step.run;
-      return acc;
-    }, {});
-
-    const onFailureAction = workflow.onFailure
-      ? {
-          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
-        }
-      : {};
-
-    this.action_registry = {
-      ...this.action_registry,
-      ...newActions,
-      ...onFailureAction,
-    };
-
-    this.action_registry = workflow.concurrency?.name
-      ? {
-          ...this.action_registry,
-          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
-        }
-      : {
-          ...this.action_registry,
-        };
+    this.registerActions(workflow);
   }
 
   registerAction<T, K>(actionId: string, action: StepRunFunction<T, K>) {
     this.action_registry[actionId] = action;
   }
 
-  handleStartStepRun(action: Action) {
+  async handleStartStepRun(action: Action) {
     const { actionId } = action;
 
     try {
@@ -182,7 +205,7 @@ export class Worker {
         return step(context);
       };
 
-      const success = (result: any) => {
+      const success = async (result: any) => {
         this.logger.info(`Step run ${action.stepRunId} succeeded`);
 
         try {
@@ -192,29 +215,31 @@ export class Worker {
             StepActionEventType.STEP_EVENT_TYPE_COMPLETED,
             result || null
           );
-          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send completed action event: ${e.message}`);
-
-            // send a failure event
-            const failureEvent = this.getStepActionEvent(
-              action,
-              StepActionEventType.STEP_EVENT_TYPE_FAILED,
-              e.message
-            );
-
-            this.client.dispatcher.sendStepActionEvent(failureEvent).catch((err2) => {
-              this.logger.error(`Could not send failed action event: ${err2.message}`);
-            });
-          });
+          await this.client.dispatcher.sendStepActionEvent(event);
 
           // delete the run from the futures
           delete this.futures[action.stepRunId];
-        } catch (e: any) {
-          this.logger.error(`Could not send action event: ${e.message}`);
+        } catch (actionEventError: any) {
+          this.logger.error(`Could not send completed action event: ${actionEventError.message}`);
+
+          // send a failure event
+          const failureEvent = this.getStepActionEvent(
+            action,
+            StepActionEventType.STEP_EVENT_TYPE_FAILED,
+            actionEventError.message
+          );
+
+          try {
+            await this.client.dispatcher.sendStepActionEvent(failureEvent);
+          } catch (failureEventError: any) {
+            this.logger.error(`Could not send failed action event: ${failureEventError.message}`);
+          }
+
+          this.logger.error(`Could not send action event: ${actionEventError.message}`);
         }
       };
 
-      const failure = (error: any) => {
+      const failure = async (error: any) => {
         this.logger.error(`Step run ${action.stepRunId} failed: ${error.message}`);
 
         if (error.stack) {
@@ -231,9 +256,8 @@ export class Worker {
               stack: error?.stack,
             }
           );
-          this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
-            this.logger.error(`Could not send action event: ${e.message}`);
-          });
+          await this.client.dispatcher.sendStepActionEvent(event);
+
           // delete the run from the futures
           delete this.futures[action.stepRunId];
         } catch (e: any) {
@@ -241,7 +265,18 @@ export class Worker {
         }
       };
 
-      const future = new HatchetPromise(run().then(success).catch(failure));
+      const future = new HatchetPromise(
+        (async () => {
+          let result: any;
+          try {
+            result = await run();
+          } catch (e: any) {
+            await failure(e);
+            return;
+          }
+          await success(result);
+        })()
+      );
       this.futures[action.stepRunId] = future;
 
       // Send the action event to the dispatcher
@@ -249,18 +284,25 @@ export class Worker {
       this.client.dispatcher.sendStepActionEvent(event).catch((e) => {
         this.logger.error(`Could not send action event: ${e.message}`);
       });
+
+      await future.promise;
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }
   }
 
-  handleStartGroupKeyRun(action: Action) {
+  async handleStartGroupKeyRun(action: Action) {
     const { actionId } = action;
 
     try {
       const context = new Context(action, this.client);
 
       const key = action.getGroupKeyRunId;
+
+      if (!key) {
+        this.logger.error(`No group key run id provided for action ${actionId}`);
+        return;
+      }
 
       this.contexts[key] = context;
 
@@ -319,7 +361,7 @@ export class Worker {
       };
 
       const future = new HatchetPromise(run().then(success).catch(failure));
-      this.futures[action.getGroupKeyRunId] = future;
+      this.futures[key] = future;
 
       // Send the action event to the dispatcher
       const event = this.getGroupKeyActionEvent(
@@ -329,6 +371,8 @@ export class Worker {
       this.client.dispatcher.sendGroupKeyActionEvent(event).catch((e) => {
         this.logger.error(`Could not send action event: ${e.message}`);
       });
+
+      await future.promise;
     } catch (e: any) {
       this.logger.error(`Could not send action event: ${e.message}`);
     }
@@ -357,6 +401,9 @@ export class Worker {
     eventType: GroupKeyActionEventType,
     payload: any = ''
   ): GroupKeyActionEvent {
+    if (!action.getGroupKeyRunId) {
+      throw new HatchetError('No group key run id provided');
+    }
     return {
       workerId: this.name,
       workflowRunId: action.workflowRunId,
@@ -368,7 +415,7 @@ export class Worker {
     };
   }
 
-  handleCancelStepRun(action: Action) {
+  async handleCancelStepRun(action: Action) {
     try {
       this.logger.info(`Cancelling step run ${action.stepRunId}`);
 
@@ -386,6 +433,7 @@ export class Worker {
           this.logger.info(`Cancelled step run ${action.stepRunId}`);
         });
         future.cancel('Cancelled by worker');
+        await future.promise;
         delete this.futures[stepRunId];
       }
     } catch (e: any) {
@@ -442,17 +490,7 @@ export class Worker {
           `Worker ${this.name} received action ${action.actionId}:${action.actionType}`
         );
 
-        if (action.actionType === ActionType.START_STEP_RUN) {
-          this.handleStartStepRun(action);
-        } else if (action.actionType === ActionType.CANCEL_STEP_RUN) {
-          this.handleCancelStepRun(action);
-        } else if (action.actionType === ActionType.START_GET_GROUP_KEY) {
-          this.handleStartGroupKeyRun(action);
-        } else {
-          this.logger.error(
-            `Worker ${this.name} received unknown action type ${action.actionType}`
-          );
-        }
+        void this.handleAction(action);
       }
     } catch (e: any) {
       // TODO TEMP this needs to be handled better
@@ -462,6 +500,21 @@ export class Worker {
       }
       this.logger.error(`Could not run worker: ${e.message}`);
       throw new HatchetError(`Could not run worker: ${e.message}`);
+    }
+  }
+
+  async handleAction(action: Action) {
+    const type = action.actionType
+      ? actionTypeFromJSON(action.actionType)
+      : ActionType.START_STEP_RUN;
+    if (type === ActionType.START_STEP_RUN) {
+      await this.handleStartStepRun(action);
+    } else if (type === ActionType.CANCEL_STEP_RUN) {
+      await this.handleCancelStepRun(action);
+    } else if (type === ActionType.START_GET_GROUP_KEY) {
+      await this.handleStartGroupKeyRun(action);
+    } else {
+      this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
     }
   }
 }

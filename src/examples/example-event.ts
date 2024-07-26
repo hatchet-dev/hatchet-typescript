@@ -1,4 +1,4 @@
-import Hatchet from '../src/sdk';
+import Hatchet from '../sdk';
 
 const hatchet = Hatchet.init();
 

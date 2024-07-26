@@ -6,6 +6,7 @@ import {
   GroupKeyActionEvent,
   OverridesData,
   DeepPartial,
+  WorkerLabels as PbWorkerAffinityConfig,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -14,11 +15,14 @@ import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 import { ActionListener } from './action-listener';
 
+export type WorkerLabels = Record<string, string | number | undefined>;
+
 interface GetActionListenerOptions {
   workerName: string;
   services: string[];
   actions: string[];
   maxRuns?: number;
+  labels: Record<string, string | number | undefined>;
 }
 
 export class DispatcherClient {
@@ -36,6 +40,7 @@ export class DispatcherClient {
     // Register the worker
     const registration = await this.client.register({
       ...options,
+      labels: options.labels ? mapLabels(options.labels) : undefined,
     });
 
     return new ActionListener(this, registration.workerId);
@@ -73,4 +78,28 @@ export class DispatcherClient {
       throw new HatchetError(e.message);
     }
   }
+
+  async upsertWorkerLabels(workerId: string, labels: WorkerLabels) {
+    try {
+      return await this.client.upsertWorkerLabels({
+        workerId,
+        labels: mapLabels(labels),
+      });
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+}
+
+function mapLabels(in_: WorkerLabels): Record<string, PbWorkerAffinityConfig> {
+  return Object.entries(in_).reduce<Record<string, PbWorkerAffinityConfig>>(
+    (acc, [key, value]) => ({
+      ...acc,
+      [key]: {
+        strValue: typeof value === 'string' ? value : undefined,
+        intValue: typeof value === 'number' ? value : undefined,
+      } as PbWorkerAffinityConfig,
+    }),
+    {} as Record<string, PbWorkerAffinityConfig>
+  );
 }

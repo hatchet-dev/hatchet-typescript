@@ -151,6 +151,7 @@ export class AdminClient {
       childIndex?: number | undefined;
       childKey?: string | undefined;
       additionalMetadata?: Record<string, string> | undefined;
+      desiredWorkerId?: string | undefined;
     }
   ) {
     let computedName = workflowName;

@@ -12,7 +12,7 @@ import {
   createClientFactory,
 } from 'nice-grpc';
 import { Workflow } from '@hatchet/workflow';
-import { Worker } from '@clients/worker';
+import { Worker, WorkerOpts } from '@clients/worker';
 import Logger from '@hatchet/util/logger/logger';
 import { AxiosRequestConfig } from 'axios';
 import { ClientConfig, ClientConfigSchema } from './client-config';
@@ -148,12 +148,26 @@ export class HatchetClient {
     return worker;
   }
 
-  async worker(workflow: string | Workflow, maxRuns?: number): Promise<Worker> {
+  async worker(
+    workflow: string | Workflow,
+    opts?: Omit<WorkerOpts, 'name'> | number
+  ): Promise<Worker> {
     const name = typeof workflow === 'string' ? workflow : workflow.id;
-    const worker = new Worker(this, {
+
+    let options: WorkerOpts = {
       name,
-      maxRuns,
-    });
+    };
+
+    if (typeof opts === 'number') {
+      this.logger.warn(
+        '@deprecated maxRuns param is deprecated and will be removed in a future release in favor of WorkerOpts'
+      );
+      options = { ...options, maxRuns: opts };
+    } else {
+      options = { ...options, ...opts };
+    }
+
+    const worker = new Worker(this, options);
 
     if (typeof workflow !== 'string') {
       await worker.registerWorkflow(workflow);

@@ -1,6 +1,6 @@
-import { Workflow } from '../src';
-import sleep from '../src/util/sleep';
-import Hatchet from '../src/sdk';
+import { Workflow } from '..';
+import sleep from '../util/sleep';
+import Hatchet from '../sdk';
 
 xdescribe('fanout-e2e', () => {
   it('should pass a fanout workflow', async () => {

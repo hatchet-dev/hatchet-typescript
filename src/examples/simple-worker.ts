@@ -1,9 +1,7 @@
-import Hatchet from '../src/sdk';
-import { Workflow } from '../src/workflow';
+import Hatchet from '../sdk';
+import { Workflow } from '../workflow';
 
-const hatchet = Hatchet.init({
-  namespace: 'example-namespace',
-});
+const hatchet = Hatchet.init();
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -23,6 +21,7 @@ const workflow: Workflow = {
         console.log('starting step1 with the following input', ctx.workflowInput());
         console.log('waiting 5 seconds...');
         await sleep(5000);
+        ctx.putStream('step1 stream');
         console.log('executed step1!');
         return { step1: 'step1 results!' };
       },

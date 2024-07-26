@@ -15,22 +15,33 @@ import {
   ConcurrencyLimitStrategy,
   CreateWorkflowJobOpts,
   CreateWorkflowStepOpts,
+  DesiredWorkerLabels,
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
 import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
-import { Context, StepRunFunction } from '../../step';
+import { Context, CreateStep, StepRunFunction } from '../../step';
+import { WorkerLabels } from '../dispatcher/dispatcher-client';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
+
+export interface WorkerOpts {
+  name: string;
+  handleKill?: boolean;
+  maxRuns?: number;
+  labels?: WorkerLabels;
+}
 
 export class Worker {
   client: HatchetClient;
   name: string;
+  workerId: string | undefined;
   killing: boolean;
   handle_kill: boolean;
 
   action_registry: ActionRegistry;
+  workflow_registry: Workflow[] = [];
   listener: ActionListener | undefined;
   futures: Record<Action['stepRunId'], HatchetPromise<any>> = {};
   contexts: Record<Action['stepRunId'], Context<any, any>> = {};
@@ -40,14 +51,23 @@ export class Worker {
 
   registeredWorkflowPromises: Array<Promise<any>> = [];
 
+  labels: WorkerLabels = {};
+
   constructor(
     client: HatchetClient,
-    options: { name: string; handleKill?: boolean; maxRuns?: number }
+    options: {
+      name: string;
+      handleKill?: boolean;
+      maxRuns?: number;
+      labels?: WorkerLabels;
+    }
   ) {
     this.client = client;
     this.name = this.client.config.namespace + options.name;
     this.action_registry = {};
     this.maxRuns = options.maxRuns;
+
+    this.labels = options.labels || {};
 
     process.on('SIGTERM', () => this.exitGracefully(true));
     process.on('SIGINT', () => this.exitGracefully(true));
@@ -139,6 +159,7 @@ export class Worker {
                 userData: '{}',
                 retries: workflow.onFailure.retries || 0,
                 rateLimits: workflow.onFailure.rate_limits ?? [],
+                workerLabels: {}, // TODO add worker labels
               },
             ],
           }
@@ -157,6 +178,7 @@ export class Worker {
         concurrency,
         scheduleTimeout: workflow.scheduleTimeout,
         onFailureJob,
+        sticky: workflow.sticky,
         jobs: [
           {
             name: workflow.id,
@@ -170,12 +192,14 @@ export class Worker {
               userData: '{}',
               retries: step.retries || 0,
               rateLimits: step.rate_limits ?? [], // Add the missing rateLimits property
+              workerLabels: toPbWorkerLabel(step.worker_labels), // TODO add worker labels
             })),
           },
         ],
       });
       this.registeredWorkflowPromises.push(registeredWorkflow);
       await registeredWorkflow;
+      this.workflow_registry.push(workflow);
     } catch (e: any) {
       throw new HatchetError(`Could not register workflow: ${e.message}`);
     }
@@ -191,7 +215,7 @@ export class Worker {
     const { actionId } = action;
 
     try {
-      const context = new Context(action, this.client);
+      const context = new Context(action, this.client, this);
       this.contexts[action.stepRunId] = context;
 
       const step = this.action_registry[actionId];
@@ -295,7 +319,7 @@ export class Worker {
     const { actionId } = action;
 
     try {
-      const context = new Context(action, this.client);
+      const context = new Context(action, this.client, this);
 
       const key = action.getGroupKeyRunId;
 
@@ -479,7 +503,10 @@ export class Worker {
         services: ['default'],
         actions: Object.keys(this.action_registry),
         maxRuns: this.maxRuns,
+        labels: this.labels,
       });
+
+      this.workerId = this.listener.workerId;
 
       const generator = this.listener.actions();
 
@@ -517,4 +544,71 @@ export class Worker {
       this.logger.error(`Worker ${this.name} received unknown action type ${type}`);
     }
   }
+
+  async upsertLabels(labels: WorkerLabels) {
+    this.labels = labels;
+
+    if (!this.workerId) {
+      this.logger.warn('Worker not registered.');
+      return this.labels;
+    }
+
+    this.client.dispatcher.upsertWorkerLabels(this.workerId, labels);
+
+    return this.labels;
+  }
+}
+
+function toPbWorkerLabel(
+  in_: CreateStep<unknown, unknown>['worker_labels']
+): Record<string, DesiredWorkerLabels> {
+  if (!in_) {
+    return {};
+  }
+
+  return Object.entries(in_).reduce<Record<string, DesiredWorkerLabels>>(
+    (acc, [key, value]) => {
+      if (!value) {
+        return {
+          ...acc,
+          [key]: {
+            strValue: undefined,
+            intValue: undefined,
+          },
+        };
+      }
+
+      if (typeof value === 'string') {
+        return {
+          ...acc,
+          [key]: {
+            strValue: value,
+            intValue: undefined,
+          },
+        };
+      }
+
+      if (typeof value === 'number') {
+        return {
+          ...acc,
+          [key]: {
+            strValue: undefined,
+            intValue: value,
+          },
+        };
+      }
+
+      return {
+        ...acc,
+        [key]: {
+          strValue: typeof value.value === 'string' ? value.value : undefined,
+          intValue: typeof value.value === 'number' ? value.value : undefined,
+          required: value.required,
+          weight: value.weight,
+          comparator: value.comparator,
+        },
+      };
+    },
+    {} as Record<string, DesiredWorkerLabels>
+  );
 }

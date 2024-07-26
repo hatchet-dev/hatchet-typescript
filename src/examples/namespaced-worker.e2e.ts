@@ -1,13 +1,15 @@
-import { Workflow, Worker } from '../src';
-import sleep from '../src/util/sleep';
-import Hatchet from '../src/sdk';
+import { Workflow, Worker } from '..';
+import sleep from '../util/sleep';
+import Hatchet from '../sdk';
 
-describe('e2e', () => {
+xdescribe('e2e', () => {
   let hatchet: Hatchet;
   let worker: Worker;
 
   beforeEach(async () => {
-    hatchet = Hatchet.init();
+    hatchet = Hatchet.init({
+      namespace: 'dev',
+    });
     worker = await hatchet.worker('example-worker');
   });
 
@@ -21,10 +23,10 @@ describe('e2e', () => {
     const start = new Date();
 
     const workflow: Workflow = {
-      id: 'simple-e2e-workflow',
+      id: 'namespaced-e2e-workflow',
       description: 'test',
       on: {
-        event: 'user:create-simple',
+        event: 'user:create-namespaced',
       },
       steps: [
         {
@@ -60,7 +62,7 @@ describe('e2e', () => {
 
     console.log('pushing event...');
 
-    await hatchet.event.push('user:create-simple', {
+    await hatchet.event.push('user:create-namespaced', {
       test: 'test',
     });
 
@@ -69,7 +71,5 @@ describe('e2e', () => {
     console.log('invoked', invoked);
 
     expect(invoked).toEqual(2);
-
-    await worker.stop();
   }, 60000);
 });

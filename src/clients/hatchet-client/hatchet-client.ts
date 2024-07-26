@@ -150,7 +150,6 @@ export class HatchetClient {
 
   async worker(
     workflow: string | Workflow,
-    // @deprecated maxRuns is deprecated and will be removed in a future release in favor of WorkerOpts
     opts?: Omit<WorkerOpts, 'name'> | number
   ): Promise<Worker> {
     const name = typeof workflow === 'string' ? workflow : workflow.id;
@@ -160,6 +159,9 @@ export class HatchetClient {
     };
 
     if (typeof opts === 'number') {
+      this.logger.warn(
+        '@deprecated maxRuns param is deprecated and will be removed in a future release in favor of WorkerOpts'
+      );
       options = { ...options, maxRuns: opts };
     } else {
       options = { ...options, ...opts };

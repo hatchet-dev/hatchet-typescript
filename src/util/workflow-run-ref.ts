@@ -1,6 +1,7 @@
+/* eslint-disable max-classes-per-file */
 import { ListenerClient, StepRunEvent } from '@hatchet/clients/listener/listener-client';
-import { WorkflowRunEventType } from '../protoc/dispatcher';
 import { Status } from 'nice-grpc';
+import { WorkflowRunEventType } from '../protoc/dispatcher';
 
 type EventualWorkflowRunId =
   | string
@@ -30,7 +31,7 @@ async function getWorkflowRunId(workflowRunId: EventualWorkflowRunId): Promise<s
 
       return resolved.workflowRunId;
     } catch (e: any) {
-      if (e.code && e.code == Status.ALREADY_EXISTS) {
+      if (e.code && e.code === Status.ALREADY_EXISTS) {
         throw new DedupeViolationErr(e.details);
       }
 

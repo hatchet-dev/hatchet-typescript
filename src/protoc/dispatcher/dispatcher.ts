@@ -342,6 +342,14 @@ export interface AssignedAction {
   stepName: string;
   /** the count number of the retry attempt */
   retryCount: number;
+  /** (optional) additional metadata set on the workflow */
+  additionalMetadata?: string | undefined;
+  /** (optional) the child workflow index (if this is a child workflow) */
+  childWorkflowIndex?: number | undefined;
+  /** (optional) the child workflow key (if this is a child workflow) */
+  childWorkflowKey?: string | undefined;
+  /** (optional) the parent workflow run id (if this is a child workflow) */
+  parentWorkflowRunId?: string | undefined;
 }
 
 export interface WorkerListenRequest {
@@ -1162,6 +1170,10 @@ function createBaseAssignedAction(): AssignedAction {
     actionPayload: '',
     stepName: '',
     retryCount: 0,
+    additionalMetadata: undefined,
+    childWorkflowIndex: undefined,
+    childWorkflowKey: undefined,
+    parentWorkflowRunId: undefined,
   };
 }
 
@@ -1205,6 +1217,18 @@ export const AssignedAction = {
     }
     if (message.retryCount !== 0) {
       writer.uint32(104).int32(message.retryCount);
+    }
+    if (message.additionalMetadata !== undefined) {
+      writer.uint32(114).string(message.additionalMetadata);
+    }
+    if (message.childWorkflowIndex !== undefined) {
+      writer.uint32(120).int32(message.childWorkflowIndex);
+    }
+    if (message.childWorkflowKey !== undefined) {
+      writer.uint32(130).string(message.childWorkflowKey);
+    }
+    if (message.parentWorkflowRunId !== undefined) {
+      writer.uint32(138).string(message.parentWorkflowRunId);
     }
     return writer;
   },
@@ -1307,6 +1331,34 @@ export const AssignedAction = {
 
           message.retryCount = reader.int32();
           continue;
+        case 14:
+          if (tag !== 114) {
+            break;
+          }
+
+          message.additionalMetadata = reader.string();
+          continue;
+        case 15:
+          if (tag !== 120) {
+            break;
+          }
+
+          message.childWorkflowIndex = reader.int32();
+          continue;
+        case 16:
+          if (tag !== 130) {
+            break;
+          }
+
+          message.childWorkflowKey = reader.string();
+          continue;
+        case 17:
+          if (tag !== 138) {
+            break;
+          }
+
+          message.parentWorkflowRunId = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1333,6 +1385,18 @@ export const AssignedAction = {
       actionPayload: isSet(object.actionPayload) ? globalThis.String(object.actionPayload) : '',
       stepName: isSet(object.stepName) ? globalThis.String(object.stepName) : '',
       retryCount: isSet(object.retryCount) ? globalThis.Number(object.retryCount) : 0,
+      additionalMetadata: isSet(object.additionalMetadata)
+        ? globalThis.String(object.additionalMetadata)
+        : undefined,
+      childWorkflowIndex: isSet(object.childWorkflowIndex)
+        ? globalThis.Number(object.childWorkflowIndex)
+        : undefined,
+      childWorkflowKey: isSet(object.childWorkflowKey)
+        ? globalThis.String(object.childWorkflowKey)
+        : undefined,
+      parentWorkflowRunId: isSet(object.parentWorkflowRunId)
+        ? globalThis.String(object.parentWorkflowRunId)
+        : undefined,
     };
   },
 
@@ -1377,6 +1441,18 @@ export const AssignedAction = {
     if (message.retryCount !== 0) {
       obj.retryCount = Math.round(message.retryCount);
     }
+    if (message.additionalMetadata !== undefined) {
+      obj.additionalMetadata = message.additionalMetadata;
+    }
+    if (message.childWorkflowIndex !== undefined) {
+      obj.childWorkflowIndex = Math.round(message.childWorkflowIndex);
+    }
+    if (message.childWorkflowKey !== undefined) {
+      obj.childWorkflowKey = message.childWorkflowKey;
+    }
+    if (message.parentWorkflowRunId !== undefined) {
+      obj.parentWorkflowRunId = message.parentWorkflowRunId;
+    }
     return obj;
   },
 
@@ -1398,6 +1474,10 @@ export const AssignedAction = {
     message.actionPayload = object.actionPayload ?? '';
     message.stepName = object.stepName ?? '';
     message.retryCount = object.retryCount ?? 0;
+    message.additionalMetadata = object.additionalMetadata ?? undefined;
+    message.childWorkflowIndex = object.childWorkflowIndex ?? undefined;
+    message.childWorkflowKey = object.childWorkflowKey ?? undefined;
+    message.parentWorkflowRunId = object.parentWorkflowRunId ?? undefined;
     return message;
   },
 };

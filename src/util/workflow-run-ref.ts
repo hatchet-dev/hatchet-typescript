@@ -1,4 +1,6 @@
+/* eslint-disable max-classes-per-file */
 import { ListenerClient, StepRunEvent } from '@hatchet/clients/listener/listener-client';
+import { Status } from 'nice-grpc';
 import { WorkflowRunEventType } from '../protoc/dispatcher';
 
 type EventualWorkflowRunId =
@@ -8,18 +10,33 @@ type EventualWorkflowRunId =
       workflowRunId: string;
     }>;
 
+export class DedupeViolationErr extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DedupeViolationErr';
+  }
+}
+
 async function getWorkflowRunId(workflowRunId: EventualWorkflowRunId): Promise<string> {
   if (typeof workflowRunId === 'string') {
     return workflowRunId;
   }
 
   if (workflowRunId instanceof Promise) {
-    const resolved = await workflowRunId;
-    if (typeof resolved === 'string') {
-      return resolved;
-    }
+    try {
+      const resolved = await workflowRunId;
+      if (typeof resolved === 'string') {
+        return resolved;
+      }
 
-    return resolved.workflowRunId;
+      return resolved.workflowRunId;
+    } catch (e: any) {
+      if (e.code && e.code === Status.ALREADY_EXISTS) {
+        throw new DedupeViolationErr(e.details);
+      }
+
+      throw new Error('Invalid workflowRunId');
+    }
   }
 
   throw new Error('Invalid workflowRunId');

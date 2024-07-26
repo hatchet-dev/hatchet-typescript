@@ -159,7 +159,7 @@ export class Worker {
                 userData: '{}',
                 retries: workflow.onFailure.retries || 0,
                 rateLimits: workflow.onFailure.rate_limits ?? [],
-                workerLabels: {}, // TODO add worker labels
+                workerLabels: {}, // no worker labels for on failure steps
               },
             ],
           }
@@ -192,7 +192,7 @@ export class Worker {
               userData: '{}',
               retries: step.retries || 0,
               rateLimits: step.rate_limits ?? [], // Add the missing rateLimits property
-              workerLabels: toPbWorkerLabel(step.worker_labels), // TODO add worker labels
+              workerLabels: toPbWorkerLabel(step.worker_labels),
             })),
           },
         ],

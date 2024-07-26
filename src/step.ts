@@ -286,6 +286,28 @@ export class Context<T, K = {}> {
       throw new HatchetError(e.message);
     }
   }
+
+  additionalMetadata(): Record<string, string> {
+    if (!this.action.additionalMetadata) {
+      return {};
+    }
+
+    // parse the additional metadata
+    const res: Record<string, string> = parseJSON(this.action.additionalMetadata);
+    return res;
+  }
+
+  childIndex(): number | undefined {
+    return this.action.childWorkflowIndex;
+  }
+
+  childKey(): string | undefined {
+    return this.action.childWorkflowKey;
+  }
+
+  parentWorkflowRunId(): string | undefined {
+    return this.action.parentWorkflowRunId;
+  }
 }
 
 export type StepRunFunction<T, K> = (

@@ -29,6 +29,8 @@ const parentWorkflow: Workflow = {
       name: 'parent-spawn',
       timeout: '10s',
       run: async (ctx) => {
+        ctx.putStream('spawning children');
+
         const promises = Array.from({ length: 7 }, (_, i) =>
           ctx.spawnWorkflow<Input, Output>('child-workflow', { input: `child-input-${i}` }).result()
         );
@@ -53,7 +55,8 @@ const childWorkflow: Workflow = {
       name: 'child-work',
       run: async (ctx) => {
         const { input } = ctx.workflowInput();
-        await sleep(100);
+        ctx.putStream('child running...');
+        await sleep(10);
         // throw new Error('child error');
         console.log('child workflow input:', input);
         return { 'child-output': 'results' };

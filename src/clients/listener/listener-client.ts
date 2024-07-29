@@ -7,6 +7,7 @@ import {
   ResourceEventType,
   ResourceType,
   DispatcherClient,
+  WorkflowEvent,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
@@ -89,9 +90,20 @@ export class RunEventListener {
 
   pollInterval: any;
 
-  constructor(workflowRunid: string, client: DispatcherClient) {
+  constructor(client: DispatcherClient) {
     this.client = client;
-    this.listen(workflowRunid);
+  }
+
+  static forRunId(workflowRunId: string, client: DispatcherClient): RunEventListener {
+    const listener = new RunEventListener(client);
+    listener.listenForRunId(workflowRunId);
+    return listener;
+  }
+
+  static forAdditionalMeta(key: string, value: string, client: DispatcherClient): RunEventListener {
+    const listener = new RunEventListener(client);
+    listener.listenForAdditionalMeta(key, value);
+    return listener;
   }
 
   emit(event: StepRunEvent) {
@@ -99,10 +111,27 @@ export class RunEventListener {
     this.eventEmitter.emit('event');
   }
 
-  async listen(workflowRunId: string) {
-    let listener = this.client.subscribeToWorkflowEvents({
-      workflowRunId,
-    });
+  async listenForRunId(workflowRunId: string) {
+    const listenerFactory = () =>
+      this.client.subscribeToWorkflowEvents({
+        workflowRunId,
+      });
+
+    return this.listenLoop(listenerFactory);
+  }
+
+  async listenForAdditionalMeta(key: string, value: string) {
+    const listenerFactory = () =>
+      this.client.subscribeToWorkflowEvents({
+        additionalMetaKey: key,
+        additionalMetaValue: value,
+      });
+
+    return this.listenLoop(listenerFactory);
+  }
+
+  async listenLoop(listenerFactory: () => AsyncIterable<WorkflowEvent>) {
+    let listener = listenerFactory();
 
     try {
       for await (const workflowEvent of listener) {
@@ -119,23 +148,18 @@ export class RunEventListener {
         return;
       }
       if (e.code === Status.UNAVAILABLE) {
-        listener = await this.retrySubscribe(workflowRunId);
+        listener = await this.retrySubscribe(listenerFactory);
       }
     }
   }
 
-  async retrySubscribe(workflowRunId: string) {
+  async retrySubscribe(listenerFactory: () => AsyncIterable<WorkflowEvent>) {
     let retries = 0;
 
     while (retries < DEFAULT_EVENT_LISTENER_RETRY_COUNT) {
       try {
         await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL);
-
-        const listener = this.client.subscribeToWorkflowEvents({
-          workflowRunId,
-        });
-
-        return listener;
+        return listenerFactory();
       } catch (e: any) {
         retries += 1;
       }
@@ -186,8 +210,19 @@ export class ListenerClient {
   }
 
   async stream(workflowRunId: string): Promise<AsyncGenerator<StepRunEvent, void, unknown>> {
-    const listener = new RunEventListener(workflowRunId, this.client);
+    const listener = RunEventListener.forRunId(workflowRunId, this.client);
+    return listener.stream();
+  }
 
+  async streamByRunId(workflowRunId: string): Promise<AsyncGenerator<StepRunEvent, void, unknown>> {
+    return this.stream(workflowRunId);
+  }
+
+  async streamByAdditionalMeta(
+    key: string,
+    value: string
+  ): Promise<AsyncGenerator<StepRunEvent, void, unknown>> {
+    const listener = RunEventListener.forAdditionalMeta(key, value, this.client);
     return listener.stream();
   }
 }

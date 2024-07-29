@@ -413,7 +413,11 @@ export interface ActionEventResponse {
 
 export interface SubscribeToWorkflowEventsRequest {
   /** the id of the workflow run */
-  workflowRunId: string;
+  workflowRunId?: string | undefined;
+  /** the key of the additional meta field to subscribe to */
+  additionalMetaKey?: string | undefined;
+  /** the value of the additional meta field to subscribe to */
+  additionalMetaValue?: string | undefined;
 }
 
 export interface SubscribeToWorkflowRunsRequest {
@@ -2097,7 +2101,7 @@ export const ActionEventResponse = {
 };
 
 function createBaseSubscribeToWorkflowEventsRequest(): SubscribeToWorkflowEventsRequest {
-  return { workflowRunId: '' };
+  return { workflowRunId: undefined, additionalMetaKey: undefined, additionalMetaValue: undefined };
 }
 
 export const SubscribeToWorkflowEventsRequest = {
@@ -2105,8 +2109,14 @@ export const SubscribeToWorkflowEventsRequest = {
     message: SubscribeToWorkflowEventsRequest,
     writer: _m0.Writer = _m0.Writer.create()
   ): _m0.Writer {
-    if (message.workflowRunId !== '') {
+    if (message.workflowRunId !== undefined) {
       writer.uint32(10).string(message.workflowRunId);
+    }
+    if (message.additionalMetaKey !== undefined) {
+      writer.uint32(18).string(message.additionalMetaKey);
+    }
+    if (message.additionalMetaValue !== undefined) {
+      writer.uint32(26).string(message.additionalMetaValue);
     }
     return writer;
   },
@@ -2125,6 +2135,20 @@ export const SubscribeToWorkflowEventsRequest = {
 
           message.workflowRunId = reader.string();
           continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.additionalMetaKey = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.additionalMetaValue = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2136,14 +2160,28 @@ export const SubscribeToWorkflowEventsRequest = {
 
   fromJSON(object: any): SubscribeToWorkflowEventsRequest {
     return {
-      workflowRunId: isSet(object.workflowRunId) ? globalThis.String(object.workflowRunId) : '',
+      workflowRunId: isSet(object.workflowRunId)
+        ? globalThis.String(object.workflowRunId)
+        : undefined,
+      additionalMetaKey: isSet(object.additionalMetaKey)
+        ? globalThis.String(object.additionalMetaKey)
+        : undefined,
+      additionalMetaValue: isSet(object.additionalMetaValue)
+        ? globalThis.String(object.additionalMetaValue)
+        : undefined,
     };
   },
 
   toJSON(message: SubscribeToWorkflowEventsRequest): unknown {
     const obj: any = {};
-    if (message.workflowRunId !== '') {
+    if (message.workflowRunId !== undefined) {
       obj.workflowRunId = message.workflowRunId;
+    }
+    if (message.additionalMetaKey !== undefined) {
+      obj.additionalMetaKey = message.additionalMetaKey;
+    }
+    if (message.additionalMetaValue !== undefined) {
+      obj.additionalMetaValue = message.additionalMetaValue;
     }
     return obj;
   },
@@ -2155,7 +2193,9 @@ export const SubscribeToWorkflowEventsRequest = {
     object: DeepPartial<SubscribeToWorkflowEventsRequest>
   ): SubscribeToWorkflowEventsRequest {
     const message = createBaseSubscribeToWorkflowEventsRequest();
-    message.workflowRunId = object.workflowRunId ?? '';
+    message.workflowRunId = object.workflowRunId ?? undefined;
+    message.additionalMetaKey = object.additionalMetaKey ?? undefined;
+    message.additionalMetaValue = object.additionalMetaValue ?? undefined;
     return message;
   },
 };

@@ -38,6 +38,45 @@ export function stickyStrategyToJSON(object: StickyStrategy): string {
   }
 }
 
+export enum WorkflowKind {
+  FUNCTION = 0,
+  DURABLE = 1,
+  DAG = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function workflowKindFromJSON(object: any): WorkflowKind {
+  switch (object) {
+    case 0:
+    case 'FUNCTION':
+      return WorkflowKind.FUNCTION;
+    case 1:
+    case 'DURABLE':
+      return WorkflowKind.DURABLE;
+    case 2:
+    case 'DAG':
+      return WorkflowKind.DAG;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return WorkflowKind.UNRECOGNIZED;
+  }
+}
+
+export function workflowKindToJSON(object: WorkflowKind): string {
+  switch (object) {
+    case WorkflowKind.FUNCTION:
+      return 'FUNCTION';
+    case WorkflowKind.DURABLE:
+      return 'DURABLE';
+    case WorkflowKind.DAG:
+      return 'DAG';
+    case WorkflowKind.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
 export enum ConcurrencyLimitStrategy {
   CANCEL_IN_PROGRESS = 0,
   DROP_NEWEST = 1,
@@ -233,6 +272,8 @@ export interface CreateWorkflowVersionOpts {
   onFailureJob?: CreateWorkflowJobOpts | undefined;
   /** (optional) the sticky strategy for assigning steps to workers */
   sticky?: StickyStrategy | undefined;
+  /** (optional) the kind of workflow */
+  kind?: WorkflowKind | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -477,6 +518,7 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     cronInput: undefined,
     onFailureJob: undefined,
     sticky: undefined,
+    kind: undefined,
   };
 }
 
@@ -517,6 +559,9 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.sticky !== undefined) {
       writer.uint32(96).int32(message.sticky);
+    }
+    if (message.kind !== undefined) {
+      writer.uint32(104).int32(message.kind);
     }
     return writer;
   },
@@ -612,6 +657,13 @@ export const CreateWorkflowVersionOpts = {
 
           message.sticky = reader.int32() as any;
           continue;
+        case 13:
+          if (tag !== 104) {
+            break;
+          }
+
+          message.kind = reader.int32() as any;
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -649,6 +701,7 @@ export const CreateWorkflowVersionOpts = {
         ? CreateWorkflowJobOpts.fromJSON(object.onFailureJob)
         : undefined,
       sticky: isSet(object.sticky) ? stickyStrategyFromJSON(object.sticky) : undefined,
+      kind: isSet(object.kind) ? workflowKindFromJSON(object.kind) : undefined,
     };
   },
 
@@ -690,6 +743,9 @@ export const CreateWorkflowVersionOpts = {
     if (message.sticky !== undefined) {
       obj.sticky = stickyStrategyToJSON(message.sticky);
     }
+    if (message.kind !== undefined) {
+      obj.kind = workflowKindToJSON(message.kind);
+    }
     return obj;
   },
 
@@ -716,6 +772,7 @@ export const CreateWorkflowVersionOpts = {
         ? CreateWorkflowJobOpts.fromPartial(object.onFailureJob)
         : undefined;
     message.sticky = object.sticky ?? undefined;
+    message.kind = object.kind ?? undefined;
     return message;
   },
 };

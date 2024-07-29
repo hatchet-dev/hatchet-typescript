@@ -25,6 +25,7 @@ const opts: CreateWorkflowVersionOpts = {
           timeout: '60s',
           inputs: '{}',
           parents: [],
+          workerLabels: {},
           userData: `{
             "example": "value"
           }`,

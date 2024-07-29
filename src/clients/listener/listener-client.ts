@@ -122,9 +122,9 @@ export class RunEventListener {
 
   async listenForAdditionalMeta(key: string, value: string) {
     const listenerFactory = () =>
-      this.client.subscribeToWorkflowEventsByAdditionalMeta({
-        key,
-        value,
+      this.client.subscribeToWorkflowEvents({
+        additionalMetaKey: key,
+        additionalMetaValue: value,
       });
 
     return this.listenLoop(listenerFactory);

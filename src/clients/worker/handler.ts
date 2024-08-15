@@ -85,10 +85,6 @@ export class WebhookHandler {
    * This method is an asynchronous function that returns an Express middleware handler.
    * The handler function is responsible for handling incoming requests and invoking the
    * corresponding logic based on the provided secret.
-   *
-   * @param {string} secret - The secret key used to authenticate and authorize the incoming requests.
-   *
-   * @return {Function} - An Express middleware handler function that receives the request and response objects.
    */
   expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
@@ -130,10 +126,6 @@ export class WebhookHandler {
 
   /**
    * A method that returns an HTTP request handler.
-   *
-   * @param {string} secret - The secret key used for verification.
-   *
-   * @returns {function} - An HTTP request handler function.
    */
   httpHandler({ secret }: HandlerOpts) {
     return (req: IncomingMessage, res: ServerResponse) => {
@@ -181,11 +173,29 @@ export class WebhookHandler {
   }
 
   /**
+   * A method that returns a Next.js pages router request handler.
+   */
+  nextJSPagesHandler({ secret }: HandlerOpts) {
+    return async (req: any, res: any) => {
+      if (req.method === 'GET') {
+        return res.status(200).send(okMessage);
+      }
+      const sig = req.headers['x-hatchet-signature'];
+      const body = JSON.stringify(req.body);
+      if (req.method === 'PUT') {
+        const resp = await this.getHealthcheckResponse(body, sig, secret);
+        return res.status(200).send(JSON.stringify(resp));
+      }
+      if (req.method !== 'POST') {
+        return res.status(405).send('Method not allowed');
+      }
+      await this.handle(body, sig, secret);
+      return res.status(200).send('ok');
+    };
+  }
+
+  /**
    * A method that returns a Next.js request handler.
-   *
-   * @param {any} req - The request object received from Next.js.
-   * @param {string} secret - The secret key used to verify the request.
-   * @return {Promise<Response>} - A Promise that resolves with a Response object.
    */
   nextJSHandler({ secret }: HandlerOpts) {
     const ok = async () => {

@@ -30,22 +30,29 @@ describe('e2e', () => {
 
     console.log('running runs...');
 
-    const run0 = await hatchet.admin.runWorkflow<any, {step1: TimedResponse}>('priority-2-workflow', {});
-    const run1 = await hatchet.admin.runWorkflow<any, {step1: TimedResponse}>('priority-2-workflow', {});
-    const run2 = await hatchet.admin.runWorkflow<any, {step1: TimedResponse}>('priority-1-workflow', {});
-    const run3 = await hatchet.admin.runWorkflow<any, {step1: TimedResponse}>('priority-2-workflow', {});
+    const run0 = await hatchet.admin.runWorkflow<any, { step1: TimedResponse }>(
+      'priority-2-workflow',
+      {}
+    );
+    const run1 = await hatchet.admin.runWorkflow<any, { step1: TimedResponse }>(
+      'priority-2-workflow',
+      {}
+    );
+    const run2 = await hatchet.admin.runWorkflow<any, { step1: TimedResponse }>(
+      'priority-1-workflow',
+      {}
+    );
+    const run3 = await hatchet.admin.runWorkflow<any, { step1: TimedResponse }>(
+      'priority-2-workflow',
+      {}
+    );
 
-    const results = await Promise.all([
-      run0.result(),
-      run1.result(),
-      run2.result(),
-      run3.result(),
-    ]);
+    const results = await Promise.all([run0.result(), run1.result(), run2.result(), run3.result()]);
 
     console.log('results', results);
 
     // Verify that run4 is the last run
-    const lastRunTime = Math.max(...results.map(r => r.step1.time));
+    const lastRunTime = Math.max(...results.map((r) => r.step1.time));
     expect(results[3].step1.time).toBe(lastRunTime);
 
     await worker.stop();

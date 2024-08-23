@@ -38,6 +38,7 @@
     "example:rate": "npm run exec -- ./src/examples/rate-limit/events.ts",
     "worker:fanout": "npm run exec -- ./src/examples/fanout-worker.ts",
     "worker:simple": "npm run exec -- ./src/examples/simple-worker.ts",
+    "worker:priority": "npm run exec -- ./src/examples/priority-worker.ts",
     "worker:affinity": "npm run exec -- ./src/examples/affinity-workers.ts",
     "worker:sticky": "npm run exec -- ./src/examples/sticky-worker.ts",
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",
@@ -92,6 +93,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.0.0",
     "@types/qs": "^6.9.11",
     "abort-controller-x": "^0.4.3",
     "axios": "^1.6.7",

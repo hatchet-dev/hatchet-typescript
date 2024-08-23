@@ -50,6 +50,7 @@ export const CreateWorkflowSchema = z.object({
   on: OnConfigSchema,
   steps: StepsSchema,
   onFailure: CreateStepSchema?.optional(),
+  defaultPriority: z.number().min(1).max(3).optional(),
 });
 
 export interface Workflow extends z.infer<typeof CreateWorkflowSchema> {

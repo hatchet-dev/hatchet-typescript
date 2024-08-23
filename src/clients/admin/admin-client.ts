@@ -297,7 +297,13 @@ export class AdminClient {
    * @param input an object containing the input to the workflow
    */
   scheduleWorkflow(name: string, options?: { schedules?: Date[]; input?: object }) {
+    let computedName = name;
+
     try {
+      if (this.config.namespace && !name.startsWith(this.config.namespace)) {
+        computedName = this.config.namespace + name;
+      }
+
       let input: string | undefined;
 
       if (options?.input) {
@@ -305,7 +311,7 @@ export class AdminClient {
       }
 
       this.client.scheduleWorkflow({
-        name,
+        name: computedName,
         schedules: options?.schedules,
         input,
       });

@@ -179,6 +179,7 @@ export class Worker {
         scheduleTimeout: workflow.scheduleTimeout,
         onFailureJob,
         sticky: workflow.sticky,
+        defaultPriority: workflow.defaultPriority,
         jobs: [
           {
             name: workflow.id,

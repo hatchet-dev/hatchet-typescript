@@ -280,6 +280,8 @@ export interface CreateWorkflowVersionOpts {
   sticky?: StickyStrategy | undefined;
   /** (optional) the kind of workflow */
   kind?: WorkflowKind | undefined;
+  /** (optional) the priority of the workflow */
+  defaultPriority?: number | undefined;
 }
 
 export interface WorkflowConcurrencyOpts {
@@ -431,6 +433,8 @@ export interface TriggerWorkflowRequest {
    * requires the workflow definition to have a sticky strategy
    */
   desiredWorkerId?: string | undefined;
+  /** (optional) override for the priority of the workflow steps, will set all steps to this priority */
+  priority?: number | undefined;
 }
 
 export interface TriggerWorkflowResponse {
@@ -525,6 +529,7 @@ function createBaseCreateWorkflowVersionOpts(): CreateWorkflowVersionOpts {
     onFailureJob: undefined,
     sticky: undefined,
     kind: undefined,
+    defaultPriority: undefined,
   };
 }
 
@@ -571,6 +576,9 @@ export const CreateWorkflowVersionOpts = {
     }
     if (message.kind !== undefined) {
       writer.uint32(104).int32(message.kind);
+    }
+    if (message.defaultPriority !== undefined) {
+      writer.uint32(112).int32(message.defaultPriority);
     }
     return writer;
   },
@@ -673,6 +681,13 @@ export const CreateWorkflowVersionOpts = {
 
           message.kind = reader.int32() as any;
           continue;
+        case 14:
+          if (tag !== 112) {
+            break;
+          }
+
+          message.defaultPriority = reader.int32();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -711,6 +726,9 @@ export const CreateWorkflowVersionOpts = {
         : undefined,
       sticky: isSet(object.sticky) ? stickyStrategyFromJSON(object.sticky) : undefined,
       kind: isSet(object.kind) ? workflowKindFromJSON(object.kind) : undefined,
+      defaultPriority: isSet(object.defaultPriority)
+        ? globalThis.Number(object.defaultPriority)
+        : undefined,
     };
   },
 
@@ -755,6 +773,9 @@ export const CreateWorkflowVersionOpts = {
     if (message.kind !== undefined) {
       obj.kind = workflowKindToJSON(message.kind);
     }
+    if (message.defaultPriority !== undefined) {
+      obj.defaultPriority = Math.round(message.defaultPriority);
+    }
     return obj;
   },
 
@@ -782,6 +803,7 @@ export const CreateWorkflowVersionOpts = {
         : undefined;
     message.sticky = object.sticky ?? undefined;
     message.kind = object.kind ?? undefined;
+    message.defaultPriority = object.defaultPriority ?? undefined;
     return message;
   },
 };
@@ -1988,6 +2010,7 @@ function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
     childKey: undefined,
     additionalMetadata: undefined,
     desiredWorkerId: undefined,
+    priority: undefined,
   };
 }
 
@@ -2016,6 +2039,9 @@ export const TriggerWorkflowRequest = {
     }
     if (message.desiredWorkerId !== undefined) {
       writer.uint32(66).string(message.desiredWorkerId);
+    }
+    if (message.priority !== undefined) {
+      writer.uint32(72).int32(message.priority);
     }
     return writer;
   },
@@ -2083,6 +2109,13 @@ export const TriggerWorkflowRequest = {
 
           message.desiredWorkerId = reader.string();
           continue;
+        case 9:
+          if (tag !== 72) {
+            break;
+          }
+
+          message.priority = reader.int32();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -2108,6 +2141,7 @@ export const TriggerWorkflowRequest = {
       desiredWorkerId: isSet(object.desiredWorkerId)
         ? globalThis.String(object.desiredWorkerId)
         : undefined,
+      priority: isSet(object.priority) ? globalThis.Number(object.priority) : undefined,
     };
   },
 
@@ -2137,6 +2171,9 @@ export const TriggerWorkflowRequest = {
     if (message.desiredWorkerId !== undefined) {
       obj.desiredWorkerId = message.desiredWorkerId;
     }
+    if (message.priority !== undefined) {
+      obj.priority = Math.round(message.priority);
+    }
     return obj;
   },
 
@@ -2153,6 +2190,7 @@ export const TriggerWorkflowRequest = {
     message.childKey = object.childKey ?? undefined;
     message.additionalMetadata = object.additionalMetadata ?? undefined;
     message.desiredWorkerId = object.desiredWorkerId ?? undefined;
+    message.priority = object.priority ?? undefined;
     return message;
   },
 };

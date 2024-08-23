@@ -92,6 +92,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.0.0",
     "@types/qs": "^6.9.11",
     "abort-controller-x": "^0.4.3",
     "axios": "^1.6.7",

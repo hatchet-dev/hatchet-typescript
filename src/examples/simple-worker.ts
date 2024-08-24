@@ -9,6 +9,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+//START how-to-use-step-level-retries
 const workflow: Workflow = {
   id: 'simple-workflow',
   description: 'test',
@@ -37,6 +38,7 @@ const workflow: Workflow = {
     },
   ],
 };
+//END how-to-use-step-level-retries
 //START registering_workflows_starting_workers
 async function main() {
   const worker = await hatchet.worker('example-worker');

@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
 
@@ -36,11 +37,11 @@ const workflow: Workflow = {
     },
   ],
 };
-
+//START registering_workflows_starting_workers
 async function main() {
   const worker = await hatchet.worker('example-worker');
   await worker.registerWorkflow(workflow);
   worker.start();
 }
-
+//END registering_workflows_starting_workers
 main();

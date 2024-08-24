@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../../../sdk';
 import { ConcurrencyLimitStrategy, Workflow } from '../../../workflow';
 
@@ -46,7 +47,9 @@ const workflow: Workflow = {
 };
 
 async function main() {
+  //START setting-concurrency-on-workers
   const worker = await hatchet.worker('example-worker');
+  //END setting-concurrency-on-workers
   await worker.registerWorkflow(workflow);
   worker.start();
 }

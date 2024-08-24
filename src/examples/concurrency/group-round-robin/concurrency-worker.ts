@@ -9,6 +9,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+//START concurrency_group_red_robin
 const workflow: Workflow = {
   id: 'concurrency-example-rr',
   description: 'test',
@@ -45,6 +46,7 @@ const workflow: Workflow = {
     },
   ],
 };
+//END concurrency_group_red_robin
 
 async function main() {
   //START setting-concurrency-on-workers

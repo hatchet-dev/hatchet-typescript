@@ -1,7 +1,9 @@
+//Typescript
 import Hatchet from '../sdk';
 
 const hatchet = Hatchet.init();
 
+//START streaming-by-additional-metadata
 async function main() {
   // Generate a random stream key to use to track all
   // stream events for this workflow run.
@@ -26,5 +28,6 @@ async function main() {
     console.log('event received', event);
   }
 }
+//END streaming-by-additional-metadata
 
 main();

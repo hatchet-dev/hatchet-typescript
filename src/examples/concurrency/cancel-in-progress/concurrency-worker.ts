@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../../../sdk';
 import { Workflow } from '../../../workflow';
 
@@ -7,7 +8,7 @@ const sleep = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-
+//START concurrency_cancel_in_progress
 const workflow: Workflow = {
   id: 'concurrency-example',
   description: 'test',
@@ -50,6 +51,7 @@ const workflow: Workflow = {
     },
   ],
 };
+//END concurrency_cancel_in_progress
 
 async function main() {
   const worker = await hatchet.worker('example-worker');

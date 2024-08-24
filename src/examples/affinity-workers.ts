@@ -1,9 +1,10 @@
+//Typescript
 import { WorkerLabelComparator } from '@hatchet/protoc/workflows';
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
 
 const hatchet = Hatchet.init();
-
+//START specifying-step-desired-labels
 const workflow: Workflow = {
   id: 'affinity-workflow',
   description: 'test',
@@ -25,7 +26,8 @@ const workflow: Workflow = {
     },
   ],
 };
-
+//END specifying-step-desired-labels
+//START specifying-step-desired-labels
 const childWorkflow: Workflow = {
   id: 'child-affinity-workflow',
   description: 'test',
@@ -59,14 +61,16 @@ const childWorkflow: Workflow = {
     },
   ],
 };
-
+//END specifying-step-desired-labels
 async function main() {
+  //START specifying-worker-labels
   const worker1 = await hatchet.worker('affinity-worker-1', {
     labels: {
       model: 'abc',
       memory: 1024,
     },
   });
+  //END specifying-worker-labels
   await worker1.registerWorkflow(workflow);
   await worker1.registerWorkflow(childWorkflow);
   worker1.start();

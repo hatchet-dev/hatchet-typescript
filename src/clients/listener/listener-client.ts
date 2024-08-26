@@ -80,6 +80,8 @@ const workflowStatusMap: Record<WorkflowRunStatus, RunEventType | undefined> = {
 export interface StepRunEvent {
   type: RunEventType;
   payload: string;
+  resourceId: string;
+  workflowRunId: string;
 }
 
 export class RunEventListener {
@@ -140,6 +142,8 @@ export class RunEventListener {
           this.emit({
             type: eventType,
             payload: workflowEvent.eventPayload,
+            resourceId: workflowEvent.resourceId,
+            workflowRunId: workflowEvent.workflowRunId,
           });
         }
       }

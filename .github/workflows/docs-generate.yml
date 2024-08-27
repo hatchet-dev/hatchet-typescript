@@ -1,0 +1,53 @@
+name: Generate Typescript Docs on SDK Update
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Checkout Go Repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: hatchet-dev/hatchet
+          path: ./hatchet
+
+      - name: Generate Docs
+        run: |
+          npm install typedoc typedoc-plugin-markdown --save-dev --force
+          npx typedoc src/index.ts  
+
+          # Copy all contexts of hatchet-typescript/docs to hatchet/frontend/docs/gen/ts
+          mkdir -p ./hatchet/frontend/docs/gen/ts
+          cp -r ./docs/* ./hatchet/frontend/docs/gen/ts
+
+      - name: Commit and Push changes to Hatchet Repo
+        run: |
+          cd hatchet
+          git remote -v
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b feat/actions/generate-ts-docs
+          git add .
+          git commit -m "feat: generate Typescript Docs"
+          git push origin feat/actions/generate-ts-docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create Pull Request
+        run: |
+          cd hatchet
+          gh pr create -R hatchet-dev/hatchet -B main -H feat/actions/generate-ts-docs --title 'Generate Typescript Docs' --body 'This PR generates Typescript Docs for updated openapi spec.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

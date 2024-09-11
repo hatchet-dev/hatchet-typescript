@@ -80,7 +80,7 @@ export class AdminClient {
    */
   async putWorkflow(workflow: CreateWorkflowVersionOpts) {
     try {
-      await retrier(async () => this.client.putWorkflow({ opts: workflow }), this.logger);
+      return await retrier(async () => this.client.putWorkflow({ opts: workflow }), this.logger);
     } catch (e: any) {
       throw new HatchetError(e.message);
     }

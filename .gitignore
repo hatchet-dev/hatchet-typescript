@@ -12,3 +12,5 @@ openapi.yaml
 
 .gitmodules
 /hatchet
+
+.idea

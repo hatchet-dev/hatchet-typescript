@@ -55,7 +55,14 @@ describe('Worker', () => {
   describe('registerWorkflow', () => {
     it('should update the registry', async () => {
       const worker = new Worker(hatchet, { name: 'WORKER_NAME' });
-      const putWorkflowSpy = jest.spyOn(worker.client.admin, 'putWorkflow').mockResolvedValue();
+      const putWorkflowSpy = jest.spyOn(worker.client.admin, 'putWorkflow').mockResolvedValue({
+        id: 'workflow1',
+        version: 'v0.1.0',
+        order: 1,
+        workflowId: 'workflow1',
+        createdAt: undefined,
+        updatedAt: undefined,
+      });
 
       const workflow = {
         id: 'workflow1',
@@ -86,8 +93,6 @@ describe('Worker', () => {
   describe('handle_start_step_run', () => {
     it('should start a step run', async () => {
       const worker = new Worker(hatchet, { name: 'WORKER_NAME' });
-
-      const putWorkflowSpy = jest.spyOn(worker.client.admin, 'putWorkflow').mockResolvedValue();
 
       const getActionEventSpy = jest.spyOn(worker, 'getStepActionEvent');
 

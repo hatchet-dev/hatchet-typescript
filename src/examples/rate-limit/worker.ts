@@ -1,9 +1,10 @@
+//Typescript
 import { RateLimitDuration } from '../../protoc/workflows';
 import Hatchet from '../../sdk';
 import { Workflow } from '../../workflow';
 
 const hatchet = Hatchet.init();
-
+//START consuming-rate-limits
 const workflow: Workflow = {
   id: 'rate-limit-workflow',
   description: 'test',
@@ -21,9 +22,12 @@ const workflow: Workflow = {
     },
   ],
 };
+//END consuming-rate-limits
 
 async function main() {
+  //START declaring-global-limits
   await hatchet.admin.putRateLimit('test-limit', 1, RateLimitDuration.MINUTE);
+  //END declaring-global-limits
   const worker = await hatchet.worker('example-worker');
   await worker.registerWorkflow(workflow);
   worker.start();

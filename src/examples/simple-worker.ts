@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
 
@@ -8,6 +9,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+//START how-to-use-step-level-retries
 const workflow: Workflow = {
   id: 'simple-workflow',
   description: 'test',
@@ -36,11 +38,12 @@ const workflow: Workflow = {
     },
   ],
 };
-
+//END how-to-use-step-level-retries
+//START registering_workflows_starting_workers
 async function main() {
   const worker = await hatchet.worker('example-worker');
   await worker.registerWorkflow(workflow);
   worker.start();
 }
-
+//END registering_workflows_starting_workers
 main();

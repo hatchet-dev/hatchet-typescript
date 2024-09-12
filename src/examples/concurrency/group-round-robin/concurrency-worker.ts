@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../../../sdk';
 import { ConcurrencyLimitStrategy, Workflow } from '../../../workflow';
 
@@ -8,6 +9,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+//START concurrency_group_red_robin
 const workflow: Workflow = {
   id: 'concurrency-example-rr',
   description: 'test',
@@ -44,9 +46,12 @@ const workflow: Workflow = {
     },
   ],
 };
+//END concurrency_group_red_robin
 
 async function main() {
+  //START setting-concurrency-on-workers
   const worker = await hatchet.worker('example-worker');
+  //END setting-concurrency-on-workers
   await worker.registerWorkflow(workflow);
   worker.start();
 }

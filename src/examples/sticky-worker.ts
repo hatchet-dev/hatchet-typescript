@@ -1,8 +1,9 @@
+//Typescript
 import Hatchet from '../sdk';
 import { StickyStrategy, Workflow } from '../workflow';
 
 const hatchet = Hatchet.init();
-
+//START setting-sticky-assignment
 const workflow: Workflow = {
   id: 'sticky-workflow',
   description: 'test',
@@ -25,7 +26,9 @@ const workflow: Workflow = {
     },
   ],
 };
+//END setting-sticky-assignment
 
+//START sticky-child-workflows
 const childWorkflow: Workflow = {
   id: 'child-sticky-workflow',
   description: 'test',
@@ -50,6 +53,7 @@ const childWorkflow: Workflow = {
     },
   ],
 };
+//END sticky-child-workflows
 
 async function main() {
   const worker1 = await hatchet.worker('sticky-worker-1');

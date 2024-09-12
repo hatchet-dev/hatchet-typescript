@@ -1,3 +1,4 @@
+//Typescript
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
 
@@ -9,7 +10,7 @@ const sleep = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-
+//START defining-an-on-failure-step
 const workflow: Workflow = {
   id: 'on-failure-example',
   description: 'test',
@@ -34,6 +35,7 @@ const workflow: Workflow = {
     },
   },
 };
+//END defining-an-on-failure-step
 
 async function main() {
   const worker = await hatchet.worker('example-worker', 1);

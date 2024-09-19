@@ -28,6 +28,7 @@ export const WorkflowConcurrency = z.object({
   name: z.string(),
   maxRuns: z.number().optional(),
   limitStrategy: z.nativeEnum(ConcurrencyLimitStrategy).optional(),
+  expression: z.string().optional(),
 });
 
 export const HatchetTimeoutSchema = z.string();
@@ -54,7 +55,7 @@ export const CreateWorkflowSchema = z.object({
 
 export interface Workflow extends z.infer<typeof CreateWorkflowSchema> {
   concurrency?: z.infer<typeof WorkflowConcurrency> & {
-    key: (ctx: any) => string;
+    key?: (ctx: any) => string;
   };
   steps: CreateStep<any, any>[];
   onFailure?: CreateStep<any, any>;

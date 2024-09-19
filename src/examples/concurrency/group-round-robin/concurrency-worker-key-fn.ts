@@ -16,6 +16,7 @@ const workflow: Workflow = {
   },
   concurrency: {
     name: 'user-concurrency',
+    // NOTE: it is recommended to use expression unless you specifically need to use a custom key function
     key: (ctx) => ctx.workflowInput().group,
     maxRuns: 2,
     limitStrategy: ConcurrencyLimitStrategy.GROUP_ROUND_ROBIN,

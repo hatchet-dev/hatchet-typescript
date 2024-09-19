@@ -75,4 +75,69 @@ describe('EventClient', () => {
       client.push('type', { foo: 'bar' });
     }).toThrow(new HatchetError('foo'));
   });
+
+  it('should bulk push events', async () => {
+    // Mock the bulkPush method
+    const clientSpy = jest.spyOn(client.client, 'bulkPush').mockResolvedValue({
+      events: [
+        {
+          tenantId: 'tenantId',
+          eventId: 'y1',
+          key: 'z1',
+          eventTimestamp: new Date(),
+          payload: 'string1',
+        },
+        {
+          tenantId: 'tenantId',
+          eventId: 'y2',
+          key: 'z2',
+          eventTimestamp: new Date(),
+          payload: 'string2',
+        },
+      ],
+    });
+
+    // Call bulkPush with an array of events
+    const events = [
+      { payload: { foo: 'bar1' }, additionalMetadata: { user_id: 'user1' } },
+      { payload: { foo: 'bar2' }, additionalMetadata: { user_id: 'user2' } },
+    ];
+    await client.bulkPush('type', events);
+
+    // Verify the bulkPush method was called with the correct parameters
+    expect(clientSpy).toHaveBeenCalledWith({
+      events: [
+        {
+          key: 'type',
+          payload: '{"foo":"bar1"}',
+          eventTimestamp: expect.any(Date),
+          additionalMetadata: '{"user_id":"user1"}',
+        },
+        {
+          key: 'type',
+          payload: '{"foo":"bar2"}',
+          eventTimestamp: expect.any(Date),
+          additionalMetadata: '{"user_id":"user2"}',
+        },
+      ],
+    });
+  });
+
+  it('should throw an error when bulkPush fails', async () => {
+    // Mock the bulkPush method to throw an error
+    const clientSpy = jest.spyOn(client.client, 'bulkPush');
+    clientSpy.mockImplementation(() => {
+      throw new Error('bulk error');
+    });
+
+    const events = [
+      { payload: { foo: 'bar1' }, additionalMetadata: { user_id: 'user1' } },
+      { payload: { foo: 'bar2' }, additionalMetadata: { user_id: 'user2' } },
+    ];
+
+    // Test that an error is thrown when bulkPush fails
+    expect(() => {
+      client.bulkPush('type', events);
+    }).toThrow(new HatchetError('bulk error'));
+  });
 });

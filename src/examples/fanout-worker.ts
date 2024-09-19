@@ -32,7 +32,7 @@ const parentWorkflow: Workflow = {
         ctx.putStream('spawning children');
 
         const promises = Array.from({ length: 7 }, (_, i) =>
-          ctx.spawnWorkflow<Input, Output>('child-workflow', { input: `child-input-${i}` }).result()
+          ctx.spawnWorkflow<Input, Output>('child-workflow', { input: `child-input-${i}` }, { additionalMetadata: { childKey: "childValue" } }).result()
         );
 
         const results = await Promise.all(promises);

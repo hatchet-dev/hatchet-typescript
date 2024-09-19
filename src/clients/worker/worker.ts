@@ -96,14 +96,15 @@ export class Worker {
       ...onFailureAction,
     };
 
-    this.action_registry = workflow.concurrency?.name
-      ? {
-          ...this.action_registry,
-          [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
-        }
-      : {
-          ...this.action_registry,
-        };
+    this.action_registry =
+      workflow.concurrency?.name && workflow.concurrency.key
+        ? {
+            ...this.action_registry,
+            [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
+          }
+        : {
+            ...this.action_registry,
+          };
   }
 
   getHandler(workflows: Workflow[]) {
@@ -136,14 +137,24 @@ export class Worker {
       id: this.client.config.namespace + initWorkflow.id,
     };
     try {
-      const concurrency: WorkflowConcurrencyOpts | undefined = workflow.concurrency?.name
-        ? {
-            action: `${workflow.id}:${workflow.concurrency.name}`,
-            maxRuns: workflow.concurrency.maxRuns || 1,
-            limitStrategy:
-              workflow.concurrency.limitStrategy || ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS,
-          }
-        : undefined;
+      if (workflow.concurrency?.key && workflow.concurrency.expression) {
+        throw new HatchetError(
+          'Cannot have both key function and expression in workflow concurrency configuration'
+        );
+      }
+
+      const concurrency: WorkflowConcurrencyOpts | undefined =
+        workflow.concurrency?.name || workflow.concurrency?.expression
+          ? {
+              action: !workflow.concurrency.expression
+                ? `${workflow.id}:${workflow.concurrency.name}`
+                : undefined,
+              maxRuns: workflow.concurrency.maxRuns || 1,
+              expression: workflow.concurrency.expression,
+              limitStrategy:
+                workflow.concurrency.limitStrategy || ConcurrencyLimitStrategy.CANCEL_IN_PROGRESS,
+            }
+          : undefined;
 
       const onFailureJob: CreateWorkflowJobOpts | undefined = workflow.onFailure
         ? {

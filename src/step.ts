@@ -237,7 +237,9 @@ export class Context<T, K = {}> {
   spawnWorkflow<Q = JsonValue, P = JsonValue>(
     workflow: string | Workflow,
     input: Q,
-    options?: string | { key?: string; sticky?: boolean, additionalMetadata?: Record<string, string> }
+    options?:
+      | string
+      | { key?: string; sticky?: boolean; additionalMetadata?: Record<string, string> }
   ): WorkflowRunRef<P> {
     const { workflowRunId, stepRunId } = this.action;
 
@@ -253,7 +255,7 @@ export class Context<T, K = {}> {
 
     let key: string | undefined = '';
     let sticky: boolean | undefined = false;
-    let metadata: Record<string, string> | undefined = undefined
+    let metadata: Record<string, string> | undefined;
 
     if (typeof options === 'string') {
       this.logger.warn(

@@ -2,10 +2,12 @@ import Hatchet from '../sdk';
 
 const hatchet = Hatchet.init();
 
+// Push a single event (example)
 hatchet.event.push('user:create', {
   test: 'test',
 });
 
+// Example events to be pushed in bulk
 const events = [
   {
     payload: { test: 'test1' },
@@ -21,6 +23,7 @@ const events = [
   },
 ];
 
+// Bulk push the events and compare the keys
 hatchet.event
   .bulkPush('user:create:bulk', events)
   .then((result) => {

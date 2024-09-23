@@ -26,6 +26,10 @@ export interface Event {
   additionalMetadata?: string | undefined;
 }
 
+export interface Events {
+  events: Event[];
+}
+
 export interface PutLogRequest {
   /** the step run id for the request */
   stepRunId: string;
@@ -53,6 +57,10 @@ export interface PutStreamEventRequest {
 }
 
 export interface PutStreamEventResponse {}
+
+export interface BulkPushEventRequest {
+  events: PushEventRequest[];
+}
 
 export interface PushEventRequest {
   /** the key for the event */
@@ -211,6 +219,67 @@ export const Event: MessageFns<Event> = {
     message.payload = object.payload ?? '';
     message.eventTimestamp = object.eventTimestamp ?? undefined;
     message.additionalMetadata = object.additionalMetadata ?? undefined;
+    return message;
+  },
+};
+
+function createBaseEvents(): Events {
+  return { events: [] };
+}
+
+export const Events: MessageFns<Events> = {
+  encode(message: Events, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.events) {
+      Event.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Events {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEvents();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events.push(Event.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Events {
+    return {
+      events: globalThis.Array.isArray(object?.events)
+        ? object.events.map((e: any) => Event.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: Events): unknown {
+    const obj: any = {};
+    if (message.events?.length) {
+      obj.events = message.events.map((e) => Event.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<Events>): Events {
+    return Events.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<Events>): Events {
+    const message = createBaseEvents();
+    message.events = object.events?.map((e) => Event.fromPartial(e)) || [];
     return message;
   },
 };
@@ -524,6 +593,67 @@ export const PutStreamEventResponse: MessageFns<PutStreamEventResponse> = {
   },
 };
 
+function createBaseBulkPushEventRequest(): BulkPushEventRequest {
+  return { events: [] };
+}
+
+export const BulkPushEventRequest: MessageFns<BulkPushEventRequest> = {
+  encode(message: BulkPushEventRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.events) {
+      PushEventRequest.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BulkPushEventRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBulkPushEventRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.events.push(PushEventRequest.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BulkPushEventRequest {
+    return {
+      events: globalThis.Array.isArray(object?.events)
+        ? object.events.map((e: any) => PushEventRequest.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BulkPushEventRequest): unknown {
+    const obj: any = {};
+    if (message.events?.length) {
+      obj.events = message.events.map((e) => PushEventRequest.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BulkPushEventRequest>): BulkPushEventRequest {
+    return BulkPushEventRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BulkPushEventRequest>): BulkPushEventRequest {
+    const message = createBaseBulkPushEventRequest();
+    message.events = object.events?.map((e) => PushEventRequest.fromPartial(e)) || [];
+    return message;
+  },
+};
+
 function createBasePushEventRequest(): PushEventRequest {
   return { key: '', payload: '', eventTimestamp: undefined, additionalMetadata: undefined };
 }
@@ -702,6 +832,14 @@ export const EventsServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    bulkPush: {
+      name: 'BulkPush',
+      requestType: BulkPushEventRequest,
+      requestStream: false,
+      responseType: Events,
+      responseStream: false,
+      options: {},
+    },
     replaySingleEvent: {
       name: 'ReplaySingleEvent',
       requestType: ReplayEventRequest,
@@ -734,6 +872,10 @@ export interface EventsServiceImplementation<CallContextExt = {}> {
     request: PushEventRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<Event>>;
+  bulkPush(
+    request: BulkPushEventRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<Events>>;
   replaySingleEvent(
     request: ReplayEventRequest,
     context: CallContext & CallContextExt
@@ -753,6 +895,10 @@ export interface EventsServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<PushEventRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<Event>;
+  bulkPush(
+    request: DeepPartial<BulkPushEventRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<Events>;
   replaySingleEvent(
     request: DeepPartial<ReplayEventRequest>,
     options?: CallOptions & CallOptionsExt

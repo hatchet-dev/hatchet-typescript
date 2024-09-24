@@ -85,6 +85,37 @@ export default class WorkflowRunRef<T> {
               return;
             }
 
+            if (event.results.length === 0) {
+              const data = await this.client.api.workflowRunGetShape(
+                this.client.config.tenant_id,
+                event.workflowRunId
+              );
+
+              const mostRecentJobRun = data.data.jobRuns?.[0];
+
+              if (!mostRecentJobRun) {
+                reject(new Error('No job runs found'));
+                return;
+              }
+
+              const outputs: { [readableStepName: string]: any } = {};
+
+              mostRecentJobRun.stepRuns?.forEach((stepRun) => {
+                const readable = mostRecentJobRun.job?.steps?.find(
+                  (step) => step.metadata.id === stepRun.stepId
+                );
+                const readableStepName = `${readable?.readableId}`;
+                try {
+                  outputs[readableStepName] = JSON.parse(stepRun.output || '{}');
+                } catch (error) {
+                  outputs[readableStepName] = stepRun.output;
+                }
+              });
+
+              resolve(outputs as T);
+              return;
+            }
+
             const result = event.results.reduce(
               (acc, r) => ({
                 ...acc,

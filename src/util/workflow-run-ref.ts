@@ -85,6 +85,21 @@ export default class WorkflowRunRef<T> {
               return;
             }
 
+            if (event.results.length === 0) {
+              const data = await this.client.api.workflowRunGet(
+                this.client.config.tenant_id,
+                event.workflowRunId
+              );
+
+              const res = data.data.jobRuns?.forEach((jr) => {
+                // TODO map this data into the same format as the results
+                console.log('jr', jr);
+              });
+
+              resolve({ big: 'data ' } as T);
+              return;
+            }
+
             const result = event.results.reduce(
               (acc, r) => ({
                 ...acc,

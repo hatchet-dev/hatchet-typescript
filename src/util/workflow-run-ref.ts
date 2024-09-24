@@ -86,17 +86,33 @@ export default class WorkflowRunRef<T> {
             }
 
             if (event.results.length === 0) {
-              const data = await this.client.api.workflowRunGet(
+              const data = await this.client.api.workflowRunGetShape(
                 this.client.config.tenant_id,
                 event.workflowRunId
               );
 
-              const res = data.data.jobRuns?.forEach((jr) => {
-                // TODO map this data into the same format as the results
-                console.log('jr', jr);
+              const mostRecentJobRun = data.data.jobRuns?.[0];
+
+              if (!mostRecentJobRun) {
+                reject(new Error('No job runs found'));
+                return;
+              }
+
+              const outputs: { [readableStepName: string]: any } = {};
+
+              mostRecentJobRun.stepRuns?.forEach((stepRun) => {
+                const readable = mostRecentJobRun.job?.steps?.find(
+                  (step) => step.metadata.id === stepRun.stepId
+                );
+                const readableStepName = `${readable?.readableId}`;
+                try {
+                  outputs[readableStepName] = JSON.parse(stepRun.output || '{}');
+                } catch (error) {
+                  outputs[readableStepName] = stepRun.output;
+                }
               });
 
-              resolve({ big: 'data ' } as T);
+              resolve(outputs as T);
               return;
             }
 

@@ -1,5 +1,6 @@
 import { Channel, ClientFactory } from 'nice-grpc';
 import {
+  BulkPushEventRequest,
   EventsServiceClient,
   EventsServiceDefinition,
   PushEventRequest,
@@ -19,6 +20,11 @@ export enum LogLevel {
 
 export interface PushEventOptions {
   additionalMetadata?: Record<string, string>;
+}
+
+export interface EventWithMetadata<T> {
+  payload: T;
+  additionalMetadata?: Record<string, any>;
 }
 
 export class EventClient {
@@ -48,6 +54,39 @@ export class EventClient {
     try {
       const e = this.client.push(req);
       this.logger.info(`Event pushed: ${namespacedType}`);
+      return e;
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+
+  bulkPush<T>(type: string, inputs: EventWithMetadata<T>[], options: PushEventOptions = {}) {
+    const namespacedType = `${this.config.namespace ?? ''}${type}`;
+
+    const events = inputs.map((input) => {
+      return {
+        key: namespacedType,
+        payload: JSON.stringify(input.payload),
+        eventTimestamp: new Date(),
+        additionalMetadata: (() => {
+          if (input.additionalMetadata) {
+            return JSON.stringify(input.additionalMetadata);
+          }
+          if (options.additionalMetadata) {
+            return JSON.stringify(options.additionalMetadata);
+          }
+          return undefined;
+        })(),
+      };
+    });
+
+    const req: BulkPushEventRequest = {
+      events,
+    };
+
+    try {
+      const e = this.client.bulkPush(req);
+      this.logger.info(`Bulk events pushed for type: ${namespacedType}`);
       return e;
     } catch (e: any) {
       throw new HatchetError(e.message);

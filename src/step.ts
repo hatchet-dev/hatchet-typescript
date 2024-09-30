@@ -10,11 +10,16 @@ import { HatchetClient } from './clients/hatchet-client';
 import WorkflowRunRef from './util/workflow-run-ref';
 import { Worker } from './clients/worker';
 import { WorkerLabels } from './clients/dispatcher/dispatcher-client';
-import { WorkerLabelComparator } from './protoc/workflows';
+import { CreateStepRateLimit, RateLimitDuration, WorkerLabelComparator } from './protoc/workflows';
 
 export const CreateRateLimitSchema = z.object({
-  key: z.string(),
-  units: z.number().min(1),
+  key: z.string().optional(),
+  staticKey: z.string().optional(),
+  dynamicKey: z.string().optional(),
+
+  units: z.union([z.number().min(1), z.string()]),
+  limit: z.union([z.number().min(1), z.string()]).optional(),
+  duration: z.nativeEnum(RateLimitDuration).optional(),
 });
 
 export const DesiredWorkerLabelSchema = z
@@ -321,4 +326,78 @@ export type StepRunFunction<T, K> = (
 
 export interface CreateStep<T, K> extends z.infer<typeof CreateStepSchema> {
   run: StepRunFunction<T, K>;
+}
+
+export function mapRateLimit(limits: CreateStep<any, any>['rate_limits']): CreateStepRateLimit[] {
+  if (!limits) return [];
+
+  return limits.map((l) => {
+    let key = l.staticKey;
+    const keyExpression = l.dynamicKey;
+
+    if (l.key !== undefined) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'key is deprecated and will be removed in a future release, please use staticKey instead'
+      );
+      key = l.key;
+    }
+
+    if (keyExpression !== undefined) {
+      if (key !== undefined) {
+        throw new Error('Cannot have both static key and dynamic key set');
+      }
+      key = keyExpression;
+      if (!validateCelExpression(keyExpression)) {
+        throw new Error(`Invalid CEL expression: ${keyExpression}`);
+      }
+    }
+
+    if (key === undefined) {
+      throw new Error(`Invalid key`);
+    }
+
+    let units: number | undefined;
+    let unitsExpression: string | undefined;
+    if (typeof l.units === 'number') {
+      units = l.units;
+    } else {
+      if (!validateCelExpression(l.units)) {
+        throw new Error(`Invalid CEL expression: ${l.units}`);
+      }
+      unitsExpression = l.units;
+    }
+
+    let limitExpression: string | undefined;
+    if (l.limit !== undefined) {
+      if (typeof l.limit === 'number') {
+        limitExpression = `${l.limit}`;
+      } else {
+        if (!validateCelExpression(l.limit)) {
+          throw new Error(`Invalid CEL expression: ${l.limit}`);
+        }
+        limitExpression = l.limit;
+      }
+    }
+
+    if (keyExpression !== undefined && limitExpression === undefined) {
+      throw new Error('CEL based keys requires limit to be set');
+    }
+
+    return {
+      key,
+      keyExpr: keyExpression,
+      units,
+      unitsExpr: unitsExpression,
+      limitValuesExpr: limitExpression,
+      duration: l.duration,
+    };
+  });
+}
+
+// Helper function to validate CEL expressions
+function validateCelExpression(expr: string): boolean {
+  // This is a placeholder. In a real implementation, you'd need to use a CEL parser or validator.
+  // For now, we'll just return true to mimic the behavior.
+  return true;
 }

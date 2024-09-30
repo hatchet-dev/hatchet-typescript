@@ -17,7 +17,7 @@ export const CreateRateLimitSchema = z.object({
   staticKey: z.string().optional(),
   dynamicKey: z.string().optional(),
 
-  units: z.union([z.number().min(1), z.string()]),
+  units: z.union([z.number().min(0), z.string()]),
   limit: z.union([z.number().min(1), z.string()]).optional(),
   duration: z.nativeEnum(RateLimitDuration).optional(),
 });

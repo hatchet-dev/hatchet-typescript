@@ -21,7 +21,7 @@ import {
 import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
-import { Context, CreateStep, StepRunFunction } from '../../step';
+import { Context, CreateStep, mapRateLimit, StepRunFunction } from '../../step';
 import { WorkerLabels } from '../dispatcher/dispatcher-client';
 
 export type ActionRegistry = Record<Action['actionId'], Function>;
@@ -169,7 +169,7 @@ export class Worker {
                 parents: [],
                 userData: '{}',
                 retries: workflow.onFailure.retries || 0,
-                rateLimits: workflow.onFailure.rate_limits ?? [],
+                rateLimits: mapRateLimit(workflow.onFailure.rate_limits),
                 workerLabels: {}, // no worker labels for on failure steps
               },
             ],
@@ -202,7 +202,7 @@ export class Worker {
               parents: step.parents ?? [],
               userData: '{}',
               retries: step.retries || 0,
-              rateLimits: step.rate_limits ?? [], // Add the missing rateLimits property
+              rateLimits: mapRateLimit(step.rate_limits),
               workerLabels: toPbWorkerLabel(step.worker_labels),
             })),
           },

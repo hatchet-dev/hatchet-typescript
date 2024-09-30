@@ -358,8 +358,16 @@ export interface CreateWorkflowStepOpts_WorkerLabelsEntry {
 export interface CreateStepRateLimit {
   /** (required) the key for the rate limit */
   key: string;
-  /** (required) the number of units this step consumes */
-  units: number;
+  /** (optional) the number of units this step consumes */
+  units?: number | undefined;
+  /** (optional) a CEL expression for determining the rate limit key */
+  keyExpr?: string | undefined;
+  /** (optional) a CEL expression for determining the number of units consumed */
+  unitsExpr?: string | undefined;
+  /** (optional) a CEL expression for determining the total amount of rate limit units */
+  limitValuesExpr?: string | undefined;
+  /** (optional) the default rate limit window to use for dynamic rate limits */
+  duration?: RateLimitDuration | undefined;
 }
 
 /** ListWorkflowsRequest is the request for ListWorkflows. */
@@ -1446,7 +1454,14 @@ export const CreateWorkflowStepOpts_WorkerLabelsEntry: MessageFns<CreateWorkflow
   };
 
 function createBaseCreateStepRateLimit(): CreateStepRateLimit {
-  return { key: '', units: 0 };
+  return {
+    key: '',
+    units: undefined,
+    keyExpr: undefined,
+    unitsExpr: undefined,
+    limitValuesExpr: undefined,
+    duration: undefined,
+  };
 }
 
 export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
@@ -1454,8 +1469,20 @@ export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
     if (message.key !== '') {
       writer.uint32(10).string(message.key);
     }
-    if (message.units !== 0) {
+    if (message.units !== undefined) {
       writer.uint32(16).int32(message.units);
+    }
+    if (message.keyExpr !== undefined) {
+      writer.uint32(26).string(message.keyExpr);
+    }
+    if (message.unitsExpr !== undefined) {
+      writer.uint32(34).string(message.unitsExpr);
+    }
+    if (message.limitValuesExpr !== undefined) {
+      writer.uint32(42).string(message.limitValuesExpr);
+    }
+    if (message.duration !== undefined) {
+      writer.uint32(48).int32(message.duration);
     }
     return writer;
   },
@@ -1481,6 +1508,34 @@ export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
 
           message.units = reader.int32();
           continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.keyExpr = reader.string();
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.unitsExpr = reader.string();
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.limitValuesExpr = reader.string();
+          continue;
+        case 6:
+          if (tag !== 48) {
+            break;
+          }
+
+          message.duration = reader.int32() as any;
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1493,7 +1548,13 @@ export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
   fromJSON(object: any): CreateStepRateLimit {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : '',
-      units: isSet(object.units) ? globalThis.Number(object.units) : 0,
+      units: isSet(object.units) ? globalThis.Number(object.units) : undefined,
+      keyExpr: isSet(object.keyExpr) ? globalThis.String(object.keyExpr) : undefined,
+      unitsExpr: isSet(object.unitsExpr) ? globalThis.String(object.unitsExpr) : undefined,
+      limitValuesExpr: isSet(object.limitValuesExpr)
+        ? globalThis.String(object.limitValuesExpr)
+        : undefined,
+      duration: isSet(object.duration) ? rateLimitDurationFromJSON(object.duration) : undefined,
     };
   },
 
@@ -1502,8 +1563,20 @@ export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
     if (message.key !== '') {
       obj.key = message.key;
     }
-    if (message.units !== 0) {
+    if (message.units !== undefined) {
       obj.units = Math.round(message.units);
+    }
+    if (message.keyExpr !== undefined) {
+      obj.keyExpr = message.keyExpr;
+    }
+    if (message.unitsExpr !== undefined) {
+      obj.unitsExpr = message.unitsExpr;
+    }
+    if (message.limitValuesExpr !== undefined) {
+      obj.limitValuesExpr = message.limitValuesExpr;
+    }
+    if (message.duration !== undefined) {
+      obj.duration = rateLimitDurationToJSON(message.duration);
     }
     return obj;
   },
@@ -1514,7 +1587,11 @@ export const CreateStepRateLimit: MessageFns<CreateStepRateLimit> = {
   fromPartial(object: DeepPartial<CreateStepRateLimit>): CreateStepRateLimit {
     const message = createBaseCreateStepRateLimit();
     message.key = object.key ?? '';
-    message.units = object.units ?? 0;
+    message.units = object.units ?? undefined;
+    message.keyExpr = object.keyExpr ?? undefined;
+    message.unitsExpr = object.unitsExpr ?? undefined;
+    message.limitValuesExpr = object.limitValuesExpr ?? undefined;
+    message.duration = object.duration ?? undefined;
     return message;
   },
 };

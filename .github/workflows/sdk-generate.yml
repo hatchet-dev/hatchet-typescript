@@ -1,0 +1,45 @@
+name: Generate SDK Client and Make PR
+
+on:
+  repository_dispatch:
+    types: [generate-sdk]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    permissions: write-all
+  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.TOKEN }}
+      - name: 'Checkout hatchet submodule'
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TOKEN }}
+          repository: hatchet-dev/hatchet
+          path: ./hatchet
+      - name: Generate Typescript SDK Client
+        run: |
+          npm i pnpm -g
+          pnpm install
+          # Run generation script
+          bash generate-protoc.sh
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b feat/actions/generate-typescript-sdk-client
+          git add ./src
+          git commit -m "feat: generate Typescript SDK client"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: feat/actions/generate-typescript-sdk-client
+
+      - name: create pull request
+        run: gh pr create -B main -H feat/actions/generate-typescript-sdk-client --title 'Generate Typescript SDK client' --body 'This PR generates a Typescript SDK client for updated openapi spec.'
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

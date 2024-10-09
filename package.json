@@ -43,6 +43,7 @@
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",
     "manual:trigger": "npm run exec -- ./src/examples/manual-trigger.ts",
     "manual:meta": "npm run exec -- ./src/examples/stream-by-additional-meta.ts",
+    "bulk:trigger": "npm run exec -- ./src/examples/bulk-trigger.ts",
     "worker:dag": "npm run exec -- ./src/examples/dag-worker.ts",
     "worker:concurrency": "npm run exec -- ./src/examples/concurrency/cancel-in-progress/concurrency-worker.ts",
     "event:concurrency": "npm run exec -- ./src/examples/concurrency/cancel-in-progress/concurrency-event.ts",

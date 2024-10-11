@@ -416,6 +416,14 @@ export interface WorkflowTriggerCronRef {
   cron: string;
 }
 
+export interface BulkTriggerWorkflowRequest {
+  workflows: TriggerWorkflowRequest[];
+}
+
+export interface BulkTriggerWorkflowResponse {
+  workflowRunIds: string[];
+}
+
 export interface TriggerWorkflowRequest {
   name: string;
   /** (optional) the input data for the workflow */
@@ -2095,6 +2103,134 @@ export const WorkflowTriggerCronRef: MessageFns<WorkflowTriggerCronRef> = {
   },
 };
 
+function createBaseBulkTriggerWorkflowRequest(): BulkTriggerWorkflowRequest {
+  return { workflows: [] };
+}
+
+export const BulkTriggerWorkflowRequest: MessageFns<BulkTriggerWorkflowRequest> = {
+  encode(
+    message: BulkTriggerWorkflowRequest,
+    writer: BinaryWriter = new BinaryWriter()
+  ): BinaryWriter {
+    for (const v of message.workflows) {
+      TriggerWorkflowRequest.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BulkTriggerWorkflowRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBulkTriggerWorkflowRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workflows.push(TriggerWorkflowRequest.decode(reader, reader.uint32()));
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BulkTriggerWorkflowRequest {
+    return {
+      workflows: globalThis.Array.isArray(object?.workflows)
+        ? object.workflows.map((e: any) => TriggerWorkflowRequest.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BulkTriggerWorkflowRequest): unknown {
+    const obj: any = {};
+    if (message.workflows?.length) {
+      obj.workflows = message.workflows.map((e) => TriggerWorkflowRequest.toJSON(e));
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BulkTriggerWorkflowRequest>): BulkTriggerWorkflowRequest {
+    return BulkTriggerWorkflowRequest.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BulkTriggerWorkflowRequest>): BulkTriggerWorkflowRequest {
+    const message = createBaseBulkTriggerWorkflowRequest();
+    message.workflows = object.workflows?.map((e) => TriggerWorkflowRequest.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseBulkTriggerWorkflowResponse(): BulkTriggerWorkflowResponse {
+  return { workflowRunIds: [] };
+}
+
+export const BulkTriggerWorkflowResponse: MessageFns<BulkTriggerWorkflowResponse> = {
+  encode(
+    message: BulkTriggerWorkflowResponse,
+    writer: BinaryWriter = new BinaryWriter()
+  ): BinaryWriter {
+    for (const v of message.workflowRunIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): BulkTriggerWorkflowResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBulkTriggerWorkflowResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.workflowRunIds.push(reader.string());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BulkTriggerWorkflowResponse {
+    return {
+      workflowRunIds: globalThis.Array.isArray(object?.workflowRunIds)
+        ? object.workflowRunIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: BulkTriggerWorkflowResponse): unknown {
+    const obj: any = {};
+    if (message.workflowRunIds?.length) {
+      obj.workflowRunIds = message.workflowRunIds;
+    }
+    return obj;
+  },
+
+  create(base?: DeepPartial<BulkTriggerWorkflowResponse>): BulkTriggerWorkflowResponse {
+    return BulkTriggerWorkflowResponse.fromPartial(base ?? {});
+  },
+  fromPartial(object: DeepPartial<BulkTriggerWorkflowResponse>): BulkTriggerWorkflowResponse {
+    const message = createBaseBulkTriggerWorkflowResponse();
+    message.workflowRunIds = object.workflowRunIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
 function createBaseTriggerWorkflowRequest(): TriggerWorkflowRequest {
   return {
     name: '',
@@ -2514,6 +2650,14 @@ export const WorkflowServiceDefinition = {
       responseStream: false,
       options: {},
     },
+    bulkTriggerWorkflow: {
+      name: 'BulkTriggerWorkflow',
+      requestType: BulkTriggerWorkflowRequest,
+      requestStream: false,
+      responseType: BulkTriggerWorkflowResponse,
+      responseStream: false,
+      options: {},
+    },
     putRateLimit: {
       name: 'PutRateLimit',
       requestType: PutRateLimitRequest,
@@ -2538,6 +2682,10 @@ export interface WorkflowServiceImplementation<CallContextExt = {}> {
     request: TriggerWorkflowRequest,
     context: CallContext & CallContextExt
   ): Promise<DeepPartial<TriggerWorkflowResponse>>;
+  bulkTriggerWorkflow(
+    request: BulkTriggerWorkflowRequest,
+    context: CallContext & CallContextExt
+  ): Promise<DeepPartial<BulkTriggerWorkflowResponse>>;
   putRateLimit(
     request: PutRateLimitRequest,
     context: CallContext & CallContextExt
@@ -2557,6 +2705,10 @@ export interface WorkflowServiceClient<CallOptionsExt = {}> {
     request: DeepPartial<TriggerWorkflowRequest>,
     options?: CallOptions & CallOptionsExt
   ): Promise<TriggerWorkflowResponse>;
+  bulkTriggerWorkflow(
+    request: DeepPartial<BulkTriggerWorkflowRequest>,
+    options?: CallOptions & CallOptionsExt
+  ): Promise<BulkTriggerWorkflowResponse>;
   putRateLimit(
     request: DeepPartial<PutRateLimitRequest>,
     options?: CallOptions & CallOptionsExt

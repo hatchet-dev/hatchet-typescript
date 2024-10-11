@@ -237,8 +237,6 @@ export class AdminClient {
         })
       );
 
-      console.log('bulkTriggerWorkflowResponse', bulkTriggerWorkflowResponse);
-
       return bulkTriggerWorkflowResponse.then((res) => {
         return res.workflowRunIds.map((resp, index) => {
           const { options } = workflowRuns[index];

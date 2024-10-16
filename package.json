@@ -40,6 +40,8 @@
     "worker:simple": "npm run exec -- ./src/examples/simple-worker.ts",
     "worker:affinity": "npm run exec -- ./src/examples/affinity-workers.ts",
     "worker:sticky": "npm run exec -- ./src/examples/sticky-worker.ts",
+    "worker:sticky-with-check": "npm run exec -- ./src/examples/sticky-worker-with-check.ts",
+    "trigger:sticky": "npm run exec -- ./src/examples/sticky-trigger.ts", 
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",
     "manual:trigger": "npm run exec -- ./src/examples/manual-trigger.ts",
     "manual:meta": "npm run exec -- ./src/examples/stream-by-additional-meta.ts",

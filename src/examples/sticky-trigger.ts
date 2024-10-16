@@ -1,11 +1,8 @@
-import { WorkflowRun } from '@hatchet/clients/admin';
 import Hatchet from '../sdk';
 
 const hatchet = Hatchet.init();
 
 async function main() {
-  const workflowRuns: WorkflowRun[] = [];
-
   const workflowRunResponse = hatchet.admin.runWorkflow(
     'sticky-workflow',
     {},

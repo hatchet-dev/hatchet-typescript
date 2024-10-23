@@ -100,6 +100,7 @@ export enum StepActionEventType {
   STEP_EVENT_TYPE_STARTED = 1,
   STEP_EVENT_TYPE_COMPLETED = 2,
   STEP_EVENT_TYPE_FAILED = 3,
+  STEP_EVENT_TYPE_ACKNOWLEDGED = 4,
   UNRECOGNIZED = -1,
 }
 
@@ -117,6 +118,9 @@ export function stepActionEventTypeFromJSON(object: any): StepActionEventType {
     case 3:
     case 'STEP_EVENT_TYPE_FAILED':
       return StepActionEventType.STEP_EVENT_TYPE_FAILED;
+    case 4:
+    case 'STEP_EVENT_TYPE_ACKNOWLEDGED':
+      return StepActionEventType.STEP_EVENT_TYPE_ACKNOWLEDGED;
     case -1:
     case 'UNRECOGNIZED':
     default:
@@ -134,6 +138,8 @@ export function stepActionEventTypeToJSON(object: StepActionEventType): string {
       return 'STEP_EVENT_TYPE_COMPLETED';
     case StepActionEventType.STEP_EVENT_TYPE_FAILED:
       return 'STEP_EVENT_TYPE_FAILED';
+    case StepActionEventType.STEP_EVENT_TYPE_ACKNOWLEDGED:
+      return 'STEP_EVENT_TYPE_ACKNOWLEDGED';
     case StepActionEventType.UNRECOGNIZED:
     default:
       return 'UNRECOGNIZED';

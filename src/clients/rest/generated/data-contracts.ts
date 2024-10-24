@@ -360,6 +360,10 @@ export interface TenantQueueMetrics {
   queues?: Record<string, number>;
 }
 
+export interface TenantStepRunQueueMetrics {
+  queues?: Record<string, number>;
+}
+
 export interface AcceptInviteRequest {
   /**
    * @minLength 36
@@ -893,6 +897,7 @@ export enum StepRunEventReason {
   SCHEDULING_TIMED_OUT = 'SCHEDULING_TIMED_OUT',
   ASSIGNED = 'ASSIGNED',
   STARTED = 'STARTED',
+  ACKNOWLEDGED = 'ACKNOWLEDGED',
   FINISHED = 'FINISHED',
   FAILED = 'FAILED',
   RETRYING = 'RETRYING',

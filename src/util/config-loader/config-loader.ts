@@ -17,7 +17,8 @@ type EnvVars =
   | 'HATCHET_CLIENT_TLS_ROOT_CA_FILE'
   | 'HATCHET_CLIENT_TLS_SERVER_NAME'
   | 'HATCHET_CLIENT_LOG_LEVEL'
-  | 'HATCHET_CLIENT_NAMESPACE';
+  | 'HATCHET_CLIENT_NAMESPACE'
+  | 'HATCHET_CLOUD_ACTIONS';
 
 type TLSStrategy = 'tls' | 'mtls';
 
@@ -83,6 +84,23 @@ export class ConfigLoader {
     const namespace =
       override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE');
 
+    let rawRunnableActions: string[] | undefined;
+
+    if (override?.runnable_actions) {
+      rawRunnableActions = override.runnable_actions;
+    } else if (yaml?.runnable_actions) {
+      rawRunnableActions = yaml.runnable_actions;
+    } else {
+      const envActions = this.env('HATCHET_CLOUD_ACTIONS');
+      if (envActions) {
+        rawRunnableActions = envActions.split(',');
+      }
+    }
+
+    const namespacePrefix = namespace ? `${namespace}_`.toLowerCase() : '';
+
+    const runnableActions = rawRunnableActions?.map((action) => namespacePrefix + action.trim());
+
     return {
       token: override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN'),
       host_port: grpcBroadcastAddress,
@@ -94,7 +112,8 @@ export class ConfigLoader {
         (this.env('HATCHET_CLIENT_LOG_LEVEL') as LogLevel) ??
         'INFO',
       tenant_id: tenantId,
-      namespace: namespace ? `${namespace}_`.toLowerCase() : '',
+      namespace: namespacePrefix,
+      runnable_actions: runnableActions,
     };
   }
 

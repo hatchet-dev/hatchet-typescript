@@ -80,7 +80,13 @@ export class Worker {
 
   private registerActions(workflow: Workflow) {
     const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
-      acc[`${workflow.id}:${step.name}`] = step.run;
+      // Only register actions that are in the runnable_actions list
+      if (
+        !this.client.config.runnable_actions ||
+        this.client.config.runnable_actions.includes(`${workflow.id}:${step.name}`)
+      ) {
+        acc[`${workflow.id}:${step.name}`] = step.run;
+      }
       return acc;
     }, {});
 

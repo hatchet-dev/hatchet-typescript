@@ -60,6 +60,12 @@ const AllowedGPUManagedWorkerRegions = [ManagedWorkerRegion.Ord];
 export const GPUComputeSchema = BaseComputeSchema.extend({
   cpuKind: z.literal('shared'),
   gpuKind: z.enum(['a10', 'l40s', 'a100-40gb', 'a100-80gb'] as const satisfies GPUKind[]),
+  gpus: z
+    .number()
+    .int()
+    .min(1, { message: 'Must be at least 1' })
+    .max(8, { message: 'Must be at most 8' })
+    .describe('The number of GPUs to use for the worker'),
   regions: z
     .array(z.nativeEnum(ManagedWorkerRegion))
     .refine((val) => val.every((region) => AllowedGPUManagedWorkerRegions.includes(region)), {

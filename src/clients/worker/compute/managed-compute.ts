@@ -63,6 +63,8 @@ export class ManagedCompute {
 
         const key = computeHash(compute);
 
+        const gpuKind = 'gpuKind' in compute ? compute.gpuKind : undefined;
+
         if (!computeMap[key]) {
           computeMap[key] = {
             actions: [],
@@ -72,6 +74,7 @@ export class ManagedCompute {
             memoryMb: compute.memoryMb,
             regions: compute.regions,
             slots: this.maxRuns,
+            gpuKind,
           };
         }
 

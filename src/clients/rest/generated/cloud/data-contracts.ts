@@ -305,6 +305,14 @@ export interface CreateManagedWorkerRuntimeConfigRequest {
    * @max 65536
    */
   memoryMb: number;
+  /** The kind of GPU to use for the worker */
+  gpuKind?: 'a10' | 'l40s' | 'a100-40gb' | 'a100-80gb';
+  /**
+   * The number of GPUs to use for the worker
+   * @min 1
+   * @max 8
+   */
+  gpus?: number;
   actions?: string[];
   /**
    * @min 1

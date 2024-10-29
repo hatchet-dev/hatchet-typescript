@@ -1,4 +1,4 @@
-import api from './api';
+import api, { cloudApi, CloudApi } from './api';
 import { Api } from './generated/Api';
 
 import { Worker as _Worker, Workflow as _Workflow } from './generated/data-contracts';
@@ -9,6 +9,6 @@ type ApiWorker = _Worker;
 type ApiWorkflow = _Workflow;
 
 // Export everything by default
-export { ApiWorker, ApiWorkflow, APIContracts, Api };
+export { ApiWorker, ApiWorkflow, APIContracts, Api, CloudApi, cloudApi };
 
 export default api;

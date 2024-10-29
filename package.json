@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.15.0",
+  "version": "0.16.0-alpha.1",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -39,6 +39,7 @@
     "example:rate": "npm run exec -- ./src/examples/rate-limit/events.ts",
     "worker:fanout": "npm run exec -- ./src/examples/fanout-worker.ts",
     "worker:simple": "npm run exec -- ./src/examples/simple-worker.ts",
+    "worker:managed": "npm run exec -- ./src/examples/managed-worker.ts",
     "worker:affinity": "npm run exec -- ./src/examples/affinity-workers.ts",
     "worker:sticky": "npm run exec -- ./src/examples/sticky-worker.ts",
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",
@@ -59,6 +60,7 @@
     "api": "npm run exec -- ./src/examples/api.ts",
     "prepublish": "cp package.json dist/package.json;",
     "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
+    "publish:ci:alpha": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks --tag alpha",
     "generate-docs": "typedoc"
   },
   "keywords": [],

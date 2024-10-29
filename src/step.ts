@@ -11,6 +11,7 @@ import WorkflowRunRef from './util/workflow-run-ref';
 import { Worker } from './clients/worker';
 import { WorkerLabels } from './clients/dispatcher/dispatcher-client';
 import { CreateStepRateLimit, RateLimitDuration, WorkerLabelComparator } from './protoc/workflows';
+import { ComputeSchema } from './clients/worker/compute/compute-config';
 
 export const CreateRateLimitSchema = z.object({
   key: z.string().optional(),
@@ -46,6 +47,7 @@ export const CreateStepSchema = z.object({
   retries: z.number().optional(),
   rate_limits: z.array(CreateRateLimitSchema).optional(),
   worker_labels: z.record(z.lazy(() => DesiredWorkerLabelSchema)).optional(),
+  compute: ComputeSchema.optional(),
 });
 
 export type JsonObject = { [Key in string]: JsonValue } & {

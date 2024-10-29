@@ -18,7 +18,8 @@ type EnvVars =
   | 'HATCHET_CLIENT_TLS_SERVER_NAME'
   | 'HATCHET_CLIENT_LOG_LEVEL'
   | 'HATCHET_CLIENT_NAMESPACE'
-  | 'HATCHET_CLOUD_ACTIONS';
+  | 'HATCHET_CLOUD_ACTIONS'
+  | 'HATCHET_CLOUD_REGISTER_ID';
 
 type TLSStrategy = 'tls' | 'mtls';
 
@@ -97,6 +98,8 @@ export class ConfigLoader {
       }
     }
 
+    const registerId = this.env('HATCHET_CLOUD_REGISTER_ID');
+
     const namespacePrefix = namespace ? `${namespace}_`.toLowerCase() : '';
 
     const runnableActions = rawRunnableActions?.map((action) => namespacePrefix + action.trim());
@@ -114,6 +117,7 @@ export class ConfigLoader {
       tenant_id: tenantId,
       namespace: namespacePrefix,
       runnable_actions: runnableActions,
+      cloud_register_id: registerId,
     };
   }
 

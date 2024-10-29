@@ -18,6 +18,7 @@ export const ClientConfigSchema = z.object({
   tenant_id: z.string(),
   namespace: z.string().optional(),
   runnable_actions: z.array(z.string()).optional(),
+  cloud_register_id: z.string().optional(),
 });
 
 export type ClientConfig = z.infer<typeof ClientConfigSchema> & {

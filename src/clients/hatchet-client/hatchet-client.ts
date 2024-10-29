@@ -18,7 +18,7 @@ import { AxiosRequestConfig } from 'axios';
 import { ClientConfig, ClientConfigSchema } from './client-config';
 import { ListenerClient } from '../listener/listener-client';
 import { Api } from '../rest/generated/Api';
-import api from '../rest';
+import api, { CloudApi, cloudApi } from '../rest';
 
 export interface HatchetClientOptions {
   config_path?: string;
@@ -66,6 +66,7 @@ export class HatchetClient {
   dispatcher: DispatcherClient;
   admin: AdminClient;
   api: Api;
+  cloudApi: CloudApi;
   listener: ListenerClient;
   tenantId: string;
 
@@ -100,6 +101,8 @@ export class HatchetClient {
 
     this.tenantId = this.config.tenant_id;
     this.api = api(this.config.api_url, this.config.token, axiosOpts);
+    this.cloudApi = cloudApi(this.config.api_url, this.config.token, axiosOpts);
+
     this.event = new EventClient(
       this.config,
       channelFactory(this.config, this.credentials),

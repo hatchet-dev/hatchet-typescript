@@ -25,4 +25,6 @@ export const cloudApi = (serverUrl: string, token: string, axiosOpts?: AxiosRequ
   });
 };
 
+export { api, CloudApi };
+
 export default api;

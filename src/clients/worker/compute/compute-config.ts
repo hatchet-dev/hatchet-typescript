@@ -1,4 +1,7 @@
-import { ManagedWorkerRegion } from '@hatchet/clients/rest/generated/cloud/data-contracts';
+import {
+  CreateManagedWorkerRuntimeConfigRequest,
+  ManagedWorkerRegion,
+} from '@hatchet/clients/rest/generated/cloud/data-contracts';
 import { createHash } from 'crypto';
 import { z } from 'zod';
 
@@ -36,8 +39,8 @@ export const SharedCPUComputeSchema = BaseComputeSchema.extend({
 
 export type SharedCPUCompute = z.infer<typeof SharedCPUComputeSchema>;
 
-export const DedicatedCPUComputeSchema = BaseComputeSchema.extend({
-  cpuKind: z.literal('dedicated'),
+export const PerformanceCPUComputeSchema = BaseComputeSchema.extend({
+  cpuKind: z.literal('performance'),
   memoryMb: z
     .number()
     .int()
@@ -47,9 +50,39 @@ export const DedicatedCPUComputeSchema = BaseComputeSchema.extend({
     .describe('The amount of memory in MB to use for the worker'),
 });
 
-export type DedicatedCPUCompute = z.infer<typeof DedicatedCPUComputeSchema>;
+export type PerformanceCPUCompute = z.infer<typeof PerformanceCPUComputeSchema>;
 
-export const ComputeSchema = z.union([SharedCPUComputeSchema, DedicatedCPUComputeSchema]);
+type GPUKind = CreateManagedWorkerRuntimeConfigRequest['gpuKind'];
+
+// eslint-disable-next-line no-shadow
+const AllowedGPUManagedWorkerRegions = [ManagedWorkerRegion.Ord];
+
+export const GPUComputeSchema = BaseComputeSchema.extend({
+  cpuKind: z.literal('shared'),
+  gpuKind: z.enum(['a10', 'l40s', 'a100-40gb', 'a100-80gb'] as const satisfies GPUKind[]),
+  regions: z
+    .array(z.nativeEnum(ManagedWorkerRegion))
+    .refine((val) => val.every((region) => AllowedGPUManagedWorkerRegions.includes(region)), {
+      message: 'Invalid GPU region',
+    })
+    .optional()
+    .describe('The regions to deploy the worker to'),
+  memoryMb: z
+    .number()
+    .int()
+    .min(2048, { message: 'Must be at least 1024 MB' })
+    .max(65536, { message: 'Must be at most 65536 MB' })
+    .refine((val) => val % 256 === 0, { message: 'Must be divisible by 256 MB' })
+    .describe('The amount of memory in MB to use for the worker'),
+});
+
+export type GPUCompute = z.infer<typeof GPUComputeSchema>;
+
+export const ComputeSchema = z.union([
+  SharedCPUComputeSchema,
+  PerformanceCPUComputeSchema,
+  GPUComputeSchema,
+]);
 
 export const computeHash = (compute: z.infer<typeof ComputeSchema>) => {
   const str = JSON.stringify(compute);

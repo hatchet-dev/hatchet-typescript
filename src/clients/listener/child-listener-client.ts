@@ -9,7 +9,7 @@ import { isAbortError } from 'abort-controller-x';
 import sleep from '@hatchet/util/sleep';
 import { ListenerClient } from './listener-client';
 
-const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
+const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 0.5; // seconds
 const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 20;
 
 export class Streamable {
@@ -36,7 +36,6 @@ export class Streamable {
 export class GrpcPooledListener {
   listener: AsyncIterable<WorkflowRunEvent> | undefined;
   requestEmitter = new EventEmitter();
-  signal: AbortController = new AbortController();
   client: ListenerClient;
 
   subscribers: Record<string, Streamable> = {};
@@ -57,9 +56,7 @@ export class GrpcPooledListener {
 
     try {
       this.client.logger.debug('Initializing child-listener');
-      this.listener = this.client.client.subscribeToWorkflowRuns(this.request(), {
-        signal: this.signal.signal,
-      });
+      this.listener = this.client.client.subscribeToWorkflowRuns(this.request(), {});
 
       if (retries > 0) setTimeout(() => this.replayRequests(), 100);
 
@@ -67,26 +64,27 @@ export class GrpcPooledListener {
         const emitter = this.subscribers[event.workflowRunId];
         if (emitter) {
           emitter.responseEmitter.emit('response', event);
+
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
             delete this.subscribers[event.workflowRunId];
             if (Object.keys(this.subscribers).length === 0) {
               // FIXME it would be better to cleanup on parent complete
               this.client.logger.debug('All subscriptions finished, cleaning up listener');
-              this.signal.abort();
-              this.onFinish();
+              break;
             }
           }
         }
       }
     } catch (e: any) {
-      if (isAbortError(e)) {
-        this.client.logger.debug('Child Listener aborted');
+      if (!isAbortError(e)) {
+        this.client.logger.error(`Error in child-listener: ${e.message}`);
+        this.init(retries + 1);
         return;
       }
-
-      this.client.logger.error(`Error in child-listener: ${e.message}`);
-      this.init(retries + 1);
+      this.client.logger.debug('Child Listener aborted');
     }
+
+    this.onFinish();
   }
 
   subscribe(request: SubscribeToWorkflowRunsRequest) {

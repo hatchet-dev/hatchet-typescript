@@ -57,6 +57,8 @@ export class GrpcPooledListener {
 
     try {
       this.client.logger.debug('Initializing child-listener');
+
+      this.signal = new AbortController();
       this.listener = this.client.client.subscribeToWorkflowRuns(this.request(), {
         signal: this.signal.signal,
       });
@@ -78,14 +80,21 @@ export class GrpcPooledListener {
           }
         }
       }
+
+      this.client.logger.debug('Child listener finished');
     } catch (e: any) {
       if (isAbortError(e)) {
         this.client.logger.debug('Child Listener aborted');
         return;
       }
-
       this.client.logger.error(`Error in child-listener: ${e.message}`);
-      this.init(retries + 1);
+    } finally {
+      // it is possible the server hangs up early,
+      // restart the listener if we still have subscribers
+      this.client.logger.debug('Child listener finally');
+      if (Object.keys(this.subscribers).length !== 0) {
+        this.init(retries + 1);
+      }
     }
   }
 

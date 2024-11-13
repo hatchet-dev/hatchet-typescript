@@ -107,7 +107,7 @@ export class EventClient {
       this.logger
     ).catch((e: any) => {
       // log a warning, but this is not a fatal error
-      this.logger.warn(`Could not put log: ${e.message}`);
+      this.logger.warn(`Could not put log: ${e.message.substring(0, 100)}`);
     });
   }
 

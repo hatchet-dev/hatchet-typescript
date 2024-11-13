@@ -255,7 +255,9 @@ export class Worker {
           // delete the run from the futures
           delete this.futures[action.stepRunId];
         } catch (actionEventError: any) {
-          this.logger.error(`Could not send completed action event: ${actionEventError.message}`);
+          this.logger.error(
+            `Could not send completed action event: ${actionEventError.message || actionEventError}`
+          );
 
           // send a failure event
           const failureEvent = this.getStepActionEvent(
@@ -267,10 +269,14 @@ export class Worker {
           try {
             await this.client.dispatcher.sendStepActionEvent(failureEvent);
           } catch (failureEventError: any) {
-            this.logger.error(`Could not send failed action event: ${failureEventError.message}`);
+            this.logger.error(
+              `Could not send failed action event: ${failureEventError.message || failureEventError}`
+            );
           }
 
-          this.logger.error(`Could not send action event: ${actionEventError.message}`);
+          this.logger.error(
+            `Could not send action event: ${actionEventError.message || actionEventError}`
+          );
         }
       };
 
@@ -320,9 +326,13 @@ export class Worker {
         this.logger.error(`Could not send action event: ${e.message}`);
       });
 
-      await future.promise;
+      try {
+        await future.promise;
+      } catch (e: any) {
+        this.logger.error(`Could not wait for step run to finish: ${e}`);
+      }
     } catch (e: any) {
-      this.logger.error(`Could not send action event: ${e.message}`);
+      this.logger.error(`Could not send action event (outer): ${e}`);
     }
   }
 
@@ -472,7 +482,7 @@ export class Worker {
         delete this.futures[stepRunId];
       }
     } catch (e: any) {
-      this.logger.error(`Could not cancel step run: ${e.message}`);
+      this.logger.error(`Could not cancel step run: ${e}`);
     }
   }
 

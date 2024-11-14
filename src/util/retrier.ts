@@ -1,7 +1,7 @@
 import { Logger } from './logger';
 import sleep from './sleep';
 
-const DEFAULT_RETRY_INTERVAL = 0.1; // seconds
+const DEFAULT_RETRY_INTERVAL = 1; // seconds
 const DEFAULT_RETRY_COUNT = 8;
 const MAX_JITTER = 400; // milliseconds
 

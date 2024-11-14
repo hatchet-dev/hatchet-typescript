@@ -7,13 +7,18 @@ import {
   OverridesData,
   DeepPartial,
   WorkerLabels as PbWorkerAffinityConfig,
+  SDKS,
+  RuntimeInfo,
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
+import path from 'path';
+import fs from 'fs';
 
 import { retrier } from '@hatchet/util/retrier';
 import { ActionListener } from './action-listener';
+import { HATCHET_VERSION } from '@hatchet/version';
 
 export type WorkerLabels = Record<string, string | number | undefined>;
 
@@ -36,11 +41,21 @@ export class DispatcherClient {
     this.logger = new Logger(`Dispatcher`, config.log_level);
   }
 
+  getRuntimeInfo(): RuntimeInfo {
+    return {
+      sdkVersion: HATCHET_VERSION,
+      language: SDKS.TYPESCRIPT,
+      languageVersion: process.version,
+      os: process.platform,
+    };
+  }
+
   async getActionListener(options: GetActionListenerOptions) {
     // Register the worker
     const registration = await this.client.register({
       ...options,
       labels: options.labels ? mapLabels(options.labels) : undefined,
+      runtimeInfo: await this.getRuntimeInfo(),
     });
 
     return new ActionListener(this, registration.workerId);

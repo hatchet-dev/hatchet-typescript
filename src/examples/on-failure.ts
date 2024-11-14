@@ -6,6 +6,7 @@ const hatchet = Hatchet.init();
 // ❓ OnFailure Step
 // This workflow will fail because the step will throw an error
 // we define an onFailure step to handle this case
+
 const workflow: Workflow = {
   // ... normal workflow definition
   id: 'on-failure-example',

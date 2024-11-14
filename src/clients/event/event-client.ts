@@ -96,19 +96,20 @@ export class EventClient {
   putLog(stepRunId: string, log: string, level?: LogLevel) {
     const createdAt = new Date();
 
-    retrier(
-      async () =>
-        this.client.putLog({
-          stepRunId,
-          createdAt,
-          message: log,
-          level: level || LogLevel.INFO,
-        }),
-      this.logger
-    ).catch((e: any) => {
-      // log a warning, but this is not a fatal error
-      this.logger.warn(`Could not put log: ${e.message.substring(0, 100)}`);
-    });
+    // retrier(
+    //   async () =>
+    //     this.client.putLog({
+    //       stepRunId,
+    //       createdAt,
+    //       message: log,
+    //       level: level || LogLevel.INFO,
+    //     }),
+    //   this.logger
+    // ).catch((e: any) => {
+    //   // log a warning, but this is not a fatal error
+    //   console.error(e);
+    //   // this.logger.warn(`Could not put log: ${e.message.substring(0, 100)}`);
+    // });
   }
 
   putStream(stepRunId: string, data: string | Uint8Array) {

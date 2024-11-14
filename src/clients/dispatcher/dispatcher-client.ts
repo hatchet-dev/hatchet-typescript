@@ -13,12 +13,10 @@ import {
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
-import path from 'path';
-import fs from 'fs';
 
 import { retrier } from '@hatchet/util/retrier';
-import { ActionListener } from './action-listener';
 import { HATCHET_VERSION } from '@hatchet/version';
+import { ActionListener } from './action-listener';
 
 export type WorkerLabels = Record<string, string | number | undefined>;
 

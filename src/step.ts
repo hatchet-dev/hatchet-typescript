@@ -178,7 +178,7 @@ export class Context<T, K = {}> {
     return defaultValue;
   }
 
-  log(message: string, level?: LogLevel): void {
+  log(message: string, level?: LogLevel) {
     const { stepRunId } = this.action;
 
     if (!stepRunId) {
@@ -224,6 +224,77 @@ export class Context<T, K = {}> {
     }
 
     await this.client.event.putStream(stepRunId, data);
+  }
+
+  /**
+   * Spawns multiple workflows.
+   *
+   * @param workflows an array of objects containing the workflow name, input data, and options for each workflow
+   * @returns a list of references to the spawned workflow runs
+   */
+  spawnWorkflows<Q = JsonValue, P = JsonValue>(
+    workflows: Array<{
+      workflow: string | Workflow;
+      input: Q;
+      options?: {
+        key?: string;
+        sticky?: boolean;
+        additionalMetadata?: Record<string, string>;
+      };
+    }>
+  ): Promise<WorkflowRunRef<P>[]> {
+    const { workflowRunId, stepRunId } = this.action;
+
+    const workflowRuns = workflows.map(({ workflow, input, options }) => {
+      let workflowName: string;
+
+      if (typeof workflow === 'string') {
+        workflowName = workflow;
+      } else {
+        workflowName = workflow.id;
+      }
+
+      const name = this.client.config.namespace + workflowName;
+
+      let key: string | undefined;
+      let sticky: boolean | undefined = false;
+      let metadata: Record<string, string> | undefined;
+
+      if (options) {
+        key = options.key;
+        sticky = options.sticky;
+        metadata = options.additionalMetadata;
+      }
+
+      if (sticky && !this.worker.hasWorkflow(name)) {
+        throw new HatchetError(
+          `Cannot run with sticky: workflow ${name} is not registered on the worker`
+        );
+      }
+
+      const resp = {
+        workflowName: name,
+        input,
+        options: {
+          parentId: workflowRunId,
+          parentStepRunId: stepRunId,
+          childKey: key,
+          childIndex: this.spawnIndex,
+          desiredWorkerId: sticky ? this.worker.id() : undefined,
+          additionalMetadata: metadata,
+        },
+      };
+      this.spawnIndex += 1;
+      return resp;
+    });
+
+    try {
+      const resp = this.client.admin.runWorkflows<Q, P>(workflowRuns);
+
+      return resp;
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
   }
 
   /**

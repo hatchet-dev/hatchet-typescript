@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.14.0",
+  "version": "0.15.1",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -17,7 +17,8 @@
   "scripts": {
     "build": "echo 'build hatchet sdk with `npn run tsc:build` to ensure it is not build during the publish step' && exit 0",
     "prepare": "npm run build",
-    "tsc:build": "tsc && resolve-tspaths",
+    "dump-version": "node -e \"console.log('export const HATCHET_VERSION = \\'' + require('./package.json').version + '\\';');\" > src/version.ts",
+    "tsc:build": "npm run dump-version && tsc && resolve-tspaths",
     "test:unit": "jest --testMatch='**/*.test.ts'",
     "test:e2e": "jest --testMatch='**/*.e2e.ts'",
     "test:unit:watch": "jest --testMatch='**/*.test.ts' --watch",
@@ -43,6 +44,9 @@
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",
     "manual:trigger": "npm run exec -- ./src/examples/manual-trigger.ts",
     "manual:meta": "npm run exec -- ./src/examples/stream-by-additional-meta.ts",
+    "bulk:trigger": "npm run exec -- ./src/examples/bulk-trigger.ts",
+    "bulk:fanout:worker": "npm run exec -- ./src/examples/bulk-fanout-worker.ts",
+    "bulk:fanout:trigger": "npm run exec -- ./src/examples/bulk-fanout-trigger.ts",
     "worker:dag": "npm run exec -- ./src/examples/dag-worker.ts",
     "worker:concurrency": "npm run exec -- ./src/examples/concurrency/cancel-in-progress/concurrency-worker.ts",
     "event:concurrency": "npm run exec -- ./src/examples/concurrency/cancel-in-progress/concurrency-event.ts",
@@ -54,7 +58,8 @@
     "worker:logger": "npm run exec -- ./src/examples/logger.ts",
     "api": "npm run exec -- ./src/examples/api.ts",
     "prepublish": "cp package.json dist/package.json;",
-    "publish:ci": "rm -rf ./dist && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
+    "publish:ci": "rm -rf ./dist && npm run dump-version && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks",
+    "publish:ci:alpha": "rm -rf ./dist && npm run dump-version && npm run tsc:build && npm run prepublish && cd dist && npm publish --access public --no-git-checks --tag alpha",
     "generate-docs": "typedoc"
   },
   "keywords": [],

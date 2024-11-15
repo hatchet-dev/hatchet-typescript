@@ -74,12 +74,6 @@ export class GrpcPooledListener {
           emitter.responseEmitter.emit('response', event);
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
             delete this.subscribers[event.workflowRunId];
-            if (Object.keys(this.subscribers).length === 0) {
-              // FIXME it would be better to cleanup on parent complete
-              this.client.logger.debug('All subscriptions finished, cleaning up listener');
-              this.signal.abort();
-              this.onFinish();
-            }
           }
         }
       }
@@ -97,10 +91,8 @@ export class GrpcPooledListener {
       this.client.logger.debug(
         `Child listener loop exited with ${Object.keys(this.subscribers).length} subscribers`
       );
-      if (Object.keys(this.subscribers).length !== 0) {
-        this.client.logger.debug(`Restarting child listener retry ${retries + 1}`);
-        this.init(retryCount + 1);
-      }
+      this.client.logger.debug(`Restarting child listener retry ${retryCount + 1}`);
+      this.init(retryCount + 1);
     }
   }
 

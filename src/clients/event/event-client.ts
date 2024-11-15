@@ -93,7 +93,7 @@ export class EventClient {
     }
   }
 
-  async putLog(stepRunId: string, log: string, level?: LogLevel) {
+  putLog(stepRunId: string, log: string, level?: LogLevel) {
     const createdAt = new Date();
 
     if (log.length > 1_000) {

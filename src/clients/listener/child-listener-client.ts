@@ -46,6 +46,7 @@ export class GrpcPooledListener {
   }
 
   private async init(retries = 0) {
+    let retryCount = retries;
     const MAX_RETRY_INTERVAL = 5000; // 5 seconds in milliseconds
     const BASE_RETRY_INTERVAL = 100; // 0.1 seconds in milliseconds
 
@@ -66,6 +67,8 @@ export class GrpcPooledListener {
       if (retries > 0) setTimeout(() => this.replayRequests(), 100);
 
       for await (const event of this.listener) {
+        retryCount = 0;
+
         const emitter = this.subscribers[event.workflowRunId];
         if (emitter) {
           emitter.responseEmitter.emit('response', event);
@@ -91,9 +94,12 @@ export class GrpcPooledListener {
     } finally {
       // it is possible the server hangs up early,
       // restart the listener if we still have subscribers
-      this.client.logger.debug('Child listener finally');
+      this.client.logger.debug(
+        `Child listener loop exited with ${Object.keys(this.subscribers).length} subscribers`
+      );
       if (Object.keys(this.subscribers).length !== 0) {
-        this.init(retries + 1);
+        this.client.logger.debug(`Restarting child listener retry ${retries + 1}`);
+        this.init(retryCount + 1);
       }
     }
   }

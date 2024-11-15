@@ -53,7 +53,7 @@ export class DispatcherClient {
     const registration = await this.client.register({
       ...options,
       labels: options.labels ? mapLabels(options.labels) : undefined,
-      runtimeInfo: await this.getRuntimeInfo(),
+      runtimeInfo: this.getRuntimeInfo(),
     });
 
     return new ActionListener(this, registration.workerId);

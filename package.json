@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.15.0",
+  "version": "0.16.0-alpha.4",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -23,6 +23,7 @@
     "test:unit:watch": "jest --testMatch='**/*.test.ts' --watch",
     "generate": "pnpm run '/generate-.*/'",
     "generate-api": "npx --yes swagger-cli bundle ./hatchet/api-contracts/openapi/openapi.yaml --outfile openapi.yaml --type yaml && npx swagger-typescript-api -p openapi.yaml -o src/clients/rest/generated -n hatchet.ts --modular --axios",
+    "generate-cloud-api": "npx --yes swagger-cli bundle ./hatchet-cloud/api-contracts/openapi/openapi.yaml --outfile openapi.yaml --type yaml && npx swagger-typescript-api -p openapi.yaml -o src/clients/rest/generated/cloud -n hatchet.ts --modular --axios",
     "generate-protoc": "./generate-protoc.sh",
     "lint:check": "npm run eslint:check && npm run prettier:check",
     "lint:fix": "npm run eslint:fix && npm run prettier:fix",
@@ -38,6 +39,7 @@
     "example:rate": "npm run exec -- ./src/examples/rate-limit/events.ts",
     "worker:fanout": "npm run exec -- ./src/examples/fanout-worker.ts",
     "worker:simple": "npm run exec -- ./src/examples/simple-worker.ts",
+    "worker:managed": "npm run exec -- ./src/examples/managed-worker.ts",
     "worker:affinity": "npm run exec -- ./src/examples/affinity-workers.ts",
     "worker:sticky": "npm run exec -- ./src/examples/sticky-worker.ts",
     "worker:on-failure": "npm run exec -- ./src/examples/on-failure.ts",

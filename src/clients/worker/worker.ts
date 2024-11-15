@@ -21,10 +21,19 @@ import {
 import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
+import { z } from 'zod';
 import { Context, CreateStep, mapRateLimit, StepRunFunction } from '../../step';
 import { WorkerLabels } from '../dispatcher/dispatcher-client';
+import { ManagedCompute } from './compute/managed-compute';
+import { ComputeSchema } from './compute/compute-config';
 
-export type ActionRegistry = Record<Action['actionId'], Function>;
+type ActionFunction = StepRunFunction<any, any> | ((ctx: any) => string | Promise<string>);
+type ActionRegistryRecord = {
+  func: ActionFunction;
+  compute?: z.infer<typeof ComputeSchema>;
+};
+
+export type ActionRegistry = Record<Action['actionId'], ActionRegistryRecord>;
 
 export interface WorkerOpts {
   name: string;
@@ -80,31 +89,44 @@ export class Worker {
 
   private registerActions(workflow: Workflow) {
     const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
-      acc[`${workflow.id}:${step.name}`] = step.run;
+      // Only register actions that are in the runnable_actions list
+      if (
+        !this.client.config.runnable_actions ||
+        this.client.config.runnable_actions.includes(`${workflow.id}:${step.name}`)
+      ) {
+        acc[`${workflow.id}:${step.name}`] = {
+          func: step.run,
+          compute: step.compute,
+        };
+      }
       return acc;
     }, {});
 
-    const onFailureAction = workflow.onFailure
+    const onFailureAction: Record<string, ActionRegistryRecord> = workflow.onFailure
       ? {
-          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: workflow.onFailure.run,
+          [`${workflow.id}-on-failure:${workflow.onFailure.name}`]: {
+            func: workflow.onFailure.run,
+            compute: workflow.onFailure.compute,
+          },
         }
       : {};
+
+    const concurrencyAction: Record<string, ActionRegistryRecord> =
+      workflow.concurrency?.name && workflow.concurrency.key
+        ? {
+            [`${workflow.id}:${workflow.concurrency.name}`]: {
+              func: workflow.concurrency.key,
+              compute: undefined,
+            },
+          }
+        : {};
 
     this.action_registry = {
       ...this.action_registry,
       ...newActions,
       ...onFailureAction,
+      ...concurrencyAction,
     };
-
-    this.action_registry =
-      workflow.concurrency?.name && workflow.concurrency.key
-        ? {
-            ...this.action_registry,
-            [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
-          }
-        : {
-            ...this.action_registry,
-          };
   }
 
   getHandler(workflows: Workflow[]) {
@@ -218,8 +240,15 @@ export class Worker {
     this.registerActions(workflow);
   }
 
-  registerAction<T, K>(actionId: string, action: StepRunFunction<T, K>) {
-    this.action_registry[actionId] = action;
+  registerAction<T, K>(
+    actionId: string,
+    action: StepRunFunction<T, K>,
+    compute?: z.infer<typeof ComputeSchema>
+  ) {
+    this.action_registry[actionId] = {
+      func: action,
+      compute,
+    };
   }
 
   async handleStartStepRun(action: Action) {
@@ -237,7 +266,7 @@ export class Worker {
       }
 
       const run = async () => {
-        return step(context);
+        return step.func(context);
       };
 
       const success = async (result: any) => {
@@ -351,7 +380,7 @@ export class Worker {
       }
 
       const run = async () => {
-        return step(context);
+        return step.func(context);
       };
 
       const success = (result: any) => {
@@ -507,6 +536,9 @@ export class Worker {
   async start() {
     // ensure all workflows are registered
     await Promise.all(this.registeredWorkflowPromises);
+
+    const managedCompute = new ManagedCompute(this.action_registry, this.client, this.maxRuns);
+    await managedCompute.cloudRegister();
 
     try {
       this.listener = await this.client.dispatcher.getActionListener({

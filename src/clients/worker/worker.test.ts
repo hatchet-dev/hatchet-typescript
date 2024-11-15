@@ -106,7 +106,7 @@ describe('Worker', () => {
       const startSpy = jest.fn().mockReturnValue({ data: 4 });
 
       worker.action_registry = {
-        [mockStart.actionId]: startSpy,
+        [mockStart.actionId]: { func: startSpy },
       };
 
       worker.handleStartStepRun(mockStart);
@@ -139,7 +139,7 @@ describe('Worker', () => {
       const startSpy = jest.fn().mockRejectedValue(new Error('ERROR'));
 
       worker.action_registry = {
-        [mockStart.actionId]: startSpy,
+        [mockStart.actionId]: { func: startSpy },
       };
 
       worker.handleStartStepRun(mockStart);

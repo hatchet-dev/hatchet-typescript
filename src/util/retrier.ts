@@ -1,8 +1,9 @@
 import { Logger } from './logger';
 import sleep from './sleep';
 
-const DEFAULT_RETRY_INTERVAL = 5; // seconds
-const DEFAULT_RETRY_COUNT = 5;
+const DEFAULT_RETRY_INTERVAL = 1; // seconds
+const DEFAULT_RETRY_COUNT = 8;
+const MAX_JITTER = 400; // milliseconds
 
 export async function retrier<T>(
   fn: () => Promise<T>,
@@ -19,7 +20,13 @@ export async function retrier<T>(
     } catch (e: any) {
       lastError = e;
       logger.error(`Error: ${e.message}`);
-      await sleep(interval * 1000);
+
+      // Calculate exponential backoff with random jitter
+      const exponentialDelay = interval * 2 ** i * 1000;
+      const jitter = Math.random() * MAX_JITTER;
+      const totalDelay = exponentialDelay + jitter;
+
+      await sleep(totalDelay);
     }
   }
 

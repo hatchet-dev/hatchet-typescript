@@ -9,9 +9,6 @@ import { isAbortError } from 'abort-controller-x';
 import sleep from '@hatchet/util/sleep';
 import { ListenerClient } from './listener-client';
 
-const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
-const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 20;
-
 export class Streamable {
   listener: AsyncIterable<WorkflowRunEvent>;
   id: string;
@@ -49,10 +46,13 @@ export class GrpcPooledListener {
   }
 
   private async init(retries = 0) {
-    if (retries > DEFAULT_EVENT_LISTENER_RETRY_COUNT) return;
+    const MAX_RETRY_INTERVAL = 5000; // 5 seconds in milliseconds
+    const BASE_RETRY_INTERVAL = 100; // 0.1 seconds in milliseconds
+
     if (retries > 0) {
-      this.client.logger.info(`Retrying in ... ${DEFAULT_EVENT_LISTENER_RETRY_INTERVAL} seconds`);
-      await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL * 1000);
+      const backoffTime = Math.min(BASE_RETRY_INTERVAL * 2 ** (retries - 1), MAX_RETRY_INTERVAL);
+      this.client.logger.info(`Retrying in ... ${backoffTime / 1000} seconds`);
+      await sleep(backoffTime);
     }
 
     try {

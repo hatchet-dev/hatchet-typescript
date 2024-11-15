@@ -17,4 +17,4 @@ openapi.yaml
 
 .vscode
 
-version.ts
+/src/version.ts

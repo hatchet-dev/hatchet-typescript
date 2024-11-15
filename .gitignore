@@ -16,3 +16,5 @@ openapi.yaml
 .idea
 
 .vscode
+
+version.ts

@@ -178,7 +178,7 @@ export class Context<T, K = {}> {
     return defaultValue;
   }
 
-  log(message: string, level?: LogLevel): void {
+  log(message: string, level?: LogLevel) {
     const { stepRunId } = this.action;
 
     if (!stepRunId) {

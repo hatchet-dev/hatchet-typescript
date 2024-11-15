@@ -93,23 +93,26 @@ export class EventClient {
     }
   }
 
-  putLog(stepRunId: string, log: string, level?: LogLevel) {
+  async putLog(stepRunId: string, log: string, level?: LogLevel) {
     const createdAt = new Date();
 
-    // retrier(
-    //   async () =>
-    //     this.client.putLog({
-    //       stepRunId,
-    //       createdAt,
-    //       message: log,
-    //       level: level || LogLevel.INFO,
-    //     }),
-    //   this.logger
-    // ).catch((e: any) => {
-    //   // log a warning, but this is not a fatal error
-    //   console.error(e);
-    //   // this.logger.warn(`Could not put log: ${e.message.substring(0, 100)}`);
-    // });
+    if (log.length > 1_000) {
+      this.logger.warn(`log is too long, skipping: ${log.length} characters`);
+      return;
+    }
+
+    //  fire and forget the log
+    this.client
+      .putLog({
+        stepRunId,
+        createdAt,
+        message: log,
+        level: level || LogLevel.INFO,
+      })
+      .catch((e: any) => {
+        // log a warning, but this is not a fatal error
+        this.logger.warn(`Could not put log: ${e.message}`);
+      });
   }
 
   putStream(stepRunId: string, data: string | Uint8Array) {

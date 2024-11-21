@@ -89,16 +89,14 @@ export class WebhookHandler {
   expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
       if (req.method === 'GET') {
-        res.sendStatus(200);
-        res.send(okMessage);
+        res.sendStatus(200).send(okMessage);
         return;
       }
 
       if (req.method === 'PUT') {
         this.getHealthcheckResponse(req.body, req.headers['x-hatchet-signature'], secret)
           .then((resp) => {
-            res.sendStatus(200);
-            res.json(resp);
+            res.sendStatus(200).json(resp);
           })
           .catch((err) => {
             res.sendStatus(500);
@@ -108,12 +106,17 @@ export class WebhookHandler {
       }
 
       if (req.method !== 'POST') {
-        res.sendStatus(405);
-        res.json({ error: 'Method not allowed' });
+        res.sendStatus(405).json({ error: 'Method not allowed' });
         return;
       }
 
-      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
+      let action = req.body;
+
+      if (typeof action !== 'string') {
+        action = JSON.stringify(action);
+      }
+
+      this.handle(action, req.headers['x-hatchet-signature'], secret)
         .then(() => {
           res.sendStatus(200);
         })

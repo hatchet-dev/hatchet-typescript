@@ -94,7 +94,13 @@ export class WebhookHandler {
       }
 
       if (req.method === 'PUT') {
-        this.getHealthcheckResponse(req.body, req.headers['x-hatchet-signature'], secret)
+        let { body } = req;
+
+        if (typeof body !== 'string') {
+          body = JSON.stringify(body);
+        }
+
+        this.getHealthcheckResponse(body, req.headers['x-hatchet-signature'], secret)
           .then((resp) => {
             res.sendStatus(200).json(resp);
           })

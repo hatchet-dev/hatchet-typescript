@@ -4,6 +4,7 @@ import { Api } from '@hatchet/clients/rest';
 import { CronWorkflows, CronWorkflowsList } from '@hatchet/clients/rest/generated/data-contracts';
 import { z } from 'zod';
 import { Workflow } from '@hatchet/workflow';
+import { AxiosError } from 'axios';
 import { ClientConfig } from '../../client-config';
 
 /**
@@ -67,6 +68,7 @@ export class CronClient {
   async create(workflow: string | Workflow, cron: CreateCronInput): Promise<CronWorkflows> {
     const workflowId = typeof workflow === 'string' ? workflow : workflow.id;
 
+    console.log('workflowId', workflowId);
     // Validate cron input with zod schema
     try {
       const parsedCron = CreateCronTriggerSchema.parse(cron);
@@ -81,6 +83,11 @@ export class CronClient {
       if (err instanceof z.ZodError) {
         throw new Error(`Invalid cron input: ${err.message}`);
       }
+
+      if (err instanceof AxiosError) {
+        throw new Error(JSON.stringify(err.response?.data.errors));
+      }
+
       throw err;
     }
   }

@@ -32,4 +32,6 @@ async function main() {
   worker.start();
 }
 
-main();
+if (require.main === module) {
+  main();
+}

@@ -1,4 +1,0 @@
-[submodule "hatchet"]
-	path = hatchet
-	url = https://github.com/hatchet-dev/hatchet.git
-	branch = main

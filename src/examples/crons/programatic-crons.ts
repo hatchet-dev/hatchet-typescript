@@ -14,6 +14,12 @@ async function main() {
     {
       name: 'customer-a-daily-report', // friendly name for the cron trigger
       expression: '0 12 * * *', // every day at noon
+      input: {
+        name: 'John Doe',
+      },
+      additionalMetadata: {
+        customerId: '123',
+      },
     }
   );
   const { id } = createdCron.metadata; // id which you can later use to reference the cron trigger

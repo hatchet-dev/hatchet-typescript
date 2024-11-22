@@ -8,7 +8,7 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const workflow: Workflow = {
+export const simpleWorkflow: Workflow = {
   id: 'simple-workflow',
   description: 'test',
   on: {
@@ -39,8 +39,10 @@ const workflow: Workflow = {
 
 async function main() {
   const worker = await hatchet.worker('example-worker');
-  await worker.registerWorkflow(workflow);
+  await worker.registerWorkflow(simpleWorkflow);
   worker.start();
 }
 
-main();
+if (require.main === module) {
+  main();
+}

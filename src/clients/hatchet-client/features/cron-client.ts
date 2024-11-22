@@ -5,7 +5,7 @@ import { CronWorkflows, CronWorkflowsList } from '@hatchet/clients/rest/generate
 import { z } from 'zod';
 import { Workflow } from '@hatchet/workflow';
 import { AxiosError } from 'axios';
-import { ClientConfig } from '../../client-config';
+import { ClientConfig } from '@hatchet/clients/hatchet-client/client-config';
 
 /**
  * Schema for creating a Cron Trigger.

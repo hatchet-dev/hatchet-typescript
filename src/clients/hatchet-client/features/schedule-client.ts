@@ -57,7 +57,7 @@ export class ScheduleClient {
 
   /**
    * Creates a new Scheduled Run.
-   * @param workflow - The workflow identifier or Workflow object.
+   * @param workflow - The workflow name or Workflow object.
    * @param scheduledRun - The input data for creating the Scheduled Run.
    * @returns A promise that resolves to the created ScheduledWorkflows object.
    * @throws Will throw an error if the input is invalid or the API call fails.

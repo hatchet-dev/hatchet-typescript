@@ -10,7 +10,6 @@ openapi.yaml
 
 **/.env
 
-.gitmodules
 /hatchet
 
 .idea

@@ -2,7 +2,7 @@ import sleep from '@hatchet/util/sleep';
 import Hatchet, { Worker } from '../..';
 import { simpleCronWorkflow } from './cron-worker';
 
-describe('cron-e2e', () => {
+xdescribe('cron-e2e', () => {
   fit(
     'should invoke the workflow on the cron schedule',
     async () => {

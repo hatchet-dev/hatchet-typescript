@@ -2,6 +2,8 @@
 
 OUT_DIR="./src/protoc"
 
+git submodule update --remote --merge
+
 if [ -d "./hatchet" ]; then
     IN_DIR="./hatchet/api-contracts"
 else

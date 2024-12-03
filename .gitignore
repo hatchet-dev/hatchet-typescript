@@ -10,8 +10,6 @@ openapi.yaml
 
 **/.env
 
-/hatchet
-
 .idea
 
 .vscode

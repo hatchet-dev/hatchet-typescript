@@ -19,11 +19,15 @@ import {
   CancelEventRequest,
   CreateAPITokenRequest,
   CreateAPITokenResponse,
+  CreateCronWorkflowTriggerRequest,
   CreateEventRequest,
   CreateSNSIntegrationRequest,
   CreateTenantAlertEmailGroupRequest,
   CreateTenantInviteRequest,
   CreateTenantRequest,
+  CronWorkflows,
+  CronWorkflowsList,
+  CronWorkflowsOrderByField,
   Event,
   EventData,
   EventKey,
@@ -49,6 +53,11 @@ import {
   ReplayWorkflowRunsRequest,
   ReplayWorkflowRunsResponse,
   RerunStepRunRequest,
+  ScheduledRunStatus,
+  ScheduledWorkflows,
+  ScheduledWorkflowsList,
+  ScheduledWorkflowsOrderByField,
+  ScheduleWorkflowRunRequest,
   SNSIntegration,
   StepRun,
   StepRunArchiveList,
@@ -1124,6 +1133,242 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
       ...params,
     });
   /**
+   * @description Schedule a new workflow run for a tenant
+   *
+   * @tags Workflow Run
+   * @name ScheduledWorkflowRunCreate
+   * @summary Trigger workflow run
+   * @request POST:/api/v1/tenants/{tenant}/workflows/{workflow}/scheduled
+   * @secure
+   */
+  scheduledWorkflowRunCreate = (
+    tenant: string,
+    workflow: string,
+    data: ScheduleWorkflowRunRequest,
+    params: RequestParams = {}
+  ) =>
+    this.request<ScheduledWorkflows, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/${workflow}/scheduled`,
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Get all scheduled workflow runs for a tenant
+   *
+   * @tags Workflow
+   * @name WorkflowScheduledList
+   * @summary Get scheduled workflow runs
+   * @request GET:/api/v1/tenants/{tenant}/workflows/scheduled
+   * @secure
+   */
+  workflowScheduledList = (
+    tenant: string,
+    query?: {
+      /**
+       * The number to skip
+       * @format int64
+       */
+      offset?: number;
+      /**
+       * The number to limit by
+       * @format int64
+       */
+      limit?: number;
+      /** The order by field */
+      orderByField?: ScheduledWorkflowsOrderByField;
+      /** The order by direction */
+      orderByDirection?: WorkflowRunOrderByDirection;
+      /**
+       * The workflow id to get runs for.
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      workflowId?: string;
+      /**
+       * The parent workflow run id
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      parentWorkflowRunId?: string;
+      /**
+       * The parent step run id
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      parentStepRunId?: string;
+      /**
+       * A list of metadata key value pairs to filter by
+       * @example ["key1:value1","key2:value2"]
+       */
+      additionalMetadata?: string[];
+      /** A list of scheduled run statuses to filter by */
+      statuses?: ScheduledRunStatus[];
+    },
+    params: RequestParams = {}
+  ) =>
+    this.request<ScheduledWorkflowsList, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/scheduled`,
+      method: 'GET',
+      query: query,
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Get a scheduled workflow run for a tenant
+   *
+   * @tags Workflow
+   * @name WorkflowScheduledGet
+   * @summary Get scheduled workflow run
+   * @request GET:/api/v1/tenants/{tenant}/workflows/scheduled/{scheduled-workflow-run}
+   * @secure
+   */
+  workflowScheduledGet = (
+    tenant: string,
+    scheduledWorkflowRun: string,
+    params: RequestParams = {}
+  ) =>
+    this.request<ScheduledWorkflows, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/scheduled/${scheduledWorkflowRun}`,
+      method: 'GET',
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Delete a scheduled workflow run for a tenant
+   *
+   * @tags Workflow
+   * @name WorkflowScheduledDelete
+   * @summary Delete scheduled workflow run
+   * @request DELETE:/api/v1/tenants/{tenant}/workflows/scheduled/{scheduled-workflow-run}
+   * @secure
+   */
+  workflowScheduledDelete = (
+    tenant: string,
+    scheduledWorkflowRun: string,
+    params: RequestParams = {}
+  ) =>
+    this.request<void, APIErrors | APIError>({
+      path: `/api/v1/tenants/${tenant}/workflows/scheduled/${scheduledWorkflowRun}`,
+      method: 'DELETE',
+      secure: true,
+      ...params,
+    });
+  /**
+   * @description Create a new cron job workflow trigger for a tenant
+   *
+   * @tags Workflow Run
+   * @name CronWorkflowTriggerCreate
+   * @summary Create cron job workflow trigger
+   * @request POST:/api/v1/tenants/{tenant}/workflows/{workflow}/crons
+   * @secure
+   */
+  cronWorkflowTriggerCreate = (
+    tenant: string,
+    workflow: string,
+    data: CreateCronWorkflowTriggerRequest,
+    params: RequestParams = {}
+  ) =>
+    this.request<CronWorkflows, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/${workflow}/crons`,
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Get all cron job workflow triggers for a tenant
+   *
+   * @tags Workflow
+   * @name CronWorkflowList
+   * @summary Get cron job workflows
+   * @request GET:/api/v1/tenants/{tenant}/workflows/crons
+   * @secure
+   */
+  cronWorkflowList = (
+    tenant: string,
+    query?: {
+      /**
+       * The number to skip
+       * @format int64
+       */
+      offset?: number;
+      /**
+       * The number to limit by
+       * @format int64
+       */
+      limit?: number;
+      /**
+       * The workflow id to get runs for.
+       * @format uuid
+       * @minLength 36
+       * @maxLength 36
+       */
+      workflowId?: string;
+      /**
+       * A list of metadata key value pairs to filter by
+       * @example ["key1:value1","key2:value2"]
+       */
+      additionalMetadata?: string[];
+      /** The order by field */
+      orderByField?: CronWorkflowsOrderByField;
+      /** The order by direction */
+      orderByDirection?: WorkflowRunOrderByDirection;
+    },
+    params: RequestParams = {}
+  ) =>
+    this.request<CronWorkflowsList, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/crons`,
+      method: 'GET',
+      query: query,
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Get a cron job workflow run for a tenant
+   *
+   * @tags Workflow
+   * @name WorkflowCronGet
+   * @summary Get cron job workflow run
+   * @request GET:/api/v1/tenants/{tenant}/workflows/crons/{cron-workflow}
+   * @secure
+   */
+  workflowCronGet = (tenant: string, cronWorkflow: string, params: RequestParams = {}) =>
+    this.request<CronWorkflows, APIErrors>({
+      path: `/api/v1/tenants/${tenant}/workflows/crons/${cronWorkflow}`,
+      method: 'GET',
+      secure: true,
+      format: 'json',
+      ...params,
+    });
+  /**
+   * @description Delete a cron job workflow run for a tenant
+   *
+   * @tags Workflow
+   * @name WorkflowCronDelete
+   * @summary Delete cron job workflow run
+   * @request DELETE:/api/v1/tenants/{tenant}/workflows/crons/{cron-workflow}
+   * @secure
+   */
+  workflowCronDelete = (tenant: string, cronWorkflow: string, params: RequestParams = {}) =>
+    this.request<void, APIErrors | APIError>({
+      path: `/api/v1/tenants/${tenant}/workflows/crons/${cronWorkflow}`,
+      method: 'DELETE',
+      secure: true,
+      ...params,
+    });
+  /**
    * @description Cancel a batch of workflow runs
    *
    * @tags Workflow Run
@@ -1572,7 +1817,7 @@ export class Api<SecurityDataType = unknown> extends HttpClient<SecurityDataType
    *
    * @tags Workflow
    * @name WorkflowRunGetMetrics
-   * @summary Get workflow runs
+   * @summary Get workflow runs metrics
    * @request GET:/api/v1/tenants/{tenant}/workflows/runs/metrics
    * @secure
    */

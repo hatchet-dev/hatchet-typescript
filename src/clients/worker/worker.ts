@@ -204,6 +204,8 @@ export class Worker {
               retries: step.retries || 0,
               rateLimits: mapRateLimit(step.rate_limits),
               workerLabels: toPbWorkerLabel(step.worker_labels),
+              backoffFactor: step.backoff?.factor,
+              backoffMaxSeconds: step.backoff?.maxSeconds,
             })),
           },
         ],

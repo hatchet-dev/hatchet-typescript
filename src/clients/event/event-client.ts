@@ -85,9 +85,9 @@ export class EventClient {
     };
 
     try {
-      const events = await retrier(async () => this.client.bulkPush(req), this.logger);
+      const res = await retrier(async () => this.client.bulkPush(req), this.logger);
       this.logger.info(`Bulk events pushed for type: ${namespacedType}`);
-      return events;
+      return res;
     } catch (e: any) {
       throw new HatchetError(e.message);
     }

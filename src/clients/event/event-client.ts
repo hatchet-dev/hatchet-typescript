@@ -39,7 +39,7 @@ export class EventClient {
     this.logger = new Logger(`Dispatcher`, config.log_level);
   }
 
-  async push<T>(type: string, input: T, options: PushEventOptions = {}) {
+  push<T>(type: string, input: T, options: PushEventOptions = {}) {
     const namespacedType = `${this.config.namespace ?? ''}${type}`;
 
     const req: PushEventRequest = {
@@ -52,7 +52,7 @@ export class EventClient {
     };
 
     try {
-      const e = await retrier(async () => this.client.push(req), this.logger);
+      const e = retrier(async () => this.client.push(req), this.logger);
       this.logger.info(`Event pushed: ${namespacedType}`);
       return e;
     } catch (e: any) {
@@ -60,7 +60,7 @@ export class EventClient {
     }
   }
 
-  async bulkPush<T>(type: string, inputs: EventWithMetadata<T>[], options: PushEventOptions = {}) {
+  bulkPush<T>(type: string, inputs: EventWithMetadata<T>[], options: PushEventOptions = {}) {
     const namespacedType = `${this.config.namespace ?? ''}${type}`;
 
     const events = inputs.map((input) => {
@@ -85,7 +85,7 @@ export class EventClient {
     };
 
     try {
-      const res = await retrier(async () => this.client.bulkPush(req), this.logger);
+      const res = retrier(async () => this.client.bulkPush(req), this.logger);
       this.logger.info(`Bulk events pushed for type: ${namespacedType}`);
       return res;
     } catch (e: any) {

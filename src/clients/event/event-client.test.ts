@@ -47,7 +47,7 @@ describe('EventClient', () => {
     );
   });
 
-  it('should push events', () => {
+  it('should push events', async () => {
     const clientSpy = jest.spyOn(client.client, 'push').mockResolvedValue({
       tenantId: 'x',
       eventId: 'y',
@@ -56,7 +56,7 @@ describe('EventClient', () => {
       payload: 'string',
     });
 
-    client.push('type', { foo: 'bar' });
+    await client.push('type', { foo: 'bar' });
 
     expect(clientSpy).toHaveBeenCalledWith({
       key: 'type',
@@ -65,15 +65,15 @@ describe('EventClient', () => {
     });
   });
 
-  it('should throw an error when push fails', () => {
+  it('should throw an error when push fails', async () => {
     const clientSpy = jest.spyOn(client.client, 'push');
     clientSpy.mockImplementation(() => {
       throw new Error('foo');
     });
 
-    expect(() => {
-      client.push('type', { foo: 'bar' });
-    }).toThrow(new HatchetError('foo'));
+    jest.spyOn(client, 'retrier').mockImplementation((fn, logger, retries, interval) => fn());
+
+    await expect(client.push('type', { foo: 'bar' })).rejects.toThrow(new HatchetError('foo'));
   });
 
   it('should bulk push events', async () => {
@@ -130,14 +130,14 @@ describe('EventClient', () => {
       throw new Error('bulk error');
     });
 
+    jest.spyOn(client, 'retrier').mockImplementation((fn, logger, retries, interval) => fn());
+
     const events = [
       { payload: { foo: 'bar1' }, additionalMetadata: { user_id: 'user1' } },
       { payload: { foo: 'bar2' }, additionalMetadata: { user_id: 'user2' } },
     ];
 
     // Test that an error is thrown when bulkPush fails
-    expect(() => {
-      client.bulkPush('type', events);
-    }).toThrow(new HatchetError('bulk error'));
+    await expect(client.bulkPush('type', events)).rejects.toThrow(new HatchetError('bulk error'));
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@hatchet-dev/typescript-sdk",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Background task orchestration & visibility for developers",
   "types": "dist/index.d.ts",
   "files": [
@@ -54,6 +54,7 @@
     "event:concurrency:rr": "npm run exec -- ./src/examples/concurrency/group-round-robin/concurrency-event.ts",
     "worker:playground": "npm run exec -- ./src/examples/playground.ts",
     "worker:retries": "npm run exec -- ./src/examples/retries-worker.ts",
+    "worker:retries-with-backoff": "npm run exec -- ./src/examples/retries-with-backoff.ts",
     "worker:multi-workflow": "npm run exec -- ./src/examples/multi-workflow.ts",
     "worker:logger": "npm run exec -- ./src/examples/logger.ts",
     "api": "npm run exec -- ./src/examples/api.ts",

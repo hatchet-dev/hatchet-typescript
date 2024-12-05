@@ -46,6 +46,12 @@ export const CreateStepSchema = z.object({
   retries: z.number().optional(),
   rate_limits: z.array(CreateRateLimitSchema).optional(),
   worker_labels: z.record(z.lazy(() => DesiredWorkerLabelSchema)).optional(),
+  backoff: z
+    .object({
+      factor: z.number().optional(),
+      maxSeconds: z.number().optional(),
+    })
+    .optional(),
 });
 
 export type JsonObject = { [Key in string]: JsonValue } & {

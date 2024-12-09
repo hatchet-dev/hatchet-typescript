@@ -35,11 +35,11 @@ async function getWorkflowRunId(workflowRunId: EventualWorkflowRunId): Promise<s
         throw new DedupeViolationErr(e.details);
       }
 
-      throw new Error('Invalid workflowRunId');
+      throw e;
     }
   }
 
-  throw new Error('Invalid workflowRunId');
+  throw new Error('Invalid workflowRunId: must be a string or a promise');
 }
 
 export default class WorkflowRunRef<T> {

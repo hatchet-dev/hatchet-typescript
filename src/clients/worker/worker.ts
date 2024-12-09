@@ -80,7 +80,7 @@ export class Worker {
 
   private registerActions(workflow: Workflow) {
     const newActions = workflow.steps.reduce<ActionRegistry>((acc, step) => {
-      acc[`${workflow.id}:${step.name}`] = step.run;
+      acc[`${workflow.id}:${step.name.toLowerCase()}`] = step.run;
       return acc;
     }, {});
 
@@ -100,7 +100,7 @@ export class Worker {
       workflow.concurrency?.name && workflow.concurrency.key
         ? {
             ...this.action_registry,
-            [`${workflow.id}:${workflow.concurrency.name}`]: workflow.concurrency.key,
+            [`${workflow.id}:${workflow.concurrency.name.toLowerCase()}`]: workflow.concurrency.key,
           }
         : {
             ...this.action_registry,
@@ -221,7 +221,7 @@ export class Worker {
   }
 
   registerAction<T, K>(actionId: string, action: StepRunFunction<T, K>) {
-    this.action_registry[actionId] = action;
+    this.action_registry[actionId.toLowerCase()] = action;
   }
 
   async handleStartStepRun(action: Action) {
@@ -234,6 +234,7 @@ export class Worker {
       const step = this.action_registry[actionId];
 
       if (!step) {
+        this.logger.error(`Registered actions: '${Object.keys(this.action_registry).join(', ')}'`);
         this.logger.error(`Could not find step '${actionId}'`);
         return;
       }

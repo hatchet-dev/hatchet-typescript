@@ -8,3 +8,4 @@ export * from './clients/admin';
 export * from './util/workflow-run-ref';
 
 export default Hatchet;
+export { Hatchet };

@@ -30,6 +30,7 @@ export interface EventWithMetadata<T> {
 export class EventClient {
   config: ClientConfig;
   client: EventsServiceClient;
+  retrier: typeof retrier;
 
   logger: Logger;
 
@@ -37,6 +38,7 @@ export class EventClient {
     this.config = config;
     this.client = factory.create(EventsServiceDefinition, channel);
     this.logger = new Logger(`Dispatcher`, config.log_level);
+    this.retrier = retrier;
   }
 
   push<T>(type: string, input: T, options: PushEventOptions = {}) {
@@ -52,7 +54,7 @@ export class EventClient {
     };
 
     try {
-      const e = this.client.push(req);
+      const e = this.retrier(async () => this.client.push(req), this.logger);
       this.logger.info(`Event pushed: ${namespacedType}`);
       return e;
     } catch (e: any) {
@@ -85,9 +87,9 @@ export class EventClient {
     };
 
     try {
-      const e = this.client.bulkPush(req);
+      const res = this.retrier(async () => this.client.bulkPush(req), this.logger);
       this.logger.info(`Bulk events pushed for type: ${namespacedType}`);
-      return e;
+      return res;
     } catch (e: any) {
       throw new HatchetError(e.message);
     }

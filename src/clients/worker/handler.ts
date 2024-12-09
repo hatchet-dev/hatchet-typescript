@@ -89,36 +89,45 @@ export class WebhookHandler {
   expressHandler({ secret }: HandlerOpts) {
     return (req: any, res: any) => {
       if (req.method === 'GET') {
-        res.sendStatus(200);
-        res.send(okMessage);
+        res.status(200).send(okMessage);
         return;
       }
 
       if (req.method === 'PUT') {
-        this.getHealthcheckResponse(req.body, req.headers['x-hatchet-signature'], secret)
+        let { body } = req;
+
+        if (typeof body !== 'string') {
+          body = JSON.stringify(body);
+        }
+
+        this.getHealthcheckResponse(body, req.headers['x-hatchet-signature'], secret)
           .then((resp) => {
-            res.sendStatus(200);
-            res.json(resp);
+            res.status(200).json(resp);
           })
           .catch((err) => {
-            res.sendStatus(500);
+            res.status(500);
             this.worker.logger.error(`Error handling request: ${err.message}`);
           });
         return;
       }
 
       if (req.method !== 'POST') {
-        res.sendStatus(405);
-        res.json({ error: 'Method not allowed' });
+        res.status(405).json({ error: 'Method not allowed' });
         return;
       }
 
-      this.handle(req.body, req.headers['x-hatchet-signature'], secret)
+      let action = req.body;
+
+      if (typeof action !== 'string') {
+        action = JSON.stringify(action);
+      }
+
+      this.handle(action, req.headers['x-hatchet-signature'], secret)
         .then(() => {
-          res.sendStatus(200);
+          res.status(200);
         })
         .catch((err) => {
-          res.sendStatus(500);
+          res.status(500);
           this.worker.logger.error(`Error handling request: ${err.message}`);
         });
     };

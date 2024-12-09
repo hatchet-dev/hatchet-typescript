@@ -60,6 +60,7 @@ describe('Worker', () => {
         version: 'v0.1.0',
         order: 1,
         workflowId: 'workflow1',
+        scheduledWorkflows: [],
         createdAt: undefined,
         updatedAt: undefined,
       });

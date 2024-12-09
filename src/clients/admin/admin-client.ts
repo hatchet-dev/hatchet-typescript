@@ -1,5 +1,6 @@
 import { Channel, ClientFactory } from 'nice-grpc';
 import {
+  BulkTriggerWorkflowRequest,
   CreateWorkflowVersionOpts,
   RateLimitDuration,
   WorkflowServiceClient,
@@ -26,6 +27,17 @@ type WorkflowMetricsQuery = {
   groupKey?: string;
 };
 
+export type WorkflowRun<T = object> = {
+  workflowName: string;
+  input: T;
+  options?: {
+    parentId?: string | undefined;
+    parentStepRunId?: string | undefined;
+    childIndex?: number | undefined;
+    childKey?: string | undefined;
+    additionalMetadata?: Record<string, string> | undefined;
+  };
+};
 /**
  * AdminClient is a client for interacting with the Hatchet Admin API. This allows you to configure, trigger,
  * and monitor workflows.
@@ -173,6 +185,64 @@ export class AdminClient {
       });
 
       return new WorkflowRunRef<P>(resp, this.listenerClient, options?.parentId);
+    } catch (e: any) {
+      throw new HatchetError(e.message);
+    }
+  }
+  /**
+   * Run multiple workflows runs with the given input and options. This will create new workflow runs and return their IDs.
+   * Order is preserved in the response.
+   * @param workflowRuns an array of objects containing the workflow name, input, and options for each workflow run
+   * @returns an array of workflow run references
+   */
+  runWorkflows<Q = object, P = object>(
+    workflowRuns: Array<{
+      workflowName: string;
+      input: Q;
+      options?: {
+        parentId?: string | undefined;
+        parentStepRunId?: string | undefined;
+        childIndex?: number | undefined;
+        childKey?: string | undefined;
+        additionalMetadata?: Record<string, string> | undefined;
+        desiredWorkerId?: string | undefined;
+      };
+    }>
+  ): Promise<WorkflowRunRef<P>[]> {
+    // Prepare workflows to be triggered in bulk
+    const workflowRequests = workflowRuns.map(({ workflowName, input, options }) => {
+      let computedName = workflowName;
+
+      if (this.config.namespace && !workflowName.startsWith(this.config.namespace)) {
+        computedName = this.config.namespace + workflowName;
+      }
+
+      const inputStr = JSON.stringify(input);
+
+      return {
+        name: computedName,
+        input: inputStr,
+        ...options,
+        additionalMetadata: options?.additionalMetadata
+          ? JSON.stringify(options.additionalMetadata)
+          : undefined,
+      };
+    });
+
+    try {
+      // Call the bulk trigger workflow method
+      const bulkTriggerWorkflowResponse = this.client.bulkTriggerWorkflow(
+        BulkTriggerWorkflowRequest.create({
+          workflows: workflowRequests,
+        })
+      );
+
+      return bulkTriggerWorkflowResponse.then((res) => {
+        return res.workflowRunIds.map((resp, index) => {
+          const { options } = workflowRuns[index];
+          return new WorkflowRunRef<P>(resp, this.listenerClient, options?.parentId);
+        });
+      });
     } catch (e: any) {
       throw new HatchetError(e.message);
     }

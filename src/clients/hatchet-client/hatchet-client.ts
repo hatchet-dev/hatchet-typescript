@@ -19,6 +19,8 @@ import { ClientConfig, ClientConfigSchema } from './client-config';
 import { ListenerClient } from '../listener/listener-client';
 import { Api } from '../rest/generated/Api';
 import api from '../rest';
+import { CronClient } from './features/cron-client';
+import { ScheduleClient } from './features/schedule-client';
 
 export interface HatchetClientOptions {
   config_path?: string;
@@ -71,6 +73,8 @@ export class HatchetClient {
 
   logger: Logger;
 
+  cron: CronClient;
+  schedule: ScheduleClient;
   constructor(
     config?: Partial<ClientConfig>,
     options?: HatchetClientOptions,
@@ -128,6 +132,10 @@ export class HatchetClient {
     this.logger = new Logger('HatchetClient', this.config.log_level);
 
     this.logger.info(`Initialized HatchetClient`);
+
+    // Feature Clients
+    this.cron = new CronClient(this.tenantId, this.config, this.api, this.admin);
+    this.schedule = new ScheduleClient(this.tenantId, this.config, this.api, this.admin);
   }
 
   static init(

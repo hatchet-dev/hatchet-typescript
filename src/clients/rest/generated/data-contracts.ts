@@ -360,6 +360,10 @@ export interface TenantQueueMetrics {
   queues?: Record<string, number>;
 }
 
+export interface TenantStepRunQueueMetrics {
+  queues?: Record<string, number>;
+}
+
 export interface AcceptInviteRequest {
   /**
    * @minLength 36
@@ -756,6 +760,74 @@ export interface WorkflowRunList {
   pagination?: PaginationResponse;
 }
 
+export interface ScheduledWorkflows {
+  metadata: APIResourceMeta;
+  tenantId: string;
+  workflowVersionId: string;
+  workflowId: string;
+  workflowName: string;
+  /** @format date-time */
+  triggerAt: string;
+  input?: Record<string, any>;
+  additionalMetadata?: Record<string, any>;
+  /** @format date-time */
+  workflowRunCreatedAt?: string;
+  workflowRunName?: string;
+  workflowRunStatus?: WorkflowRunStatus;
+  /**
+   * @format uuid
+   * @minLength 36
+   * @maxLength 36
+   * @example "bb214807-246e-43a5-a25d-41761d1cff9e"
+   */
+  workflowRunId?: string;
+  method: 'DEFAULT' | 'API';
+}
+
+export interface ScheduledWorkflowsList {
+  rows?: ScheduledWorkflows[];
+  pagination?: PaginationResponse;
+}
+
+export enum ScheduledWorkflowsOrderByField {
+  TriggerAt = 'triggerAt',
+  CreatedAt = 'createdAt',
+}
+
+export enum ScheduledRunStatus {
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+  QUEUED = 'QUEUED',
+  SCHEDULED = 'SCHEDULED',
+}
+
+export interface CronWorkflows {
+  metadata: APIResourceMeta;
+  tenantId: string;
+  workflowVersionId: string;
+  workflowId: string;
+  workflowName: string;
+  cron: string;
+  name?: string;
+  input?: Record<string, any>;
+  additionalMetadata?: Record<string, any>;
+  enabled: boolean;
+  method: 'DEFAULT' | 'API';
+}
+
+export interface CronWorkflowsList {
+  rows?: CronWorkflows[];
+  pagination?: PaginationResponse;
+}
+
+export enum CronWorkflowsOrderByField {
+  Name = 'name',
+  CreatedAt = 'createdAt',
+}
+
 export enum WorkflowRunOrderByField {
   CreatedAt = 'createdAt',
   StartedAt = 'startedAt',
@@ -893,6 +965,7 @@ export enum StepRunEventReason {
   SCHEDULING_TIMED_OUT = 'SCHEDULING_TIMED_OUT',
   ASSIGNED = 'ASSIGNED',
   STARTED = 'STARTED',
+  ACKNOWLEDGED = 'ACKNOWLEDGED',
   FINISHED = 'FINISHED',
   FAILED = 'FAILED',
   RETRYING = 'RETRYING',
@@ -960,6 +1033,20 @@ export interface StepRunArchive {
 export interface StepRunArchiveList {
   pagination?: PaginationResponse;
   rows?: StepRunArchive[];
+}
+
+export interface WorkerRuntimeInfo {
+  sdkVersion?: string;
+  language?: WorkerRuntimeSDKs;
+  languageVersion?: string;
+  os?: string;
+  runtimeExtra?: string;
+}
+
+export enum WorkerRuntimeSDKs {
+  GOLANG = 'GOLANG',
+  PYTHON = 'PYTHON',
+  TYPESCRIPT = 'TYPESCRIPT',
 }
 
 export interface WorkerList {
@@ -1054,6 +1141,7 @@ export interface Worker {
    * @format uuid
    */
   webhookId?: string;
+  runtimeInfo?: WorkerRuntimeInfo;
 }
 
 export interface WorkerLabel {
@@ -1110,6 +1198,20 @@ export interface RerunStepRunRequest {
 export interface TriggerWorkflowRunRequest {
   input: object;
   additionalMetadata?: object;
+}
+
+export interface ScheduleWorkflowRunRequest {
+  input: object;
+  additionalMetadata: object;
+  /** @format date-time */
+  triggerAt: string;
+}
+
+export interface CreateCronWorkflowTriggerRequest {
+  input: object;
+  additionalMetadata: object;
+  cronName: string;
+  cronExpression: string;
 }
 
 export interface CreatePullRequestFromStepRun {

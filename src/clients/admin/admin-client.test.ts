@@ -95,6 +95,7 @@ describe('AdminClient', () => {
         workflowId: 'workflow1',
         createdAt: undefined,
         updatedAt: undefined,
+        scheduledWorkflows: [],
       });
 
       await client.putWorkflow(workflow);
@@ -110,6 +111,7 @@ describe('AdminClient', () => {
         version: 'v0.0.1',
         order: 1,
         workflowId: 'string',
+        scheduledWorkflows: [],
         createdAt: undefined,
         updatedAt: undefined,
       };

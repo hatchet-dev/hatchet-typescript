@@ -9,9 +9,6 @@ import { isAbortError } from 'abort-controller-x';
 import sleep from '@hatchet/util/sleep';
 import { ListenerClient } from './listener-client';
 
-const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
-const DEFAULT_EVENT_LISTENER_RETRY_COUNT = 20;
-
 export class Streamable {
   listener: AsyncIterable<WorkflowRunEvent>;
   id: string;
@@ -49,14 +46,20 @@ export class GrpcPooledListener {
   }
 
   private async init(retries = 0) {
-    if (retries > DEFAULT_EVENT_LISTENER_RETRY_COUNT) return;
+    let retryCount = retries;
+    const MAX_RETRY_INTERVAL = 5000; // 5 seconds in milliseconds
+    const BASE_RETRY_INTERVAL = 100; // 0.1 seconds in milliseconds
+
     if (retries > 0) {
-      this.client.logger.info(`Retrying in ... ${DEFAULT_EVENT_LISTENER_RETRY_INTERVAL} seconds`);
-      await sleep(DEFAULT_EVENT_LISTENER_RETRY_INTERVAL * 1000);
+      const backoffTime = Math.min(BASE_RETRY_INTERVAL * 2 ** (retries - 1), MAX_RETRY_INTERVAL);
+      this.client.logger.info(`Retrying in ... ${backoffTime / 1000} seconds`);
+      await sleep(backoffTime);
     }
 
     try {
       this.client.logger.debug('Initializing child-listener');
+
+      this.signal = new AbortController();
       this.listener = this.client.client.subscribeToWorkflowRuns(this.request(), {
         signal: this.signal.signal,
       });
@@ -64,28 +67,32 @@ export class GrpcPooledListener {
       if (retries > 0) setTimeout(() => this.replayRequests(), 100);
 
       for await (const event of this.listener) {
+        retryCount = 0;
+
         const emitter = this.subscribers[event.workflowRunId];
         if (emitter) {
           emitter.responseEmitter.emit('response', event);
           if (event.eventType === WorkflowRunEventType.WORKFLOW_RUN_EVENT_TYPE_FINISHED) {
             delete this.subscribers[event.workflowRunId];
-            if (Object.keys(this.subscribers).length === 0) {
-              // FIXME it would be better to cleanup on parent complete
-              this.client.logger.debug('All subscriptions finished, cleaning up listener');
-              this.signal.abort();
-              this.onFinish();
-            }
           }
         }
       }
+
+      this.client.logger.debug('Child listener finished');
     } catch (e: any) {
       if (isAbortError(e)) {
         this.client.logger.debug('Child Listener aborted');
         return;
       }
-
       this.client.logger.error(`Error in child-listener: ${e.message}`);
-      this.init(retries + 1);
+    } finally {
+      // it is possible the server hangs up early,
+      // restart the listener if we still have subscribers
+      this.client.logger.debug(
+        `Child listener loop exited with ${Object.keys(this.subscribers).length} subscribers`
+      );
+      this.client.logger.debug(`Restarting child listener retry ${retryCount + 1}`);
+      this.init(retryCount + 1);
     }
   }
 

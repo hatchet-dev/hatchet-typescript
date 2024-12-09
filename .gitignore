@@ -10,8 +10,8 @@ openapi.yaml
 
 **/.env
 
-.gitmodules
-/hatchet
-
 .idea
+
 .vscode
+
+/src/version.ts

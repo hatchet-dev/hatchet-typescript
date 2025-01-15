@@ -242,11 +242,11 @@ class HatchetLogger implements Logger {
     this.log('INFO', message, '32');
   }
 
-  warn(message: string): void {
-    this.log('WARN', message, '93');
+  warn(message: string, error?: Error): void {
+    this.log('WARN', `${message} ${error}`, '93');
   }
 
-  error(message: string): void {
-    this.log('ERROR', message, '91');
+  error(message: string, error?: Error): void {
+    this.log('ERROR', `${message} ${error}`, '91');
   }
 }

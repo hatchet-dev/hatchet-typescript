@@ -4,7 +4,7 @@ import * as p from 'path';
 import { z } from 'zod';
 import { ClientConfig, ClientConfigSchema } from '@clients/hatchet-client';
 import { ChannelCredentials } from 'nice-grpc';
-import { LogLevel } from '../logger/logger';
+import { LogLevel } from '@util/logger';
 import { getAddressesFromJWT, getTenantIdFromJWT } from './token';
 
 type EnvVars =

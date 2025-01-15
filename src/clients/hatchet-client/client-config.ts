@@ -1,5 +1,6 @@
 import { ChannelCredentials } from 'nice-grpc';
 import { z } from 'zod';
+import { Logger, LogLevel } from '@util/logger';
 
 const ClientTLSConfigSchema = z.object({
   tls_strategy: z.enum(['tls', 'mtls', 'none']).optional(),
@@ -19,7 +20,9 @@ export const ClientConfigSchema = z.object({
   namespace: z.string().optional(),
 });
 
+export type LogConstructor = (context: string, logLevel?: LogLevel) => Logger;
+
 export type ClientConfig = z.infer<typeof ClientConfigSchema> & {
   credentials?: ChannelCredentials;
-};
+} & { logger: LogConstructor };
 export type ClientTLSConfig = z.infer<typeof ClientTLSConfigSchema>;

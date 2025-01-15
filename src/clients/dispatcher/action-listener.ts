@@ -4,7 +4,7 @@ import { Status } from 'nice-grpc';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import sleep from '@util/sleep';
 import HatchetError from '@util/errors/hatchet-error';
-import { HatchetLogger } from '@hatchet/util/logger';
+import { Logger } from '@hatchet/util/logger';
 
 import { DispatcherClient } from './dispatcher-client';
 import { Heartbeat } from './heartbeat/heartbeat-controller';
@@ -24,7 +24,7 @@ export class ActionListener {
   config: ClientConfig;
   client: PbDispatcherClient;
   workerId: string;
-  logger: HatchetLogger;
+  logger: Logger;
   lastConnectionAttempt: number = 0;
   retries: number = 0;
   retryInterval: number = DEFAULT_ACTION_LISTENER_RETRY_INTERVAL;
@@ -42,7 +42,7 @@ export class ActionListener {
     this.config = client.config;
     this.client = client.client;
     this.workerId = workerId;
-    this.logger = new HatchetLogger(`ActionListener`, this.config.log_level);
+    this.logger = client.config.logger(`ActionListener`, this.config.log_level);
     this.retryInterval = retryInterval;
     this.retryCount = retryCount;
     this.heartbeat = new Heartbeat(client, workerId);

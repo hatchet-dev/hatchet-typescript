@@ -13,8 +13,8 @@ import {
 } from 'nice-grpc';
 import { Workflow } from '@hatchet/workflow';
 import { Worker, WorkerOpts } from '@clients/worker';
-import HatchetLogger, { Logger } from '@util/logger/logger';
 import { AxiosRequestConfig } from 'axios';
+import { Logger, LogLevel, LogLevelEnum } from '@util/logger';
 import { ClientConfig, ClientConfigSchema } from './client-config';
 import { ListenerClient } from '../listener/listener-client';
 import { Api } from '../rest/generated/Api';
@@ -25,7 +25,6 @@ import { ScheduleClient } from './features/schedule-client';
 export interface HatchetClientOptions {
   config_path?: string;
   credentials?: ChannelCredentials;
-  logger?: Logger;
 }
 
 export const channelFactory = (config: ClientConfig, credentials: ChannelCredentials) =>
@@ -90,7 +89,18 @@ export class HatchetClient {
 
     try {
       const valid = ClientConfigSchema.parse(loaded);
-      this.config = valid;
+
+      let logConstructor = config?.logger;
+
+      if (logConstructor == null) {
+        logConstructor = (context: string, logLevel?: LogLevel) =>
+          new HatchetLogger(context, logLevel);
+      }
+
+      this.config = {
+        ...valid,
+        logger: logConstructor,
+      };
     } catch (e) {
       if (e instanceof z.ZodError) {
         throw new Error(`Invalid client config: ${e.message}`);
@@ -130,12 +140,7 @@ export class HatchetClient {
       this.listener
     );
 
-    if (options?.logger) {
-      this.logger = options.logger;
-    } else {
-      this.logger = new HatchetLogger('HatchetClient', this.config.log_level);
-    }
-
+    this.logger = this.config.logger('HatchetClient', this.config.log_level);
     this.logger.info(`Initialized HatchetClient`);
 
     // Feature Clients
@@ -196,5 +201,52 @@ export class HatchetClient {
     });
 
     return worker.getHandler(workflows);
+  }
+}
+
+class HatchetLogger implements Logger {
+  private logLevel: LogLevel;
+  private context: string;
+
+  constructor(context: string, logLevel: LogLevel = 'INFO') {
+    this.logLevel = logLevel;
+    this.context = context;
+  }
+
+  private log(level: LogLevel, message: string, color?: string): void {
+    if (LogLevelEnum[level] >= LogLevelEnum[this.logLevel]) {
+      const time = new Date().toLocaleString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      // eslint-disable-next-line no-console
+      console.log(
+        `🪓 ${process.pid} | ${time} ${color && `\x1b[${color}m`} [${level}/${this.context}] ${message}\x1b[0m`
+      );
+    }
+  }
+
+  debug(message: string): void {
+    this.log('DEBUG', message, '35');
+  }
+
+  info(message: string): void {
+    this.log('INFO', message);
+  }
+
+  green(message: string): void {
+    this.log('INFO', message, '32');
+  }
+
+  warn(message: string): void {
+    this.log('WARN', message, '93');
+  }
+
+  error(message: string): void {
+    this.log('ERROR', message, '91');
   }
 }

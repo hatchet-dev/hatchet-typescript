@@ -1,4 +1,3 @@
-import HatchetLogger from '@util/logger/logger';
 import { AdminClient } from '@hatchet/clients/admin';
 import { Api } from '@hatchet/clients/rest';
 import { CronWorkflows, CronWorkflowsList } from '@hatchet/clients/rest/generated/data-contracts';
@@ -6,6 +5,7 @@ import { z } from 'zod';
 import { Workflow } from '@hatchet/workflow';
 import { AxiosError } from 'axios';
 import { ClientConfig } from '@hatchet/clients/hatchet-client/client-config';
+import { Logger } from '@util/logger';
 
 /**
  * Schema for creating a Cron Trigger.
@@ -31,7 +31,7 @@ export type CreateCronInput = z.infer<typeof CreateCronTriggerSchema>;
  * Client for managing Cron Triggers.
  */
 export class CronClient {
-  private logger: HatchetLogger;
+  private logger: Logger;
 
   /**
    * Initializes a new instance of CronClient.
@@ -46,7 +46,7 @@ export class CronClient {
     private readonly api: Api,
     private readonly adminClient: AdminClient
   ) {
-    this.logger = new HatchetLogger('Cron', this.config.log_level);
+    this.logger = config.logger('Cron', this.config.log_level);
   }
 
   /**

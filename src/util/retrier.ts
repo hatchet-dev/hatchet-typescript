@@ -1,4 +1,4 @@
-import { HatchetLogger } from './logger';
+import { Logger } from './logger';
 import sleep from './sleep';
 
 const DEFAULT_RETRY_INTERVAL = 0.1; // seconds
@@ -7,7 +7,7 @@ const MAX_JITTER = 100; // milliseconds
 
 export async function retrier<T>(
   fn: () => Promise<T>,
-  logger: HatchetLogger,
+  logger: Logger,
   retries: number = DEFAULT_RETRY_COUNT,
   interval: number = DEFAULT_RETRY_INTERVAL
 ) {

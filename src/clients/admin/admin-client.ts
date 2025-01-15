@@ -8,7 +8,7 @@ import {
 } from '@hatchet/protoc/workflows';
 import HatchetError from '@util/errors/hatchet-error';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
-import { HatchetLogger } from '@hatchet/util/logger';
+import { Logger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 import WorkflowRunRef from '@hatchet/util/workflow-run-ref';
 
@@ -59,7 +59,7 @@ export class AdminClient {
   client: WorkflowServiceClient;
   api: Api;
   tenantId: string;
-  logger: HatchetLogger;
+  logger: Logger;
   listenerClient: ListenerClient;
 
   constructor(
@@ -74,7 +74,7 @@ export class AdminClient {
     this.client = factory.create(WorkflowServiceDefinition, channel);
     this.api = api;
     this.tenantId = tenantId;
-    this.logger = new HatchetLogger(`Admin`, config.log_level);
+    this.logger = config.logger(`Admin`, config.log_level);
     this.listenerClient = listenerClient;
   }
 

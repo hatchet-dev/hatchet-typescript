@@ -18,7 +18,7 @@ import {
   DesiredWorkerLabels,
   WorkflowConcurrencyOpts,
 } from '@hatchet/protoc/workflows';
-import { HatchetLogger } from '@hatchet/util/logger';
+import { Logger } from '@hatchet/util/logger';
 import { WebhookHandler } from '@clients/worker/handler';
 import { WebhookWorkerCreateRequest } from '@clients/rest/generated/data-contracts';
 import { Context, CreateStep, mapRateLimit, StepRunFunction } from '../../step';
@@ -47,7 +47,7 @@ export class Worker {
   contexts: Record<Action['stepRunId'], Context<any, any>> = {};
   maxRuns?: number;
 
-  logger: HatchetLogger;
+  logger: Logger;
 
   registeredWorkflowPromises: Array<Promise<any>> = [];
 
@@ -75,7 +75,7 @@ export class Worker {
     this.killing = false;
     this.handle_kill = options.handleKill === undefined ? true : options.handleKill;
 
-    this.logger = new HatchetLogger(`Worker/${this.name}`, this.client.config.log_level);
+    this.logger = client.config.logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
   private registerActions(workflow: Workflow) {

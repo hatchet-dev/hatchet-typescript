@@ -7,7 +7,7 @@ import {
 } from '@hatchet/protoc/events/events';
 import HatchetError from '@util/errors/hatchet-error';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
-import { Logger } from '@hatchet/util/logger';
+import { HatchetLogger } from '@hatchet/util/logger';
 import { retrier } from '@hatchet/util/retrier';
 
 // eslint-disable-next-line no-shadow
@@ -32,12 +32,12 @@ export class EventClient {
   client: EventsServiceClient;
   retrier: typeof retrier;
 
-  logger: Logger;
+  logger: HatchetLogger;
 
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory) {
     this.config = config;
     this.client = factory.create(EventsServiceDefinition, channel);
-    this.logger = new Logger(`Dispatcher`, config.log_level);
+    this.logger = new HatchetLogger(`Dispatcher`, config.log_level);
     this.retrier = retrier;
   }
 

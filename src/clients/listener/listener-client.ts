@@ -11,7 +11,7 @@ import {
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
-import { Logger } from '@hatchet/util/logger';
+import { HatchetLogger } from '@hatchet/util/logger';
 import sleep from '@hatchet/util/sleep';
 import { Api } from '../rest';
 import { WorkflowRunStatus } from '../rest/generated/data-contracts';
@@ -189,7 +189,7 @@ export class RunEventListener {
 export class ListenerClient {
   config: ClientConfig;
   client: PbDispatcherClient;
-  logger: Logger;
+  logger: HatchetLogger;
   api: Api;
 
   pooledListener: GrpcPooledListener | undefined;
@@ -197,7 +197,7 @@ export class ListenerClient {
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory, api: Api) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
-    this.logger = new Logger(`Listener`, config.log_level);
+    this.logger = new HatchetLogger(`Listener`, config.log_level);
     this.api = api;
   }
 

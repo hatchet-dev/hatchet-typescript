@@ -1,4 +1,4 @@
-import Logger from '@hatchet/util/logger/logger';
+import HatchetLogger from '@util/logger/logger';
 import { AdminClient } from '@hatchet/clients/admin';
 import { Api } from '@hatchet/clients/rest';
 import {
@@ -28,7 +28,7 @@ export type CreateScheduledRunInput = z.infer<typeof CreateScheduledRunTriggerSc
  * Client for managing Scheduled Runs.
  */
 export class ScheduleClient {
-  private logger: Logger;
+  private logger: HatchetLogger;
 
   /**
    * Initializes a new instance of ScheduleClient.
@@ -43,7 +43,7 @@ export class ScheduleClient {
     private readonly api: Api,
     private readonly adminClient: AdminClient
   ) {
-    this.logger = new Logger('Scheduled Run', this.config.log_level);
+    this.logger = new HatchetLogger('Scheduled Run', this.config.log_level);
   }
 
   /**

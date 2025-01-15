@@ -9,7 +9,15 @@ enum LogLevelEnum {
   ERROR = 3,
 }
 
-export class Logger {
+export interface Logger {
+  debug(message: string): void;
+  info(message: string): void;
+  green(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
+
+export class HatchetLogger implements Logger {
   private logLevel: LogLevel;
   private context: string;
 
@@ -56,4 +64,4 @@ export class Logger {
   }
 }
 
-export default Logger;
+export default HatchetLogger;

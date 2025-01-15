@@ -12,7 +12,7 @@ import {
 } from '@hatchet/protoc/dispatcher';
 import { ClientConfig } from '@clients/hatchet-client/client-config';
 import HatchetError from '@util/errors/hatchet-error';
-import { Logger } from '@hatchet/util/logger';
+import { HatchetLogger } from '@hatchet/util/logger';
 
 import { retrier } from '@hatchet/util/retrier';
 import { HATCHET_VERSION } from '@hatchet/version';
@@ -31,12 +31,12 @@ interface GetActionListenerOptions {
 export class DispatcherClient {
   config: ClientConfig;
   client: PbDispatcherClient;
-  logger: Logger;
+  logger: HatchetLogger;
 
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
-    this.logger = new Logger(`Dispatcher`, config.log_level);
+    this.logger = new HatchetLogger(`Dispatcher`, config.log_level);
   }
 
   getRuntimeInfo(): RuntimeInfo {

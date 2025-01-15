@@ -1,4 +1,4 @@
-import { Logger } from '@hatchet/util/logger';
+import { HatchetLogger } from '@hatchet/util/logger';
 import { DispatcherClient as PbDispatcherClient } from '@hatchet/protoc/dispatcher';
 import { Worker } from 'worker_threads';
 import path from 'path';
@@ -10,7 +10,7 @@ export class Heartbeat {
   config: ClientConfig;
   client: PbDispatcherClient;
   workerId: string;
-  logger: Logger;
+  logger: HatchetLogger;
 
   heartbeatWorker: Worker | undefined;
 
@@ -18,7 +18,7 @@ export class Heartbeat {
     this.config = client.config;
     this.client = client.client;
     this.workerId = workerId;
-    this.logger = new Logger(`HeartbeatController`, this.config.log_level);
+    this.logger = new HatchetLogger(`HeartbeatController`, this.config.log_level);
   }
 
   async start() {

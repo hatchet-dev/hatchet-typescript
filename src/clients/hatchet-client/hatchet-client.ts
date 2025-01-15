@@ -13,7 +13,7 @@ import {
 } from 'nice-grpc';
 import { Workflow } from '@hatchet/workflow';
 import { Worker, WorkerOpts } from '@clients/worker';
-import Logger from '@hatchet/util/logger/logger';
+import HatchetLogger, { Logger } from '@util/logger/logger';
 import { AxiosRequestConfig } from 'axios';
 import { ClientConfig, ClientConfigSchema } from './client-config';
 import { ListenerClient } from '../listener/listener-client';
@@ -25,6 +25,7 @@ import { ScheduleClient } from './features/schedule-client';
 export interface HatchetClientOptions {
   config_path?: string;
   credentials?: ChannelCredentials;
+  logger?: Logger;
 }
 
 export const channelFactory = (config: ClientConfig, credentials: ChannelCredentials) =>
@@ -129,7 +130,11 @@ export class HatchetClient {
       this.listener
     );
 
-    this.logger = new Logger('HatchetClient', this.config.log_level);
+    if (options?.logger) {
+      this.logger = options.logger;
+    } else {
+      this.logger = new HatchetLogger('HatchetClient', this.config.log_level);
+    }
 
     this.logger.info(`Initialized HatchetClient`);
 

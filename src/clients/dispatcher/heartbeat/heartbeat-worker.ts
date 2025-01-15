@@ -1,5 +1,5 @@
 import { parentPort, workerData } from 'worker_threads';
-import { Logger } from '@util/logger';
+import { HatchetLogger } from '@util/logger';
 import { ClientConfig, addTokenMiddleware, channelFactory } from '@hatchet/clients/hatchet-client';
 import { DispatcherClient as PbDispatcherClient } from '@hatchet/protoc/dispatcher';
 import { ConfigLoader } from '@hatchet/util/config-loader';
@@ -10,7 +10,7 @@ const HEARTBEAT_INTERVAL = 4000;
 
 class HeartbeatWorker {
   heartbeatInterval: any;
-  logger: Logger;
+  logger: HatchetLogger;
   client: PbDispatcherClient;
   workerId: string;
   timeLastHeartbeat = new Date().getTime();
@@ -18,7 +18,7 @@ class HeartbeatWorker {
   constructor(config: ClientConfig, workerId: string) {
     this.workerId = workerId;
 
-    this.logger = new Logger(`Heartbeat`, config.log_level);
+    this.logger = new HatchetLogger(`Heartbeat`, config.log_level);
 
     const credentials = ConfigLoader.createCredentials(config.tls_config);
     const clientFactory = createClientFactory().use(addTokenMiddleware(config.token));

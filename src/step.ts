@@ -4,7 +4,7 @@ import * as z from 'zod';
 import { HatchetTimeoutSchema, Workflow } from './workflow';
 import { Action } from './clients/dispatcher/action-listener';
 import { LogLevel } from './clients/event/event-client';
-import { Logger } from './util/logger';
+import { HatchetLogger } from './util/logger';
 import { parseJSON } from './util/parse';
 import { HatchetClient } from './clients/hatchet-client';
 import WorkflowRunRef from './util/workflow-run-ref';
@@ -106,7 +106,7 @@ export class Context<T, K = {}> {
   worker: ContextWorker;
 
   overridesData: Record<string, any> = {};
-  logger: Logger;
+  logger: HatchetLogger;
 
   spawnIndex: number = 0;
 
@@ -117,7 +117,7 @@ export class Context<T, K = {}> {
       this.action = action;
       this.client = client;
       this.worker = new ContextWorker(worker);
-      this.logger = new Logger(`Context Logger`, client.config.log_level);
+      this.logger = new HatchetLogger(`Context Logger`, client.config.log_level);
 
       // if this is a getGroupKeyRunId, the data is the workflow input
       if (action.getGroupKeyRunId !== '') {

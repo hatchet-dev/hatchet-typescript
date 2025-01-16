@@ -1,4 +1,5 @@
 import { Logger, LogLevel } from '@hatchet/util/logger';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import pino from 'pino';
 import Hatchet from '../sdk';
 import { Workflow } from '../workflow';
@@ -55,6 +56,7 @@ const workflow: Workflow = {
     {
       name: 'logger-step1',
       run: async (ctx) => {
+        // eslint-disable-next-line no-plusplus
         for (let i = 0; i < 5; i++) {
           logger.info(`log message ${i}`);
           await sleep(500);

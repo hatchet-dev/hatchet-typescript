@@ -1,4 +1,5 @@
 import { StepActionEventType } from '@hatchet/protoc/dispatcher';
+import { DEFAULT_LOGGER } from '@clients/hatchet-client/hatchet-logger';
 import { DispatcherClient } from './dispatcher-client';
 import { mockChannel, mockFactory } from '../hatchet-client/hatchet-client.test';
 
@@ -21,6 +22,7 @@ describe('DispatcherClient', () => {
         },
         api_url: 'API_URL',
         tenant_id: 'tenantId',
+        logger: DEFAULT_LOGGER,
       },
       mockChannel,
       mockFactory
@@ -45,6 +47,7 @@ describe('DispatcherClient', () => {
         },
         api_url: 'API_URL',
         tenant_id: 'tenantId',
+        logger: DEFAULT_LOGGER,
       },
       mockChannel,
       mockFactory

@@ -30,6 +30,10 @@ const workflow: Workflow = {
     run: async (ctx) => {
       // 👀 we can do things like perform cleanup logic
       // or notify a user here
+
+      // 👀 you can access the error from the failed step(s) like this
+      console.log(ctx.stepErrors());
+
       return { onFailure: 'step' };
     },
   },

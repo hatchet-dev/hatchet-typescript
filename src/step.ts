@@ -71,6 +71,7 @@ interface ContextData<T, K> {
   parents: Record<string, any>;
   triggered_by: string;
   user_data: K;
+  step_run_errors: Record<string, string>;
 }
 
 export class ContextWorker {
@@ -140,6 +141,10 @@ export class Context<T, K = {}> {
       throw new HatchetError(`Step output for '${step}' not found`);
     }
     return this.data.parents[step];
+  }
+
+  stepErrors(): Record<string, string> {
+    return this.data.step_run_errors || {};
   }
 
   triggeredByEvent(): boolean {

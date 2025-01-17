@@ -148,7 +148,7 @@ export class Context<T, K = {}> {
 
     if (Object.keys(errors).length === 0) {
       this.log(
-        'No step run errors found. This method is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10',
+        'No step run errors found. `ctx.stepRunErrors` is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10',
         LogLevel.ERROR
       );
     }

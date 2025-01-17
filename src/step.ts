@@ -152,7 +152,7 @@ export class Context<T, K = {}> {
       );
     }
 
-    return this.data.step_run_errors || {};
+    return errors;
   }
 
   triggeredByEvent(): boolean {

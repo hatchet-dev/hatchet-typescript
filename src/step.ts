@@ -147,9 +147,8 @@ export class Context<T, K = {}> {
     const errors = this.data.step_run_errors || {};
 
     if (Object.keys(errors).length === 0) {
-      this.log(
-        'No step run errors found. `ctx.stepRunErrors` is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10',
-        LogLevel.ERROR
+      this.logger.error(
+        'No step run errors found. `ctx.stepRunErrors` is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10'
       );
     }
 

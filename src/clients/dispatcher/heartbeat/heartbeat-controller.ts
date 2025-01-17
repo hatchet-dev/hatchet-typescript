@@ -25,7 +25,10 @@ export class Heartbeat {
     if (!this.heartbeatWorker) {
       this.heartbeatWorker = runThreaded(path.join(__dirname, './heartbeat-worker'), {
         workerData: {
-          config: this.config,
+          config: {
+            ...this.config,
+            logger: undefined,
+          },
           workerId: this.workerId,
         },
       });

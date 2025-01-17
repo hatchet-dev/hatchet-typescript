@@ -143,7 +143,16 @@ export class Context<T, K = {}> {
     return this.data.parents[step];
   }
 
-  stepErrors(): Record<string, string> {
+  stepRunErrors(): Record<string, string> {
+    const errors = this.data.step_run_errors || {};
+
+    if (Object.keys(errors).length === 0) {
+      this.log(
+        'No step run errors found. This method is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10',
+        LogLevel.ERROR
+      );
+    }
+
     return this.data.step_run_errors || {};
   }
 

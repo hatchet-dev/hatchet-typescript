@@ -1,4 +1,6 @@
 import { CreateWorkflowVersionOpts, WorkflowVersion } from '@hatchet/protoc/workflows';
+import { DEFAULT_LOGGER } from '@clients/hatchet-client/hatchet-logger';
+import { ClientConfig } from '@clients/hatchet-client';
 import { AdminClient } from './admin-client';
 import { mockChannel, mockFactory } from '../hatchet-client/hatchet-client.test';
 import { ListenerClient } from '../listener/listener-client';
@@ -7,7 +9,7 @@ describe('AdminClient', () => {
   let client: AdminClient;
 
   it('should create a client', () => {
-    const config = {
+    const config: ClientConfig = {
       token:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
       host_port: 'HOST_PORT',
@@ -19,6 +21,7 @@ describe('AdminClient', () => {
       },
       api_url: 'API_URL',
       tenant_id: 'tenantId',
+      logger: DEFAULT_LOGGER,
     };
 
     const x = new AdminClient(
@@ -34,7 +37,7 @@ describe('AdminClient', () => {
   });
 
   beforeEach(() => {
-    const config = {
+    const config: ClientConfig = {
       token:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJncnBjX2Jyb2FkY2FzdF9hZGRyZXNzIjoiMTI3LjAuMC4xOjgwODAiLCJzZXJ2ZXJfdXJsIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwic3ViIjoiNzA3ZDA4NTUtODBhYi00ZTFmLWExNTYtZjFjNDU0NmNiZjUyIn0K.abcdef',
       host_port: 'HOST_PORT',
@@ -46,6 +49,7 @@ describe('AdminClient', () => {
       },
       api_url: 'API_URL',
       tenant_id: 'tenantId',
+      logger: DEFAULT_LOGGER,
     };
 
     client = new AdminClient(

@@ -1,6 +1,11 @@
 import { parentPort, workerData } from 'worker_threads';
 import { Logger } from '@util/logger';
-import { ClientConfig, addTokenMiddleware, channelFactory } from '@hatchet/clients/hatchet-client';
+import {
+  ClientConfig,
+  HatchetLogger,
+  addTokenMiddleware,
+  channelFactory,
+} from '@hatchet/clients/hatchet-client';
 import { DispatcherClient as PbDispatcherClient } from '@hatchet/protoc/dispatcher';
 import { ConfigLoader } from '@hatchet/util/config-loader';
 import { Status, createClientFactory } from 'nice-grpc';
@@ -18,13 +23,13 @@ class HeartbeatWorker {
   constructor(config: ClientConfig, workerId: string) {
     this.workerId = workerId;
 
-    this.logger = new Logger(`Heartbeat`, config.log_level);
+    this.logger = new HatchetLogger(`Heartbeat`, config.log_level);
 
     const credentials = ConfigLoader.createCredentials(config.tls_config);
     const clientFactory = createClientFactory().use(addTokenMiddleware(config.token));
 
     const dispatcher = new DispatcherClient(
-      config,
+      { ...config, logger: (ctx, level) => new HatchetLogger(ctx, level) },
       channelFactory(config, credentials),
       clientFactory
     );

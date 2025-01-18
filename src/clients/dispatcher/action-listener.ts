@@ -42,7 +42,7 @@ export class ActionListener {
     this.config = client.config;
     this.client = client.client;
     this.workerId = workerId;
-    this.logger = new Logger(`ActionListener`, this.config.log_level);
+    this.logger = client.config.logger(`ActionListener`, this.config.log_level);
     this.retryInterval = retryInterval;
     this.retryCount = retryCount;
     this.heartbeat = new Heartbeat(client, workerId);

@@ -1,4 +1,5 @@
 import HatchetError from '@util/errors/hatchet-error';
+import { DEFAULT_LOGGER } from '@clients/hatchet-client/hatchet-logger';
 import { EventClient } from './event-client';
 import { mockChannel, mockFactory } from '../hatchet-client/hatchet-client.test';
 
@@ -19,6 +20,7 @@ describe('EventClient', () => {
         },
         api_url: 'API_URL',
         tenant_id: 'tenantId',
+        logger: DEFAULT_LOGGER,
       },
       mockChannel,
       mockFactory
@@ -41,6 +43,7 @@ describe('EventClient', () => {
         },
         api_url: 'API_URL',
         tenant_id: 'tenantId',
+        logger: DEFAULT_LOGGER,
       },
       mockChannel,
       mockFactory

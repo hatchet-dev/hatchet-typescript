@@ -197,7 +197,7 @@ export class ListenerClient {
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory, api: Api) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
-    this.logger = new Logger(`Listener`, config.log_level);
+    this.logger = config.logger(`Listener`, config.log_level);
     this.api = api;
   }
 

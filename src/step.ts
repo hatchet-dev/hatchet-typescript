@@ -118,7 +118,7 @@ export class Context<T, K = {}> {
       this.action = action;
       this.client = client;
       this.worker = new ContextWorker(worker);
-      this.logger = new Logger(`Context Logger`, client.config.log_level);
+      this.logger = client.config.logger(`Context Logger`, client.config.log_level);
 
       // if this is a getGroupKeyRunId, the data is the workflow input
       if (action.getGroupKeyRunId !== '') {

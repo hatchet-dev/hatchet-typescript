@@ -7,14 +7,15 @@ import {
   CallOptions,
   ChannelCredentials,
   ClientMiddlewareCall,
-  Metadata,
   createChannel,
   createClientFactory,
+  Metadata,
 } from 'nice-grpc';
 import { Workflow } from '@hatchet/workflow';
 import { Worker, WorkerOpts } from '@clients/worker';
-import Logger from '@hatchet/util/logger/logger';
 import { AxiosRequestConfig } from 'axios';
+import { Logger } from '@util/logger';
+import { DEFAULT_LOGGER } from '@clients/hatchet-client/hatchet-logger';
 import { ClientConfig, ClientConfigSchema } from './client-config';
 import { ListenerClient } from '../listener/listener-client';
 import { Api } from '../rest/generated/Api';
@@ -89,7 +90,17 @@ export class HatchetClient {
 
     try {
       const valid = ClientConfigSchema.parse(loaded);
-      this.config = valid;
+
+      let logConstructor = config?.logger;
+
+      if (logConstructor == null) {
+        logConstructor = DEFAULT_LOGGER;
+      }
+
+      this.config = {
+        ...valid,
+        logger: logConstructor,
+      };
     } catch (e) {
       if (e instanceof z.ZodError) {
         throw new Error(`Invalid client config: ${e.message}`);
@@ -129,8 +140,7 @@ export class HatchetClient {
       this.listener
     );
 
-    this.logger = new Logger('HatchetClient', this.config.log_level);
-
+    this.logger = this.config.logger('HatchetClient', this.config.log_level);
     this.logger.info(`Initialized HatchetClient`);
 
     // Feature Clients

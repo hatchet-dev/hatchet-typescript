@@ -1,4 +1,3 @@
-import Logger from '@hatchet/util/logger/logger';
 import { AdminClient } from '@hatchet/clients/admin';
 import { Api } from '@hatchet/clients/rest';
 import {
@@ -9,6 +8,7 @@ import { z } from 'zod';
 import { Workflow } from '@hatchet/workflow';
 import { AxiosError } from 'axios';
 import { ClientConfig } from '@hatchet/clients/hatchet-client/client-config';
+import { Logger } from '@util/logger';
 
 /**
  * Schema for creating a Scheduled Run Trigger.
@@ -43,7 +43,7 @@ export class ScheduleClient {
     private readonly api: Api,
     private readonly adminClient: AdminClient
   ) {
-    this.logger = new Logger('Scheduled Run', this.config.log_level);
+    this.logger = config.logger('Scheduled Run', this.config.log_level);
   }
 
   /**

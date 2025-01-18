@@ -36,7 +36,7 @@ export class DispatcherClient {
   constructor(config: ClientConfig, channel: Channel, factory: ClientFactory) {
     this.config = config;
     this.client = factory.create(DispatcherDefinition, channel);
-    this.logger = new Logger(`Dispatcher`, config.log_level);
+    this.logger = config.logger(`Dispatcher`, config.log_level);
   }
 
   getRuntimeInfo(): RuntimeInfo {

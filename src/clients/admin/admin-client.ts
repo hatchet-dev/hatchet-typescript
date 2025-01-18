@@ -74,7 +74,7 @@ export class AdminClient {
     this.client = factory.create(WorkflowServiceDefinition, channel);
     this.api = api;
     this.tenantId = tenantId;
-    this.logger = new Logger(`Admin`, config.log_level);
+    this.logger = config.logger(`Admin`, config.log_level);
     this.listenerClient = listenerClient;
   }
 

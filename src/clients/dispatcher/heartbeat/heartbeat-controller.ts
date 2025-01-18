@@ -18,14 +18,17 @@ export class Heartbeat {
     this.config = client.config;
     this.client = client.client;
     this.workerId = workerId;
-    this.logger = new Logger(`HeartbeatController`, this.config.log_level);
+    this.logger = client.config.logger(`HeartbeatController`, this.config.log_level);
   }
 
   async start() {
     if (!this.heartbeatWorker) {
       this.heartbeatWorker = runThreaded(path.join(__dirname, './heartbeat-worker'), {
         workerData: {
-          config: this.config,
+          config: {
+            ...this.config,
+            logger: undefined,
+          },
           workerId: this.workerId,
         },
       });

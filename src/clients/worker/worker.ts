@@ -75,7 +75,7 @@ export class Worker {
     this.killing = false;
     this.handle_kill = options.handleKill === undefined ? true : options.handleKill;
 
-    this.logger = new Logger(`Worker/${this.name}`, this.client.config.log_level);
+    this.logger = client.config.logger(`Worker/${this.name}`, this.client.config.log_level);
   }
 
   private registerActions(workflow: Workflow) {
@@ -332,10 +332,10 @@ export class Worker {
       try {
         await future.promise;
       } catch (e: any) {
-        this.logger.error(`Could not wait for step run to finish: ${e}`);
+        this.logger.error('Could not wait for step run to finish: ', e);
       }
     } catch (e: any) {
-      this.logger.error(`Could not send action event (outer): ${e}`);
+      this.logger.error('Could not send action event (outer): ', e);
     }
   }
 
@@ -485,7 +485,7 @@ export class Worker {
         delete this.futures[stepRunId];
       }
     } catch (e: any) {
-      this.logger.error(`Could not cancel step run: ${e}`);
+      this.logger.error('Could not cancel step run: ', e);
     }
   }
 

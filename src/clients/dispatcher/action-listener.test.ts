@@ -1,6 +1,7 @@
 import { ActionType, AssignedAction } from '@hatchet/protoc/dispatcher';
 import sleep from '@util/sleep';
 // import { ServerError, Status } from 'nice-grpc-common';
+import { DEFAULT_LOGGER } from '@clients/hatchet-client/hatchet-logger';
 import { DispatcherClient } from './dispatcher-client';
 import { ActionListener } from './action-listener';
 import { mockChannel, mockFactory } from '../hatchet-client/hatchet-client.test';
@@ -61,6 +62,7 @@ describe('ActionListener', () => {
         },
         api_url: 'API_URL',
         tenant_id: 'tenantId',
+        logger: DEFAULT_LOGGER,
       },
       mockChannel,
       mockFactory

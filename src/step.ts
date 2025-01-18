@@ -71,6 +71,7 @@ interface ContextData<T, K> {
   parents: Record<string, any>;
   triggered_by: string;
   user_data: K;
+  step_run_errors: Record<string, string>;
 }
 
 export class ContextWorker {
@@ -140,6 +141,18 @@ export class Context<T, K = {}> {
       throw new HatchetError(`Step output for '${step}' not found`);
     }
     return this.data.parents[step];
+  }
+
+  stepRunErrors(): Record<string, string> {
+    const errors = this.data.step_run_errors || {};
+
+    if (Object.keys(errors).length === 0) {
+      this.logger.error(
+        'No step run errors found. `ctx.stepRunErrors` is intended to be run in an on-failure step, and will only work on engine versions more recent than v0.53.10'
+      );
+    }
+
+    return errors;
   }
 
   triggeredByEvent(): boolean {

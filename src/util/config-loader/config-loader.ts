@@ -17,7 +17,8 @@ type EnvVars =
   | 'HATCHET_CLIENT_TLS_ROOT_CA_FILE'
   | 'HATCHET_CLIENT_TLS_SERVER_NAME'
   | 'HATCHET_CLIENT_LOG_LEVEL'
-  | 'HATCHET_CLIENT_NAMESPACE';
+  | 'HATCHET_CLIENT_NAMESPACE'
+  | 'HATCHET_CLIENT_AUTOSCALING_TARGET';
 
 type TLSStrategy = 'tls' | 'mtls';
 
@@ -83,6 +84,16 @@ export class ConfigLoader {
     const namespace =
       override?.namespace ?? yaml?.namespace ?? this.env('HATCHET_CLIENT_NAMESPACE');
 
+    const autoscalingTarget =
+      override?.autoscaling_target ??
+      yaml?.autoscaling_target ??
+      this.env('HATCHET_CLIENT_AUTOSCALING_TARGET');
+
+    const presetLabels = {
+      ...(override?.preset_labels ?? yaml?.preset_labels ?? {}),
+      ...(autoscalingTarget ? { 'hatchet-autoscaling-target': autoscalingTarget } : {}),
+    };
+
     return {
       token: override?.token ?? yaml?.token ?? this.env('HATCHET_CLIENT_TOKEN'),
       host_port: grpcBroadcastAddress,
@@ -95,6 +106,8 @@ export class ConfigLoader {
         'INFO',
       tenant_id: tenantId,
       namespace: namespace ? `${namespace}_`.toLowerCase() : '',
+      autoscaling_target: autoscalingTarget,
+      preset_labels: presetLabels,
     };
   }
 

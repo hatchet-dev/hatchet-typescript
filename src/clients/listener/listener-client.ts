@@ -14,7 +14,6 @@ import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
 import sleep from '@hatchet/util/sleep';
 import { Api } from '../rest';
-import { WorkflowRunStatus } from '../rest/generated/data-contracts';
 import { GrpcPooledListener } from './child-listener-client';
 
 const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds
@@ -66,15 +65,6 @@ const resourceTypeMap: Record<
   [ResourceType.RESOURCE_TYPE_WORKFLOW_RUN]: workflowEventTypeMap,
   [ResourceType.RESOURCE_TYPE_UNKNOWN]: undefined,
   [ResourceType.UNRECOGNIZED]: undefined,
-};
-
-const workflowStatusMap: Record<WorkflowRunStatus, RunEventType | undefined> = {
-  [WorkflowRunStatus.SUCCEEDED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
-  [WorkflowRunStatus.FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
-  [WorkflowRunStatus.CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
-  [WorkflowRunStatus.PENDING]: undefined,
-  [WorkflowRunStatus.RUNNING]: undefined,
-  [WorkflowRunStatus.QUEUED]: undefined,
 };
 
 export interface StepRunEvent {

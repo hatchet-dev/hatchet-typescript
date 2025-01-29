@@ -68,15 +68,6 @@ const resourceTypeMap: Record<
   [ResourceType.UNRECOGNIZED]: undefined,
 };
 
-const workflowStatusMap: Record<WorkflowRunStatus, RunEventType | undefined> = {
-  [WorkflowRunStatus.SUCCEEDED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_COMPLETED,
-  [WorkflowRunStatus.FAILED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_FAILED,
-  [WorkflowRunStatus.CANCELLED]: RunEventType.WORKFLOW_RUN_EVENT_TYPE_CANCELLED,
-  [WorkflowRunStatus.PENDING]: undefined,
-  [WorkflowRunStatus.RUNNING]: undefined,
-  [WorkflowRunStatus.QUEUED]: undefined,
-};
-
 export interface StepRunEvent {
   type: RunEventType;
   payload: string;

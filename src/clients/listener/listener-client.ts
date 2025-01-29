@@ -14,7 +14,6 @@ import HatchetError from '@util/errors/hatchet-error';
 import { Logger } from '@hatchet/util/logger';
 import sleep from '@hatchet/util/sleep';
 import { Api } from '../rest';
-import { WorkflowRunStatus } from '../rest/generated/data-contracts';
 import { GrpcPooledListener } from './child-listener-client';
 
 const DEFAULT_EVENT_LISTENER_RETRY_INTERVAL = 5; // seconds

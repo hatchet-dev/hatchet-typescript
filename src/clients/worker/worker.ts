@@ -441,6 +441,7 @@ export class Worker {
       eventTimestamp: new Date(),
       eventType,
       eventPayload: JSON.stringify(payload),
+      retryCount: action.retryCount,
     };
   }
 

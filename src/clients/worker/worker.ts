@@ -134,7 +134,7 @@ export class Worker {
   async registerWorkflow(initWorkflow: Workflow) {
     const workflow: Workflow = {
       ...initWorkflow,
-      id: this.client.config.namespace + initWorkflow.id,
+      id: (this.client.config.namespace + initWorkflow.id).toLowerCase(),
     };
     try {
       if (workflow.concurrency?.key && workflow.concurrency.expression) {

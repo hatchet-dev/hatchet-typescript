@@ -49,10 +49,17 @@ export class DispatcherClient {
   }
 
   async getActionListener(options: GetActionListenerOptions) {
+    // merge preset labels with labels
+
+    const mergedLabels = {
+      ...this.config.preset_labels,
+      ...options.labels,
+    };
+
     // Register the worker
     const registration = await this.client.register({
       ...options,
-      labels: options.labels ? mapLabels(options.labels) : undefined,
+      labels: mergedLabels ? mapLabels(mergedLabels) : undefined,
       runtimeInfo: this.getRuntimeInfo(),
     });
 

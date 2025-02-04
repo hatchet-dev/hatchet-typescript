@@ -18,6 +18,8 @@ export const ClientConfigSchema = z.object({
   log_level: z.enum(['OFF', 'DEBUG', 'INFO', 'WARN', 'ERROR']).optional(),
   tenant_id: z.string(),
   namespace: z.string().optional(),
+  autoscaling_target: z.string().optional(),
+  preset_labels: z.record(z.string(), z.string()).optional(),
 });
 
 export type LogConstructor = (context: string, logLevel?: LogLevel) => Logger;

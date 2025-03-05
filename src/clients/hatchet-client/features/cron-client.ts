@@ -7,17 +7,15 @@ import { AxiosError } from 'axios';
 import { ClientConfig } from '@hatchet/clients/hatchet-client/client-config';
 import { Logger } from '@util/logger';
 
+export const CronRegex =
+  /^(\*|([0-9]|[1-5][0-9])(,([0-9]|[1-5][0-9]))*|([0-9]|[1-5][0-9])-([0-9]|[1-5][0-9])|\*\/([0-9]|[1-5][0-9])) (\*|([0-9]|1[0-9]|2[0-3])(,([0-9]|1[0-9]|2[0-3]))*|([0-9]|1[0-9]|2[0-3])-([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|[12][0-9]|3[01])(,([1-9]|[12][0-9]|3[01]))*|([1-9]|[12][0-9]|3[01])-([1-9]|[12][0-9]|3[01])|\*\/([1-9]|[12][0-9]|3[01])) (\*|([1-9]|1[0-2])(,([1-9]|1[0-2]))*|([1-9]|1[0-2])-([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-7])(,([0-7]))*|([0-7])-([0-7])|\*\/([0-7]))$/;
+
 /**
  * Schema for creating a Cron Trigger.
  */
 export const CreateCronTriggerSchema = z.object({
   name: z.string(),
-  expression: z.string().refine((val) => {
-    // Basic cron validation regex
-    const cronRegex =
-      /^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/;
-    return cronRegex.test(val);
-  }, 'Invalid cron expression'),
+  expression: z.string().refine((val) => CronRegex.test(val), 'Invalid cron expression'),
   input: z.record(z.any()).optional(),
   additionalMetadata: z.record(z.string()).optional(),
 });
@@ -68,7 +66,6 @@ export class CronClient {
   async create(workflow: string | Workflow, cron: CreateCronInput): Promise<CronWorkflows> {
     const workflowId = typeof workflow === 'string' ? workflow : workflow.id;
 
-    console.log('workflowId', workflowId);
     // Validate cron input with zod schema
     try {
       const parsedCron = CreateCronTriggerSchema.parse(cron);
